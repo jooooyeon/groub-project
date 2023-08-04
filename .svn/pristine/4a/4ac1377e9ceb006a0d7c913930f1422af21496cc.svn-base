@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.draft.mapper.DraftMapper">
+
+	<resultMap type="kr.or.ddit.draft.vo.DraftUserVO" id="draftUserMap">
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="userNm" column="USER_NM" />
+		<result property="userEml" column="USER_EML" />
+		<result property="userImg" column="USER_IMG" />
+		<result property="signImg" column="SIGN_IMG" />
+		<result property="deptNo" column="DEPT_NO" />
+		<result property="deptNm" column="DEPT_NM" />
+		<result property="jbgdCd" column="JBGD_CD" />
+		<result property="jbgdNm" column="JBGD_NM" />
+		<result property="jbtlCd" column="JBTL_CD" />
+		<result property="jbtlNm" column="JBTL_NM" />
+		<collection property="DraftVacVOList" resultMap="draftVacMap"></collection>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftVacVO" id="draftVacMap">
+		<result property="vacGrntNo" column="VAC_GRNT_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="vacTp" column="VAC_TP" />
+		<result property="vacNm" column="VAC_NM" />
+		<result property="vacGrntYmd" column="VAC_GRNT_YMD" />
+		<result property="vacGrntDays" column="VAC_GRNT_DAYS" />
+		<result property="vldYmd" column="VLD_YMD" />
+		<result property="vacUseDays" column="VAC_USE_DAYS" />
+	</resultMap>
+	
+
+
+	<select id="selectDraftUsesrInfo" resultMap="draftUserMap">
+		SELECT
+			u.USER_ID
+			, u.CO_ID
+			, u.USER_NM
+			, u.USER_EML
+			, u.USER_IMG
+			, u.SIGN_IMG
+			, ei.DEPT_NO
+			, FN_GET_DEPT_NO_NM(ei.DEPT_NO, u.CO_ID) AS DEPT_NM
+			, ei.JBGD_CD 
+			, FN_GET_CST_CD_NM2CO(ei.JBGD_CD, u.CO_ID) AS JBGD_NM
+			, ei.JBTL_CD
+			, FN_GET_CST_CD_NM2CO(ei.JBTL_CD, u.CO_ID) AS JBTL_NM
+			, vg.VAC_GRNT_NO
+			, vg.VAC_TP 
+			, FN_GET_MNG_CD_NM(vg.VAC_TP ) AS VAC_NM
+			, vg.VAC_GRNT_YMD
+			, vg.VAC_GRNT_DAYS 
+			, vg.VLD_YMD 
+			, vu.VAC_USE_DAYS
+		FROM USERS u
+		INNER JOIN EMP_INFO ei 
+		ON ei.USER_ID = u.USER_ID 
+		INNER JOIN VAC_GRNT vg 
+		ON vg.USER_ID = u.USER_ID
+		INNER JOIN 
+			(SELECT
+					NVL(sum(vut.CNY_DAY), 0) AS VAC_USE_DAYS
+					, vut.USER_ID
+					, vut.VAC_GRNT_NO
+				FROM 
+					VAC_USE_TEST vut
+				GROUP BY 
+					USER_ID
+					, vut.VAC_GRNT_NO ) vu
+		ON vu.USER_ID = u.USER_ID AND vu.VAC_GRNT_NO = vg.VAC_GRNT_NO
+		WHERE u.USER_ID = #{userId} AND vg.VLD_YMD >= SYSDATE 
+	</select>
+
+
+
+</mapper>

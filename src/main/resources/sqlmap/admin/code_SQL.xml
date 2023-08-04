@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.admin.code.mapper.CodeMapper">
+
+	<!-- 공통코드 목록 -->
+	<select id="groupCodeList" resultType="kr.or.ddit.admin.code.vo.GrCdVO">
+		SELECT
+			ROWNUM
+			, GR_CD
+			, GRCD_NM
+			, USE_YN
+			, CATEGORY
+		FROM
+			GRP_CODE
+		ORDER BY GR_CD ASC
+	</select>
+
+
+	<!-- 공통상세코드 목록 -->
+	<select id="manageCodeList" resultType="kr.or.ddit.admin.code.vo.MngCdVO">
+		SELECT
+			ROWNUM
+			, MNG_CD
+			, GR_CD
+			, MNG_CD_NM1
+			, MNG_CD_NM2
+			, USE_YN
+		FROM
+			MANAGE_CODE
+		ORDER BY MNG_CD ASC
+	</select>
+
+	<!-- 사용자 코드 목록 -->
+	<select id="customeCodeList" parameterType="String" resultType="kr.or.ddit.admin.code.vo.CstCdVO">
+		SELECT
+			ROWNUM
+			, CST_CD
+			, GR_CD
+			, CST_CD_NM
+			, USER_ID
+			, REG_DT
+			, USE_YN
+		FROM
+			CUSTOME_CODE
+		WHERE
+			CO_ID = #{coId}
+		ORDER BY CST_CD
+	</select>
+
+	<!-- 공통 코드 명칭 -->
+	<select id="manageCodeName" resultType="kr.or.ddit.admin.code.vo.MngCdVO">
+		SELECT DISTINCT
+		       A.GR_CD
+		      , B.GRCD_NM
+		FROM
+			MANAGE_CODE A
+		INNER JOIN GRP_CODE B ON A.GR_CD = B.GR_CD
+	</select>
+
+	<!-- 사용자 코드 명칭 -->
+	<select id="customeCodeName" parameterType="String" resultType="kr.or.ddit.admin.code.vo.CstCdVO">
+		SELECT DISTINCT
+		       A.GR_CD
+		      , B.GRCD_NM
+		FROM
+			CUSTOME_CODE A
+		INNER JOIN GRP_CODE B ON A.GR_CD = B.GR_CD
+		WHERE
+			CO_ID = #{coId}
+		ORDER BY B.GRCD_NM
+	</select>
+
+	<!-- 사용자 상세코드 최대값 확인 -->
+	<select id="maxCstCd" parameterType="map" resultType="String">
+		SELECT
+			MAX(CST_CD)
+		FROM
+			CUSTOME_CODE
+		WHERE
+			GR_CD = #{grCd}
+		AND
+			CO_ID = #{coId}
+	</select>
+
+	<insert id="createCsdCd" parameterType="kr.or.ddit.admin.code.vo.CstCdVO">
+		INSERT
+			INTO
+			CUSTOME_CODE
+		(CST_CD
+			, CO_ID
+			, GR_CD
+			, CST_CD_NM
+			, USER_ID
+			, REG_DT
+			, USE_YN)
+		VALUES(#{cstCd}
+		, #{coId}
+		, #{grCd}
+		, #{cstCdNm}
+		, #{userId}
+		, SYSDATE
+		, 'Y'
+		   )
+	</insert>
+
+	<update id="codeAct" parameterType="String">
+		UPDATE CUSTOME_CODE
+		SET
+		    USE_YN = CASE
+		        WHEN USE_YN = 'Y' THEN 'N'
+		        WHEN USE_YN = 'N' THEN 'Y'
+		    END
+		WHERE
+		    CST_CD = #{cstCd}
+	</update>
+
+</mapper>

@@ -1,0 +1,226 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec"	uri="http://www.springframework.org/security/tags"%>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+<script>
+  var jQuery1x = jQuery.noConflict();
+</script>
+
+<style>
+<!-- Js tree 스타일 시작 -->	
+.custom-offcanvas-body {
+	max-height: calc(100vh - 210px);
+	overflow-y: auto;
+}
+
+.wrapper {
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: 100px 100px 100px;
+	grid-gap: 100px;
+	
+}
+
+#search1 {
+	width: 200px;
+	height: 25px;
+	border: 0;
+	border-radius: 5px;
+	font-size: 15px;
+	background-color: #E1ECFF;
+}
+
+#searchBox {
+	width: 200px;
+	font-size: 10px;
+}
+
+#jstree1 {
+	width: 20rem;
+/* 	flex: 0 0 30%; */
+/* 	margin-right: 10px; */
+	grid-column: 2/4;
+	grid-row: 1;
+/* 	overflow: auto; */
+	overflow:overlay;
+	position:relative;
+
+}
+
+#jstree1::-webkit-scrollbar {
+	width: 10px;
+}
+
+#jstree1::-webkit-scrollbar-thumb {
+	background-color: hsla(207.2, 63.9%, 87.1%, 0.45);
+    border-radius: 100px;
+}
+
+#jstree1 ul li { 
+/* line-height: 50px;  */
+/* border-bottom: 1px solid #fff;  */
+/* text-align: center;  */
+/* font-size: 22px;  */
+/* background-color:#EFF5FB */
+} 
+
+
+
+#outBox {
+	display: flex;
+	height: 700px;
+}
+
+
+#childCard {
+	width: 400px;
+	height: 400px;
+}
+
+.card .image {
+/* 	display: flex; */
+	max-width : 90%; 
+	height: auto; 
+	text-align: left;
+	padding: 10px;
+	/* 	max-width: auto; */
+	width: 130px;
+	height: 130px;
+}
+
+.card .image img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.card-container2 {
+	display: flex;
+/* 	align-items: flex-start; */
+	
+}
+
+.card .card-body {
+	/* 남은 공간을 모두 차지하도록 설정 */
+/* 	flex-grow: 1;  */
+	padding: 10px;
+}
+
+.hidden {
+	display: none;
+}
+
+.card-head-text {
+	font-size: 3px;
+	font-color: gray;
+
+}
+
+<!-- Js tree 스타일 끝 -->	
+</style>
+<!-- footer 시작 -->
+<footer class="footer">
+	<div class="row g-0 justify-content-between fs--1 mt-4 mb-3">
+		<div class="col-12 col-sm-auto text-center">
+			<p class="mb-0 text-600">
+				Thank you for creating with Falcon <span
+					class="d-none d-sm-inline-block">| </span><br class="d-sm-none" />
+				2023 &copy; <a href="https://themewagon.com">Themewagon</a>
+			</p>
+		</div>
+		<div class="col-12 col-sm-auto text-center"></div>
+	</div>
+</footer>
+<!-- footer 끝 -->
+
+<!-- user-list modal 시작 -->
+<div class="modal modal-center fade" id="user-list" tabindex="-1" role="dialog" aria-labelledby="myCenterModalLabel">
+  <div class="modal-dialog modal-center modal-sm" role="document">
+    <div class="modal-content user-list">
+		<div class="wrapper">
+			<div class="card d-flex align-items-auto" id="outBox" >
+				<div class="card" id="searchBox">
+					<i class="fa-solid fa-magnifying-glass"> 사원을 검색하세요.</i> 
+					<input type="text" id="search1" placeholder="이름을 입력하세요.">
+				</div>
+				<br /> 
+				<label> 사원 이름을 클릭하여 ID 카드를 열 수 있습니다. <br> 부서명을 클릭하면 사라져용. </label>
+				<div class="card border h-100 border-light" style="width:200px; height:150px;" >
+					<div class="" id="jstree1" style="overflow:scroll; width:200px; height:450px; layout:fixed;" ></div>
+				</div>
+				<div id="idCard1"></div>
+			</div>
+		</div>
+    </div>
+  </div>
+</div> 
+<!-- user-list modal 끝 -->
+
+<!-- offcanvas 채팅창 시작 -->
+<div class="offcanvas offcanvas-end" style="height: 50%;" tabindex="-1" id="offcanvas-chat" aria-labelledby="offcanvasRightLabel">
+  <div class="offcanvas-header">
+    <h5 id="offcanvas-chat-header">채팅방 목록</h5>
+  </div>
+  <div class="offcanvas-body custom-offcanvas-body" id="off-chat-msg">
+  </div>
+  <div class="offcanvas-footer"> 
+	  <input type="text" class="form-control" id="chatMsgCn" placeholder="채팅을 입력해주세요">
+	  <div class="d-flex justify-content-end">
+	      <button class="btn btn-outline-secondary" id="off-chat-send">보내기</button>
+	      <button class="btn btn-outline-secondary" id="off-chat-cancle">취소</button>
+	  </div>
+  </div>
+</div>
+<!-- offcanvas 채팅창 끝 -->
+
+<!-- toast 알림 시작 -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <img src="#" class="rounded me-2" alt="...">
+      <strong class="me-auto">알람 왔어요</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Hello, world! This is a toast message.
+    </div>
+  </div>
+</div>
+<!-- toast 알림 끝 -->
+
+<!-- offcanvas 채팅방 목록 시작 -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  <div class="offcanvas-header">
+    <h5 id="offcanvasRightLabel">채팅방 목록</h5>
+  </div>
+  <div class="offcanvas-body" id="off-chat-list">
+    ...
+  </div>
+</div>
+<!-- offcanvas 채팅방 목록 끝 -->
+
+<sec:authorize access="isAuthenticated()">
+<script>
+	let userId = `<%=request.getUserPrincipal().getName()%>`;
+</script>
+<!-- 알람 -->
+<script src="/resources/alarm-js/alarm.js"></script>
+<!-- 채팅 소켓 -->
+<script src="/resources/chat-js/socket.js"></script>
+<!-- 사용자 리스트 -->
+<script src="/resources/chat-js/user-list.js"></script>
+<!-- 사용자 대화방 리스트 -->
+<script src="/resources/chat-js/chat-list.js"></script>
+
+<script>
+	function userDataSet(userData){
+		return userData;
+	}
+</script>
+<script src="/resources/chat-js/room-add.js"></script>
+</sec:authorize>

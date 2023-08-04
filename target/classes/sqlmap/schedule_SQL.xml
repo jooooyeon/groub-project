@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.schedule.mapper.ScheduleMapper">
+
+
+	<!-- 전체 일정 조회 -->
+	<select id="listAll" parameterType="String" resultType="kr.or.ddit.schedule.vo.ScheduleVO">
+		SELECT
+			A.SCHDL_NO
+			, A.USER_ID
+			, A.SCHDL_TTL
+			, A.SCHDL_CN
+			, A.REG_DT
+			, A.STRT_SCHDL_DT
+			, A.END_SCHDL_DT
+			, A.SCHDL_TP
+			, A.DEL_YN
+			, A.DEL_DT
+			, B.CO_ID
+			, C.DEPT_NO
+		FROM
+			SCHDL A
+		INNER JOIN USERS B ON B.USER_ID = A.USER_ID
+		INNER JOIN EMP_INFO C ON C.USER_ID = A.USER_ID
+		WHERE A.SCHDL_TP = #{schdlTp}
+	</select>
+
+	<!-- 일정 등록 -->
+	<insert id="registSchdl" parameterType="kr.or.ddit.schedule.vo.ScheduleVO">
+	<selectKey order="BEFORE" keyProperty="schdlNo" resultType="String">
+		SELECT SEQ_SCHDL.NEXTVAL FROM DUAL
+	</selectKey>
+		INSERT INTO SCHDL(
+			 SCHDL_NO
+			, USER_ID
+			, SCHDL_TTL
+			, SCHDL_CN
+			, STRT_SCHDL_DT
+			, END_SCHDL_DT
+			, SCHDL_TP
+		)
+		VALUES(
+			#{schdlNo}
+			, #{userId}
+			, #{schdlTtl}
+			, #{schdlCn}
+			, to_date(#{strtSchdlDt},'yyyy-MM-dd HH24:MI')
+			, to_date(#{endSchdlDt},'yyyy-MM-dd HH24:MI')
+			, #{schdlTp}
+		   )
+	</insert>
+
+	<!-- 드래그앤드롭방식으로 일정 수정 -->
+	<update id="dragDropUpdate" parameterType="kr.or.ddit.schedule.vo.ScheduleVO">
+		UPDATE
+			SCHDL
+		SET
+			 REG_DT = SYSDATE
+			, STRT_SCHDL_DT = to_date(#{strtSchdlDt},'yyyy-MM-dd HH24:MI')
+			, END_SCHDL_DT = to_date(#{endSchdlDt},'yyyy-MM-dd HH24:MI')
+		WHERE
+			SCHDL_NO = #{schdlNo}
+	</update>
+
+
+	<!-- 일정 삭제 -->
+	<delete id="deleteSchdl" parameterType="String">
+		DELETE FROM SCHDL
+		WHERE
+		    SCHDL_NO = #{schdlNo}
+	</delete>
+
+
+
+</mapper>

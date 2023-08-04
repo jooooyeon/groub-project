@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.empinfo.mapper.EmpInfoMapper">
+
+<select id="vacGrant" resultType="kr.or.ddit.empinfo.vo.VacationVO"  >
+   SELECT
+       VAC_GRNT_NO,
+       user_id,
+       VAC_TP,
+       FN_GET_MNG_CD_NM(VAC_TP) AS VAC_TP_NM,
+       vac_grnt_days,
+       VAC_GRNT_YMD,
+       SUM(vac_grnt_days) OVER (PARTITION BY user_id) AS TOTAL_VAC_GRNT_DAYS,
+       VLD_YMD,
+       VAC_GRNT_EXPLN
+   FROM
+       vac_grnt
+   WHERE
+       USER_ID=#{userId}
+   ORDER BY
+       VAC_GRNT_YMD DESC
+
+</select>
+
+<!-- 
+VacationVO(vacGrntNo=0, userId=NAVER_2014030001, vacTp=null, vacTpNm=null, vacGrntDays=0
+, vacGrntYmd=null, totalVacGrntDays=null, vldYmd=null, vacGrntExpln=null, remainDays=null)
+ -->
+<select id="vacMain" parameterType="kr.or.ddit.empinfo.vo.VacationVO" resultType="kr.or.ddit.empinfo.vo.VacationVO">
+   SELECT 
+       A.user_id,
+       NVL(SUM(A.vac_grnt_days),0) AS TOTAL_VAC_GRNT_DAYS,
+       (SELECT
+           NVL(SUM(B.CNY_DAY),0) AS TOTAL_CNY_DAY
+       FROM 
+           VAC_USE B   
+       WHERE
+           TO_CHAR(B.BGNG_DT, 'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+           AND B.user_id = A.user_id
+       GROUP BY B.user_id) AS USED_DAYS
+   FROM 
+       vac_grnt A
+   WHERE
+       TO_CHAR(A.VAC_GRNT_YMD, 'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+       AND A.USER_ID = #{userId}
+   GROUP BY A.user_id
+
+</select>
+
+
+
+<!--    <select id="detail" resultType="kr.or.ddit.empinfo.vo.EmpInfoVO"> -->
+<select id="detail" resultType="kr.or.ddit.empinfo.vo.EmpInfoVO" resultMap="empinfoMap">
+   SELECT
+       A.user_id
+      ,A.co_id
+      ,A.user_pswd
+      ,A.user_nm
+      ,A.user_telno
+      ,A.user_eml
+      ,A.brth_ymd
+      ,A.user_zip
+      ,A.user_addr
+      ,A.user_daddr
+      ,A.user_img
+      ,A.sign_img
+      ,A.gndr_mf
+      ,A.hobby
+      ,A.spcabl
+      ,A.USER_IMG
+      ,A.SIGN_IMG
+      ,A.msngr_stts
+      ,FN_GET_MNG_CD_NM(A.MSNGR_STTS) AS MSNGR_STTS
+      ,A.enabled
+      ,A.mngr_yn
+      ,B.dept_no
+      ,B.jbgd_cd
+      , FN_GET_CST_CD_NM(B.jbgd_cd) AS jbgd_cd_nm
+      ,B.jbtl_cd
+      , FN_GET_CST_CD_NM(B.jbtl_cd) AS jbtl_cd_nm
+      ,B.anslry
+      ,B.bank_nm
+      ,B.act_no
+      ,B.jncmp_ymd
+      ,B.rsgntn_ymd
+      ,B.hdof_cd
+      ,FN_GET_MNG_CD_NM(B.hdof_cd) AS hdof_cd_nm
+      ,B.mtrsc_cd
+      ,FN_GET_MNG_CD_NM(B.mtrsc_cd) AS mtrsc_cd_nm
+      ,C.co_nm
+      ,D.hr_rcrd_no
+      ,D.DEPT_NO
+      ,FN_GET_DEPT_NO_NM(D.DEPT_NO,A.co_id) as DEPT_NO_record
+      ,D.jbgd_cd 
+      , FN_GET_CST_CD_NM(D.jbgd_cd) AS  jbgd_cd_nm_record
+      ,D.jbtl_cd
+      , FN_GET_CST_CD_NM(D.jbtl_cd) AS jbtl_cd_nm_record
+      ,D.bgng_ymd
+      ,D.end_ymd
+      ,D.hr_rcrd_expln
+      ,E.fam_no
+      ,E.fam_nm
+      ,E.fam_rel_cd
+      ,FN_GET_MNG_CD_NM(E.fam_rel_cd) AS fam_rel_cd_nm
+      ,E.brth_ymd AS brth_ymd_fam
+         ,E.gndr_mf AS gndr_mf_fam
+      ,F.DEPT_NM 
+      ,G.CRTFCT_NO
+      ,G.CR_ACQS_NO
+        ,G.CRTFCT_ISSU_NO
+        ,G.CRTFCT_ACQS_YMD
+        ,FN_GET_CRTFCT_CD_NM(G.CRTFCT_NO) AS CRTFCT_NO_NM
+        ,G.CRTFCT_SCR
+      
+   FROM
+       users A
+   INNER JOIN emp_info B    
+   ON A.user_id = B.user_id
+   
+   INNER JOIN CO_INFO C
+   ON A.co_id = C.co_id
+   
+   LEFT JOIN hr_rcrd D    
+   ON A.user_id = D.user_id
+   
+   LEFT JOIN fam E    
+   ON A.user_id = E.user_id 
+   
+   INNER JOIN dept F
+   ON B.dept_no = F.dept_no
+   
+   LEFT jOIN CRTFCT_ACQS G
+     ON A.user_id = G.user_id
+           
+   WHERE A.user_id = #{userId}
+   
+   
+</select>
+
+<resultMap type="kr.or.ddit.empinfo.vo.EmpInfoVO" id="empinfoMap">
+   <result property="userId" column="USER_ID" />
+   <result property="coId" column="CO_ID" />
+   <result property="userPswd" column="USER_PSWD" />
+   <result property="userNm" column="USER_NM" />
+   <result property="userTelno" column="USER_TELNO" />
+   <result property="userEml" column="USER_EML" />
+   <result property="brthYmd" column="BRTH_YMD" />
+   <result property="userZip" column="USER_ZIP" />
+   <result property="userAddr" column="USER_ADDR" />
+   <result property="userDaddr" column="USER_DADDR" />
+   <result property="userImg" column="USER_IMG" />
+   <result property="signImg" column="SIGN_IMG" />
+   <result property="gndrMf" column="GNDR_MF" />
+   <result property="hobby" column="HOBBY" />
+   <result property="spcabl" column="SPCABL" />
+   <result property="msngrStts" column="MSNGR_STTS" />
+   <result property="enabled" column="ENABLED" />
+   <result property="mngrYn" column="MNGR_YN" />
+   
+   <result property="deptNo" column="DEPT_NO" />
+   <result property="jbgdCd" column="JBGD_CD" />
+   <result property="jbgdCdNm" column="JBGD_CD_NM" />
+   <result property="jbtlCd" column="JBTL_CD" />
+   <result property="jbtlCdNm" column="JBTL_CD_NM" />
+   <result property="anslry" column="ANSLRY" />
+   <result property="bankNm" column="BANK_NM" />
+   <result property="actNo" column="ACT_NO" />
+   <result property="jncmpYmd" column="JNCMP_YMD" />
+   <result property="rsgntnYmd" column="RSGNTN_YMD" />
+   <result property="hdofCd" column="HDOF_CD" />
+   <result property="hdofCdNm" column="HDOF_CD_NM" />
+   <result property="mtrscCd" column="MTRSC_CD" />
+   <result property="mtrscCdNm" column="MTRSC_CD_NM" />
+   
+   <result property="coNm" column="CO_NM" />
+   
+   <result property="deptNm" column="DEPT_NM" />
+   
+   <collection property="hrRcrdVO" resultMap="hHrRcrdMap"></collection>
+   <collection property="famVO" resultMap="famMap"></collection>
+   <collection property="empInfoCertificationVO" resultMap="crtfctMap"></collection>
+</resultMap>
+
+<resultMap type="kr.or.ddit.empinfo.vo.HrRcrdVO" id="hHrRcrdMap">
+   <result property="hrRcrdNo" column="HR_RCRD_NO" />
+   <result property="deptNo" column="DEPT_NOD" />
+   <result property="deptNoRecord" column="DEPT_NO_RECORD" />
+   <result property="jbgdCd" column="jbgd_cd" />
+   <result property="jbgdCdNmRecord" column="jbgd_cd_nm_record" />
+   <result property="jbtlCd" column="jbtl_cd" />
+   <result property="jbtlCdNmRecord" column="jbtl_cd_nm_record" />
+   <result property="bgngYmd" column="BGNG_YMD" />
+   <result property="endYmd" column="END_YMD" />
+   <result property="hrRcrdExpln" column="HR_RCRD_EXPLN" />
+</resultMap>
+
+<resultMap type="kr.or.ddit.empinfo.vo.FamVO" id="famMap">
+   <result property="famNo" column="FAM_NO" />
+   <result property="famNm" column="FAM_NM" />
+   <result property="famRelCd" column="FAM_REL_CD" />
+   <result property="famRelCdNm" column="FAM_REL_CD_NM" />
+   <result property="brthYmdFam" column="BRTH_YMD_FAM" />
+   <result property="gndrMfFam" column="GNDR_MF_FAM" />
+</resultMap>
+
+<resultMap type="kr.or.ddit.empinfo.vo.EmpInfoCertificationVO" id="crtfctMap">
+   <result property="crAcqsNo" column="CR_ACQS_NO" />
+   <result property="crtfctNo" column="CRTFCT_NO" />
+   <result property="crtfctNoNm" column="CRTFCT_NO_NM" />
+   <result property="crtfctIssuNo" column="CRTFCT_ISSU_NO" />
+   <result property="crtfctAcqsYmd" column="CRTFCT_ACQS_YMD" />
+   <result property="crtfctScr" column="CRTFCT_SCR" />
+</resultMap>
+
+
+<update id="updatePersonal" parameterType="kr.or.ddit.empinfo.vo.EmpInfoVO">
+   UPDATE users
+   SET 
+       HOBBY = #{hobby}
+       , SPCABL = #{spcabl} 
+       , USER_ZIP = #{userZip}
+       , USER_ADDR = #{userAddr}
+       , USER_DADDR = #{userDaddr}
+   WHERE user_id = #{userId}
+</update>
+
+
+<delete id="deleteCrtfct" parameterType="kr.or.ddit.empinfo.vo.EmpInfoCertificationVO">
+   DELETE
+   FROM CRTFCT_ACQS
+   WHERE CR_ACQS_NO = #{crAcqsNo}
+</delete>
+
+<select id="selectCrtfct" resultType="kr.or.ddit.empinfo.vo.CrtfctVO">
+   SELECT CRTFCT_NO, CRTFCT_NM
+   FROM CRTFCT
+</select>
+
+<insert id="insertCrtfct" parameterType="kr.or.ddit.empinfo.vo.CrtfctVO">
+   <selectKey resultType="int" order="BEFORE" keyProperty="crAcqsNo">
+      SELECT NVL(MAX(CR_ACQS_NO), 1) + 1 FROM CRTFCT_ACQS
+   </selectKey>
+      INSERT INTO CRTFCT_ACQS(
+         CR_ACQS_NO
+         , USER_ID
+         , CRTFCT_NO
+         , CRTFCT_NM
+         , CRTFCT_ISSU_NO
+         , CRTFCT_ACQS_YMD
+         , CRTFCT_SCR
+      )
+      VALUES (
+          #{crAcqsNo}
+         ,#{userId}
+         ,#{crtfctNo}
+         ,#{crtfctNoNm}
+         ,#{crtfctIssuNo}
+         ,#{crtfctAcqsYmd}
+         ,#{crtfctScr}
+      
+      )
+</insert>
+
+<delete id="deleteFam" parameterType="kr.or.ddit.empinfo.vo.FamVO">
+   DELETE
+   FROM FAM
+   WHERE FAM_NO = #{famNo}
+</delete>
+
+<!-- 1) 로그인 아이디에 해당되는 가족 데이터 삭제 -->
+<delete id="deleteFamUserId" parameterType="kr.or.ddit.empinfo.vo.EmpInfoVO">
+   DELETE
+   FROM FAM
+   WHERE USER_ID = #{userId}
+</delete>
+
+<!-- 2) 로그인 아이디에 해당 는 가족 insert -->
+<insert id="insertFam" parameterType="kr.or.ddit.empinfo.vo.FamVO">
+   <selectKey resultType="int" order="BEFORE" keyProperty="famNo">
+      SELECT NVL(MAX(FAM_NO),0)+1 FROM FAM
+   </selectKey>
+
+   INSERT INTO FAM(FAM_NO, USER_ID, FAM_NM, FAM_REL_CD, BRTH_YMD, GNDR_MF)
+   VALUES(#{famNo},#{userId},#{famNm},#{famRelCd},#{brthYmdFam},#{gndrMfFam})
+</insert>
+
+<select id="selectFamManageCode" resultType="kr.or.ddit.empinfo.vo.FamManageCodeVO"> 
+   SELECT MNG_CD, GR_CD, MNG_CD_NM1, USE_YN
+   FROM MANAGE_CODE
+   WHERE GR_CD = 'FM' AND USE_YN = 'Y'
+</select>
+
+<select id="detailUsedVac" resultType="kr.or.ddit.empinfo.vo.VacationVO">
+	SELECT
+	   user_id
+	   ,cny_day
+	   ,vac_tp
+	   ,FN_GET_MNG_CD_NM(vac_tp) as vac_tp_nm
+	   ,bgng_dt
+	   ,end_dt
+	   ,VAC_RSN
+	
+	FROM
+	    vac_use
+	    
+	WHERE USER_ID = #{userId}
+	AND 
+	TO_CHAR(bgng_dt, 'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+	
+	ORDER BY bgng_dt
+
+</select>
+
+<select id="makeVacSelect" resultType="kr.or.ddit.empinfo.vo.VacationVO">
+	SELECT
+	   A.user_id
+	   ,A.cny_day
+	   ,A.vac_tp
+	   ,FN_GET_MNG_CD_NM(A.vac_tp) AS vac_tp_nm
+	   ,A.bgng_dt
+	   ,A.end_dt
+	   ,A.VAC_RSN
+	   ,TO_CHAR(B.JNCMP_YMD,'YYYY') AS JOIN_YEAR
+	   
+	FROM
+	    vac_use A
+	INNER JOIN EMP_INFO B ON B.user_id = A.user_id
+	WHERE A.user_id = #{userId}
+	ORDER BY A.bgng_dt
+
+</select>
+
+<select id="findJoinYear" resultType="kr.or.ddit.empinfo.vo.VacationVO">
+	SELECT
+	   user_id
+	   ,TO_CHAR(JNCMP_YMD,'YYYY') AS JOIN_YEAR
+	
+	FROM
+	    EMP_INFO
+	
+	WHERE user_id = #{userId}
+</select>
+
+
+<select id="showVacUsed" resultType="kr.or.ddit.empinfo.vo.VacationVO">
+   SELECT
+      A.user_id
+      ,A.cny_day
+      ,A.vac_tp
+      ,FN_GET_MNG_CD_NM(A.vac_tp) AS vac_tp_nm
+      ,A.bgng_dt
+      ,A.end_dt
+      ,A.VAC_RSN
+      ,TO_CHAR(B.JNCMP_YMD,'YYYY') AS JOIN_YEAR
+      
+   FROM
+       vac_use A
+   INNER JOIN EMP_INFO B ON B.user_id = A.user_id
+   WHERE A.user_id = #{userId}
+   AND TO_CHAR(A.bgng_dt, 'YYYY') = #{selectedValue}
+</select>
+
+<select id="employeesVacVO" resultType="kr.or.ddit.empinfo.vo.EmployeesVacVO">
+   SELECT
+       A.user_id,
+       A.user_nm,
+       A.CO_ID,
+       FN_GET_DEPT_NO_NM(B.DEPT_NO, A.CO_ID) AS DEPT_NO_NM,
+       TO_CHAR(SYSDATE, 'YYYY') - TO_CHAR(B.JNCMP_YMD, 'YYYY') + 1 AS WORKING_YEAR,
+       FN_GET_MNG_CD_NM(B.HDOF_CD) AS HDOF_CD_NM,
+       NVL(c.TOTAL_VAC_GRNT_DAYS, 0) AS TOTAL_VAC_GRNT_DAYS,
+       NVL(d.TOTAL_CNY_DAY, 0) AS TOTAL_CNY_DAY,
+       NVL(c.TOTAL_VAC_GRNT_DAYS, 0) - NVL(d.TOTAL_CNY_DAY, 0) AS REMAIN_DAYS
+   FROM
+       users A
+   INNER JOIN EMP_INFO B ON B.USER_ID = A.USER_ID
+   LEFT JOIN (
+       SELECT USER_ID, NVL(SUM(vac_grnt_days), 0) AS TOTAL_VAC_GRNT_DAYS
+       FROM vac_grnt
+       WHERE TO_CHAR(vac_grnt_ymd, 'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+       GROUP BY USER_ID
+   ) c ON c.USER_ID = A.USER_ID
+   LEFT JOIN (
+       SELECT USER_ID, NVL(SUM(cny_day), 0) AS TOTAL_CNY_DAY
+       FROM VAC_USE
+       WHERE TO_CHAR(bgng_dt, 'YYYY') = TO_CHAR(SYSDATE,'YYYY')
+       GROUP BY USER_ID
+   ) d ON d.USER_ID = A.USER_ID
+   WHERE A.CO_ID = #{coId}
+</select>
+
+
+<select id="paymentVO" resultType="kr.or.ddit.empinfo.vo.PaymentVO">
+	SELECT
+	    payment_no,
+	    user_id,
+	    co_id,
+	    work_ym,
+	    pay_ymd,
+	    ROUND(salary,0),
+	    COALESCE(extn_salary, 0) AS extn_salary,
+	    cgffd,
+	    npn,
+	    emplyminsrnc,
+	    incmtax,
+	    llx,
+	    ROUND(pymntamt,0) AS pymntamt,
+	    nhis,
+	    ltc,
+	    TRUNC(COALESCE(salary, 0) + COALESCE(extn_salary, 0) + COALESCE(cgffd, 0), -2) AS totalPayment,
+	    npn + emplyminsrnc + incmtax + llx + nhis + ltc  AS totalTex, 
+	    SUBSTR(work_ym, 1, 4) AS selectYear
+	   
+	FROM
+	    payment A
+	    
+	WHERE co_id = #{coId}
+	AND user_id = #{userId}
+	AND SUBSTR(work_ym, 1, 4) = #{selectYear}
+	ORDER BY
+	    work_ym
+</select>
+
+
+<select id="paymentDetail" resultType="kr.or.ddit.empinfo.vo.PaymentVO">
+	SELECT
+	    A.payment_no,
+	    A.user_id,
+	    B.USER_NM,
+	    A.co_id,
+	    FN_GET_DEPT_NO_NM(C.DEPT_NO, A.CO_ID) AS DEPT_NO_NM,
+	    FN_GET_CST_CD_NM(c.jbgd_cd) AS jbgd_cd_nm,
+	    B.BRTH_YMD,
+	    A.work_ym,
+	    A.pay_ymd,
+	    A.salary,
+	    ROUND(A.salary,0) AS round_salary,
+	    COALESCE(A.extn_salary, 0) AS extn_salary,
+	    A.cgffd,
+	    A.npn,
+	    A.emplyminsrnc,
+	    A.incmtax,
+	    A.llx,
+	    ROUND(A.pymntamt,0) AS pymntamt,
+	    A.nhis,
+	    A.ltc,
+	    TRUNC(COALESCE(salary, 0) + COALESCE(extn_salary, 0) + COALESCE(cgffd, 0), -2)  AS totalPayment,
+	    A.npn + A.emplyminsrnc + A.incmtax + A.llx + A.nhis + A.ltc  AS totalTex
+	
+	
+	FROM
+	    payment A
+	    
+	INNER JOIN USERS B
+	on B.user_id = A.user_id
+	
+	INNER JOIN EMP_INFO C
+	on C.USER_ID = A.USER_ID
+	    
+	WHERE payment_no = #{paymentNo}
+</select>
+
+
+
+<select id="selectBank" resultType="kr.or.ddit.empinfo.vo.PaymentVO">
+	SELECT 
+	A.USER_ID
+	,B.USER_NM
+	,A.BANK_NM
+	,A.ACT_NO
+	FROM EMP_INFO A
+	INNER JOIN USERS B
+	ON B.USER_ID = A.USER_ID
+	WHERE A.USER_ID= #{userId}
+</select>
+
+
+<update id="paymentUpdate" parameterType="kr.or.ddit.empinfo.vo.PaymentVO">
+	UPDATE EMP_INFO
+	SET BANK_NM = #{bankNm}
+	,ACT_NO = #{actNo}
+	
+	WHERE USER_ID = #{userId}
+
+</update>
+
+
+<select id="paymentEmployeeList" resultType="kr.or.ddit.empinfo.vo.PaymentEmployeeVO">
+
+	SELECT
+	    A.payment_no,
+	    A.user_id,
+	    B.USER_NM,
+	    A.co_id,
+	    FN_GET_DEPT_NO_NM(C.DEPT_NO, A.CO_ID) AS DEPT_NO_NM,
+	    C.BANK_NM,
+	    C.ACT_NO,
+	    ROUND(A.pymntamt,0) AS pymntamt,
+	    TRUNC(COALESCE(A.salary, 0) + COALESCE(A.extn_salary, 0) + COALESCE(A.cgffd, 0), -2) AS totalPayment,
+	    nvl(A.npn + A.emplyminsrnc + A.incmtax + A.llx + A.nhis + A.ltc,0)  AS totalTex, 
+	    SUBSTR(A.work_ym, 1, 4) AS selectYear,
+	    SUBSTR(A.work_ym, 5, 6) AS selectMonth
+	   
+	FROM
+	    payment A
+	    
+	INNER JOIN USERS B
+	ON A.USER_ID = B.USER_ID
+	
+	INNER JOIN EMP_INFO C
+	ON C.USER_ID = A.USER_ID
+	
+	WHERE A.co_id = #{coId}
+	ORDER BY
+	    A.work_ym desc
+
+</select>
+
+
+<select id="paymentEmployeeExcel" resultType="kr.or.ddit.empinfo.vo.PaymentVO">
+	SELECT
+	    A.payment_no,
+	    A.user_id,
+	    B.USER_NM,
+	    A.co_id,
+	    FN_GET_DEPT_NO_NM(C.DEPT_NO, A.CO_ID) AS DEPT_NO_NM,
+	    FN_GET_CST_CD_NM(c.jbgd_cd) AS jbgd_cd_nm,
+        c.BANK_NM,
+        c.ACT_NO,
+	    A.work_ym,
+	    A.pay_ymd,
+	    ROUND(A.salary,0) AS round_salary,
+	    COALESCE(A.extn_salary, 0) AS extn_salary,
+	    A.cgffd,
+	    A.npn,
+	    A.emplyminsrnc,
+	    A.incmtax,
+	    A.llx,
+	    A.nhis,
+	    A.ltc,
+	    TRUNC(COALESCE(salary, 0) + COALESCE(extn_salary, 0) + COALESCE(cgffd, 0), -2)  AS totalPayment,
+	    A.npn + A.emplyminsrnc + A.incmtax + A.llx + A.nhis + A.ltc  AS totalTex,
+        ROUND(A.pymntamt,0) AS pymntamt
+	
+	
+	FROM
+	    payment A
+	    
+	INNER JOIN USERS B
+	on B.user_id = A.user_id
+	
+	INNER JOIN EMP_INFO C
+	on C.USER_ID = A.USER_ID
+    
+    WHERE A.CO_ID = #{coId}
+    
+    order by pay_ymd desc,user_id asc, DEPT_NO_NM desc
+        
+</select>
+
+<update id="personpic" parameterType="kr.or.ddit.empinfo.vo.EmpInfoVO">
+	UPDATE USERS
+	SET
+	USER_IMG = #{userImg}
+	WHERE USER_ID = #{userId}
+</update>
+
+<update id="regSign" parameterType="kr.or.ddit.empinfo.vo.EmpInfoVO">
+	UPDATE USERS
+	SET
+	SIGN_IMG = #{signImg}
+	WHERE USER_ID = #{userId}
+</update>
+
+<update id="changePw">
+	UPDATE USERS
+	SET
+	USER_PSWD = #{userPswd}
+	WHERE 
+	USER_ID = #{userId}
+</update>
+
+</mapper>

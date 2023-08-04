@@ -1,0 +1,161 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec"	uri="http://www.springframework.org/security/tags"%>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+<link rel="stylesheet" href="/resources/css/chat.css" />
+<link rel="stylesheet" href="/resources/css/jstree.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+<script>
+  var jQuery1x = jQuery.noConflict();
+</script>
+
+<style>
+
+</style>
+<!-- footer 시작 -->
+<footer class="footer">
+	<div class="row g-0 justify-content-between fs--1 mt-4 mb-3">
+		<div class="col-12 col-sm-auto text-center">
+			<p class="mb-0 text-600">
+				Thank you for creating with Falcon <span
+					class="d-none d-sm-inline-block">| </span><br class="d-sm-none" />
+				2023 &copy; <a href="https://themewagon.com">Themewagon</a>
+			</p>
+		</div>
+		<div class="col-12 col-sm-auto text-center"></div>
+	</div>
+</footer>
+<!-- footer 끝 -->
+
+<!-- user-list modal 시작 -->
+<div class="modal modal-center fade" id="user-list" tabindex="-1" role="dialog" aria-labelledby="myCenterModalLabel">
+  <div class="modal-dialog modal-center modal-sm" role="document">
+    <div class="modal-content user-list">
+		<div class="wrapper">
+			<div class="card d-flex align-items-auto" id="outBox" >
+				<div class="card" id="searchBox">
+					<i class="fa-solid fa-magnifying-glass"> 사원을 검색하세요.</i> 
+					<input type="text" id="search1" placeholder="이름을 입력하세요.">
+				</div>
+				<br /> 
+				<label> 사원 이름을 클릭하여 ID 카드를 열 수 있습니다. <br> 부서명을 클릭하면 사라져용. </label>
+				<div class="card border h-100 border-light" style="width:200px; height:150px;" >
+					<div class="" id="jstree1" style="overflow:scroll; width:200px; height:450px; layout:fixed;" ></div>
+				</div>
+				<div id="idCard1"></div>
+			</div>
+		</div>
+    </div>
+  </div>
+</div> 
+<!-- user-list modal 끝 -->
+
+<!-- offcanvas 채팅방 목록 시작 -->
+<div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop=true tabindex="-1" id="off-chatlist" aria-labelledby="offcanvasScrollingLabel">
+	<div class="offcanvas-header">
+			<h5 class="offcanvas-title" id="offcanvasScrollingLabel">채팅방 목록</h5>
+			<div>
+				<a class="btn btn-outline" id="user-list-btn">사용자 목록 보기</a>
+				<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+			</div>
+	</div>
+		<div class="offcanvas-body" id="off-chat-list">
+	</div>
+</div>
+<!-- offcanvas 채팅방 목록 끝 -->
+
+<!-- modal 채팅창 시작 -->
+<div class="modal fade" id="modal-chatroom" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="true">
+	<div class="modal-dialog" style="max-width: 600px;" role="document">
+		<div class="modal-content" style="background: transparent; border: none;">
+			<div class="modal-body">
+				<!-- modal body 시작 -->
+					<div class="container" style="background: none;">
+						<div class="row d-flex justify-content-center">
+							<div class="">
+								<div class="card" id="chat1" style="height:550px; border-radius: 15px;">
+									<div class="card-header d-flex justify-content-between align-items-center p-3 bg-info text-white border-bottom-0"
+										style="border-top-left-radius: 15px; border-top-right-radius: 15px;">
+										<i class="fas fa-angle-left"></i>
+										<p class="mb-0 fw-bold">Live chat</p>
+										<i class="fas fa-times"></i>
+									</div>
+									<div class="card-body" style="500px;">
+										<div class="card ms-2" id="modal-chatlist" style="width: 95%; height: 70%;"></div>
+										<div class="form-outline d-flex justify-content-between mt-3" style="overflow-y:auto;">
+											<textarea class="ms-2 form-control" id="chatMsgCn" rows="4"  style="overflow-y:auto;"></textarea>
+											<a class="btn btn-outline btn-sm mt-auto" id="modal-chat-send"><i class="fas fa-paper-plane fa-lg"></i></a>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+					</div>
+				<!-- modal body 끝 -->
+			</div>
+		</div>
+	</div>
+</div>
+<!-- modal 채팅창 끝 -->
+
+<!-- toast 알림 시작 -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <img src="#" class="rounded me-2" alt="...">
+      <strong class="me-auto">알람 왔어요</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Hello, world! This is a toast message.
+    </div>
+  </div>
+</div>
+<!-- toast 알림 끝 -->
+
+<sec:authorize access="isAuthenticated()">
+<script>
+	let userData;
+	let userId = `<%=request.getUserPrincipal().getName()%>`;
+	
+	var sockJs = new SockJS("/ws");
+	var stomp = Stomp.over(sockJs);
+	stomp.debug = null;
+
+	var receiver = $('#receiver');
+	
+	stomp.connect({}, function() {
+
+		stomp.subscribe("/sub/alarm/" + userId, function(chat) {
+			var content = chat.body; 
+			if (content) {
+				$('.toast-body').html(content);
+				$('#liveToast').toast('show');
+			}
+		});
+		
+		stomp.subscribe("/sub/userData", function(chat) {
+			var content = JSON.parse(chat.body); 
+			if (content) {
+				userData = content;
+			}
+		});
+	});
+	
+</script>
+<!-- 채팅 소켓 -->
+<script src="/resources/js/chat-js/socket.js"></script>
+<!-- 사용자 리스트 -->
+<script src="/resources/js/chat-js/user-list.js"></script>
+<!-- 사용자 대화방 리스트 -->
+<script src="/resources/js/chat-js/chat-list.js"></script>
+<!-- 채팅방 추가 -->
+<script src="/resources/js/chat-js/room-add.js"></script>
+</sec:authorize>

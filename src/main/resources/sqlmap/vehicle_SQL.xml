@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.ai.module.vehicle.mapper.VehicleMapper">
+
+	<select id="list" resultType="kr.or.ddit.ai.module.vehicle.vo.VehicleVO" >
+		SELECT V_LOG_NO
+			, VHCL_NO
+			, VHCL_IO
+			, CG_DT
+		FROM 
+			VHCL_LOG
+		ORDER BY
+   			CG_DT
+	</select>
+
+</mapper>
+
+
+
+
+
+
+

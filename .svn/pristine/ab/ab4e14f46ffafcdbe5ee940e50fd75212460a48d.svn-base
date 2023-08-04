@@ -1,0 +1,206 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- ///////////////// 근무현황 ////////////-->
+<div class="card overflow-hidden" style="width: 55rem;">
+    <div class="card-body">
+        <div class="row">
+            <div class="col text-center" >
+                <h5 class="card-title">근무현황</h5>
+                <!-- 날짜 -->
+                <div id="date" style="font-size: 18px; font-family: Arial; color: #dcdcdc; text-align: center;"></div>
+                <!-- 시간 -->
+                <div id="clock" style="font-size: 45px; font-family: Arial; color: #1e90ff; text-align: center;"></div>
+                <!-- /////////////////////출퇴근버튼///////////////// -->
+                <button class="btn btn-sm btn-primary" id="startButton" onclick="startWork()" style="text-align: center;">
+                    <span class="d-md-inline-block">출근하기</span>
+                </button>
+                <button class="btn btn-sm btn-secondary" id="endButton" onclick="endWork()" style="text-align: center;">
+                    <span class="d-md-inline-block">퇴근하기</span>
+                </button>
+            </div>
+            <div class="col">
+                <div class="d-flex flex-column justify-content-center h-100">
+              		<form id="frm" action="/attendance/insert" method="post">
+              			<input type="hidden" name="attendanceDt" id="attendanceDt " value="${attendance.attendDt}" pattern="yyyy-MM-dd"> 
+	                	<span>출근 시간 : <span id="attendDt" style="display: inline-block; text-align: center;"></span></span>
+	                	<br>
+<!-- 	                <input type="hidden" name="" value="" id="">  -->
+	                	<span>퇴근 시간 : <span id="lvffcDt" style="display: inline-block; text-align: center;"></span></span>
+	                	<br>
+	                	<span>근무 시간 : <span id="workDuration" style="display: inline-block; text-align: center;"></span></span>
+	                	<!-- 시큐리티 관련.. form태그 안에 꼭 붙여야함 -->
+	                	<sec:csrfInput/>
+               		</form>
+                </div>
+            </div>
+            <div class="col">
+                <h1>여기엔 개인 정보가 담겨야합니다... 왼쪽으로 옮겨질 수도 있고요...</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card overflow-hidden" style="width: 55rem;">
+	<div class="card-body" style="height: 800px;">
+		<div id="tableExample4" data-list='{"valueNames":["name","email","payment"],"filter":{"key":"payment"}}'>
+  <div class="row justify-content-end g-0">
+    <div class="col-auto px-3">
+      <select class="form-select form-select-sm mb-3" aria-label="Bulk actions" data-list-filter="data-list-filter">
+        <option selected="" value="">근무 구분 선택</option>
+        <option value="Success">정상 출근</option>
+        <option value="Blocked">출장</option>
+        <option value="Pending">조퇴</option>
+        <option value="Blocked">결근</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-responsive scrollbar">
+    <table class="table table-sm table-striped fs--1 mb-0 overflow-hidden">
+      <thead class="bg-200 text-900">
+        <tr>
+          <th class="sort pe-1 align-middle white-space-nowrap" >날짜</th>
+          <th class="sort pe-1 align-middle white-space-nowrap" >출근 시간</th>
+          <th class="sort pe-1 align-middle white-space-nowrap" >퇴근 시간</th>
+          <th class="sort pe-1 align-middle white-space-nowrap" >근무 시간</th>
+          <th class="sort align-middle white-space-nowrap text-end pe-10" >근무구분</th>
+        </tr>
+      </thead>
+      
+      
+      <tbody class="list" id="table-purchase-body">
+	      <c:forEach var ="attendance" items="${data}">
+	        <tr class="btn-reveal-trigger">
+	          <td class="align-middle white-space-nowrap"><fmt:formatDate value="${attendance.attendDt}" pattern="yyyy-MM-dd" /></td>
+	          <td class="align-middle white-space-nowrap"><fmt:formatDate value="${attendance.attendDt}" pattern="HH:mm:ss" /></td>
+	          <td class="align-middle white-space-nowrap"><fmt:formatDate value="${attendance.lvffcDt}" pattern="HH:mm:ss" /></td>
+	          <td class="align-middle white-space-nowrap">${attendance.dclzSttsCd}</td>
+	          <td class="align-middle text-end fs-0 white-space-nowrap workStatus"><span class="badge badge rounded-pill badge-subtle-success">정상 출근<span class="ms-1 fas fa-check" data-fa-transform="shrink-2"></span></span>
+	          </td>
+	        </tr>
+	      </c:forEach>
+      </tbody>
+    </table>
+  </div>
+</div>
+	</div>
+</div>
+
+
+<!-- <script type="text/javascript"> -->
+<!-- // $(function(){ -->
+<!-- // 	$("#submit").on("click",function(){ -->
+<!-- // 		$("frm").submit(); -->
+<!-- // 	}); -->
+	
+<!-- // }); -->
+<!-- </script> -->
+
+<script>
+	var clock = document.querySelector("#clock");
+	var dateElement = document.querySelector("#date");
+// 	var workTimeElement = document.querySelector("#workTime");
+	var attendDtElement = document.querySelector("#attendDt");  //출근시간
+    var lvffcDtElement = document.querySelector("#lvffcDt");      //퇴근시간
+    var workDurationElement = document.querySelector("#workDuration");    //근무시간
+	var startButton = document.querySelector("#startButton");             //출근하기 버튼
+	var endButton = document.querySelector("#endButton");         		  //퇴근하기 버튼
+	var workLog = []; // 근무 시간 기록 배열
+	var startTime; // 출근 시간 저장 변수
+
+	function getClock() {
+		const d = new Date();
+
+		var h = String(d.getHours()).padStart(2, "0");
+		var m = String(d.getMinutes()).padStart(2, "0");
+		var s = String(d.getSeconds()).padStart(2, "0");
+		clock.innerText = h + ":" + m + ":" + s;
+
+		var year = d.getFullYear();
+		var month = d.getMonth() + 1;
+		var day = d.getDate();
+
+		var dateInfo = year + "-" + month + "-" + day;
+		dateElement.innerText = dateInfo;
+	}
+
+	function startWork() {
+		startTime = new Date();
+		startButton.disabled = true; // 출근하기 버튼 비활성화
+		endButton.disabled = false; // 퇴근하기 버튼 활성화
+		
+		var startTimeString = formatTime(startTime);
+		var workEntry = document.createElement("div");
+		workEntry.innerText = startTimeString;
+		
+		attendDtElement.insertAdjacentHTML('afterbegin',workEntry.outerHTML);
+		
+// 		document.getElementById('frm').submit();
+		
+		// Ajax를 이용해서 출근시간을 컨트롤러로 보내서 컨트롤러에서는
+		// 출근시간을 받아서 지각 여부를 확인하고 세션에서 로그인한 회원ID를 구한 후 
+		//  DB 에 Insert한다.
+		
+// 		$.ajax({
+// 			type : 'post',
+// 			url : '/attendance/insert', //서버에서 데이터를 처리할 URL로 변경
+// 			data : {attend: startTime},
+// 			success : function(data){
+// 				console.log('데이터 갔당');
+// 			}
+// 		});
+	}
+
+	function endWork() {
+		var endTime = new Date();
+		var workHours = (endTime - startTime) / 1000 / 60 / 60; //근무시간
+		console.log("퇴근하기 버튼 누름")
+		//시간이 마이너스면 0으로 출력
+// 		if (workHours < 0) {
+//             workHours = 0;
+//         }
+		
+		var endTimeString = formatTime(endTime);
+		lvffcDtElement.innerText = endTimeString;
+		
+		var hoursWorkedEntry = document.createElement("div");
+		//toFixed(2) 이거 안하면 숫자가 0.00000111이런식으로 출력됨
+		hoursWorkedEntry.innerHTML = workHours.toFixed(2) + "시간";
+		workDurationElement.appendChild(hoursWorkedEntry);
+		
+		workLog.push({
+		    startTime: startTime,
+		    endTime: endTime,
+		    hours: workHours
+		});
+// 		startButton.disabled = false; // 출근하기 버튼 활성화
+		endButton.disabled = true; // 퇴근하기 버튼 비활성화
+		//데이터 전송 
+// 		document.getElementById('frm').submit();
+	}
+
+	
+	//실시간 시간 출력
+	function formatTime(time) {
+	    var hour = String(time.getHours()).padStart(2, "0");
+	    var minute = String(time.getMinutes()).padStart(2, "0");
+	    var second = String(time.getSeconds()).padStart(2, "0");
+	    return hour + ":" + minute + ":" + second;
+	 }
+
+	getClock(); //맨처음에 한번 실행
+	setInterval(getClock, 1000); //1초 주기로 새로실행
+</script>
+
+
+
+
+
+
+
+
+
+

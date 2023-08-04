@@ -1,0 +1,32 @@
+package kr.or.ddit.alarm.vo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @author 김종명
+ *
+ */
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AlarmVO {
+	/**
+	 * 보내는 사람
+	 */
+	private String sender;
+	/**
+	 * 받는 사람
+	 */
+	private String userId;
+	/**
+	 * webSocket sessionId 값 저장
+	 */
+	private String sessionId;
+	private String userNm;
+	private String userEml;
+	
+}

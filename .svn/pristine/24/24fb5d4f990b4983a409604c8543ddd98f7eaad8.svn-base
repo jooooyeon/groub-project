@@ -1,0 +1,126 @@
+package kr.or.ddit.user.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.admin.account.vo.UserRegisterVO;
+import kr.or.ddit.user.mapper.UserMapper;
+import kr.or.ddit.user.service.UserService;
+import kr.or.ddit.user.vo.UserVO;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+	@Autowired
+	UserMapper userMapper;
+
+	/**
+	 * 유저 목록
+	 */
+	@Override
+	public List<UserVO> list(String coId){
+		return this.userMapper.list(coId);
+	};
+
+	/**
+	 * ROLE_ADMIN 권한 보유 유저 목록
+	 */
+	@Override
+	public List<UserVO> hasAdminList(String coId){
+		return this.userMapper.hasAdminList(coId);
+	};
+
+	/**
+	 * 유저 검색
+	 */
+	@Override
+	public UserVO detail(UserVO userVO) {
+		return this.userMapper.detail(userVO);
+	};
+
+	/**
+	 * 유저 검색
+	 */
+	@Override
+	public UserVO detailUserAuth(UserVO userVO) {
+		return this.userMapper.detailUserAuth(userVO);
+	};
+
+	/**
+	 * 유저 등록
+	 */
+	@Override
+	public int registerUser(UserRegisterVO userRegisterVO) {
+		return this.userMapper.registerUser(userRegisterVO);
+	};
+
+	/**
+	 * 유저 등록
+	 */
+	@Override
+	public int registerEmpInfo(UserRegisterVO userRegisterVO) {
+		return this.userMapper.registerEmpInfo(userRegisterVO);
+	};
+
+	/**
+	 * 사용자 계정 생성시 ROLE_USER 권한 부여
+	 */
+	public int addAuth(String auth, String userId) {
+		return this.userMapper.addAuth(auth,userId);
+	};
+
+	/**
+	 * ROLE_ADMIN 권한 삭제
+	 */
+	public int delAuth(String auth, String userId) {
+		return this.userMapper.delAuth(auth, userId);
+	};
+
+	/**
+	 * 유저 수정
+	 */
+	@Override
+	@Transactional
+	public int update(UserVO userVO) {
+		int cnt = 0;
+		cnt += this.userMapper.updateUser(userVO);
+		cnt += this.userMapper.updateEmpInfo(userVO);
+		return cnt;
+	};
+
+	/**
+	 * 유저 삭제
+	 */
+	@Override
+	public int delete(UserVO userVO) {
+		return this.userMapper.delete(userVO);
+	}
+
+	/**
+	 * userId 자동생성 값 조건 조회
+	 */
+	@Override
+	public String maxUserId(String search) {
+		return this.userMapper.maxUserId(search);
+	}
+
+	/**
+	 * email 중복 체크
+	 */
+	@Override
+	public int checkEmail(String email) {
+		return this.userMapper.checkEmail(email);
+	}
+
+	/**
+	 * 계정 활성화
+	 */
+	@Override
+	public int accountAct(String userId) {;
+		return this.userMapper.accountAct(userId);
+	}
+
+}

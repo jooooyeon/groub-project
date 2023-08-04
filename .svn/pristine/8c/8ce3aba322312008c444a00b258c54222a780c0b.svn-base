@@ -1,0 +1,46 @@
+package kr.or.ddit.alarm.config;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+
+/**
+ * @author 김종명
+ *
+ */
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
+	
+	/**
+	 * 웹소켓 입구 출구 설정
+	 * sub = 출구, pub = 입구
+	 */
+	@Override
+	public void configureMessageBroker(MessageBrokerRegistry registry) {
+		registry.enableSimpleBroker("/sub"); //보낼 때 매핑하는 경로
+		/*
+		 받을 때 /pub + controller mapping path(RequestMapping("/hello")) = /pub/hello로 설정해주는 경로
+		stomp.send("/pub/hello")로 설정하면 됨
+		*/
+		registry.setApplicationDestinationPrefixes("/pub");
+	}
+	
+	/**
+	 * 웹소켓 서버 설정
+	 * ws와 chat 2개의 서버가 있음
+	 */
+	@Override
+	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/ws")
+		.setAllowedOrigins("*")
+		.withSockJS();
+		
+		registry.addEndpoint("/chat")
+		.setAllowedOrigins("*")
+		.withSockJS();
+	}
+}

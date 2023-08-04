@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.chat.mapper.ChatMapper">
+
+	<!-- 대화방 사용자 내역 보기 -->
+	<select id="userList" resultType="kr.or.ddit.chat.vo.ChatUserVO">
+		WITH T AS(
+		            SELECT
+		                chat_rm_no
+		                , user_id
+		                , host_yn
+		                , user_no
+		            FROM
+		                chat_users
+		        )
+		        , J AS
+		        (
+		            SELECT
+		                a.chat_rm_no
+		                , a.user_id
+		                , b.user_nm
+		                , b.user_img
+		                , c.dept_no
+		                , d.dept_nm
+		                , f.cst_cd_nm 
+		            FROM
+		                chat_users a
+		            INNER JOIN
+		                users b on b.user_id = a.user_id
+		            INNER JOIN
+		                emp_info c on c.user_id = a.user_id
+		            INNER JOIN
+		                dept d on d.dept_no = c.dept_no
+		            INNER JOIN 
+		                custome_code f on f.cst_cd = c.jbgd_cd
+		        )
+		            SELECT DISTINCT 
+		                T.*
+		                , J.*
+		            FROM
+		                T
+		            LEFT JOIN
+		                J on J.chat_rm_no = T.chat_rm_no
+		            AND 
+		                J.user_id = T.user_id
+		            WHERE
+		                T.chat_rm_no = #{chatRmNo}
+	</select>
+	<!-- 채팅 내용 저장 -->
+	<insert id="msgInsert" parameterType="kr.or.ddit.chat.vo.ChatMsgVO">
+		INSERT
+		    INTO
+		        chat_msg
+		(
+		        chat_msg_no
+		        , chat_rm_no
+		        , user_id
+		        , chat_msg_cn
+		        , reg_dt
+		        , file_yn
+		    )
+		VALUES(
+		    (SELECT NVL(MAX(CHAT_MSG_NO),0)+1 FROM CHAT_MSG)
+		    , #{chatRmNo}
+		    , #{userId}
+		    , #{chatMsgCn}
+		    , SYSDATE
+		    , #{fileYn}
+		)
+	</insert>
+	
+	<!-- 채팅 내용 리스트 -->
+	<select id="msgList" resultType="kr.or.ddit.chat.vo.ChatMsgVO">
+        SELECT
+            a.chat_msg_no
+            , a.chat_rm_no
+            , a.user_id
+            , a.chat_msg_cn
+            , a.reg_dt
+            , a.file_yn
+            , b.user_nm
+            , d.dept_nm
+            , f.cst_cd_nm 
+        FROM
+            chat_msg a
+        LEFT JOIN
+            users b on b.user_id = a.user_id 
+        LEFT JOIN
+            emp_info c on c.user_id = a.user_id
+        LEFT JOIN 
+            dept d on d.dept_no = c.dept_no
+        LEFT JOIN 
+            custome_code f on f.cst_cd = c.jbgd_cd
+        WHERE
+            1=1
+        AND
+            chat_rm_no = #{chatRmNo}
+        ORDER BY 
+            reg_dt ASC
+	</select>
+	<!-- 방 목록 가져오기 -->	
+	<select id="chatList" resultType="kr.or.ddit.chat.vo.ChatRoomVO">
+		SELECT DISTINCT  
+            a.chat_rm_no
+            , a.user_id
+            , a.user_no
+            , NVL(MAX(c.reg_dt),d.crt_dt) as reg_dt
+        FROM
+            chat_users a
+        LEFT JOIN
+            chat_room b on b.chat_rm_no = a.chat_rm_no
+        LEFT JOIN
+            chat_msg c on c.chat_rm_no = a.chat_rm_no
+        LEFT JOIN 
+            chat_room d on d.chat_rm_no = a.chat_rm_no 
+        WHERE 
+            1=1
+        AND 
+            a.user_id = #{userId}
+        GROUP BY 
+            a.chat_rm_no
+            , a.user_id
+            , a.user_no
+            , d.crt_dt
+        ORDER BY 
+            reg_dt DESC 
+	</select>
+	<!-- 대화방 등록 -->
+	<update id="chatRoomMerge" parameterType="kr.or.ddit.chat.vo.ChatVO">
+	    MERGE INTO CHAT_ROOM CR
+		    USING (SELECT #{chatRoomVO.chatRmNo} as TMP_CHAT_RM_NO FROM dual) TMP
+		    ON (CR.CHAT_RM_NO = TMP.TMP_CHAT_RM_NO)
+		    WHEN MATCHED THEN 
+		        UPDATE SET CR.USER_ID = #{chatRoomVO.userId}, 
+		                   CR.CAHT_RM_NM = #{chatRoomVO.cahtRmNm}, 
+		                   CR.CRT_DT = SYSDATE
+		    WHEN NOT MATCHED THEN 
+		        INSERT (
+		            CHAT_RM_NO,
+		            USER_ID,
+		            CRT_DT
+		        )
+		        VALUES (
+		            (SELECT NVL(MAX(chat_rm_no),0)+1 FROM CHAT_ROOM),
+		            #{chatRoomVO.userId},
+		            SYSDATE
+		        )
+	</update>
+
+	<!-- 대화방 사용자 등록 -->
+	<update id="chatRoomUserInsert" parameterType="kr.or.ddit.chat.vo.ChatVO">
+		<foreach collection="chatUserList" item="item" index="i" separator=" " open="insert all" close="select * from dual">
+			INTO
+			    CHAT_USERS
+			(
+					  USER_NO
+			        , CHAT_RM_NO
+			        , USER_ID
+			        , HOST_YN
+			    )
+			VALUES(
+				(SELECT NVL(MAX(USER_NO),0)+1 FROM CHAT_USERS) +#{i}
+				, (SELECT MAX(CHAT_RM_NO) FROM CHAT_ROOM)
+			    , #{item.userId}
+			    , #{item.hostYn}
+			)
+		</foreach>
+	</update>
+
+</mapper>

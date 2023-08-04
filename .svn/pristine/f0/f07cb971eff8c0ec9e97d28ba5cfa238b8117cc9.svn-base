@@ -1,0 +1,37 @@
+package kr.or.ddit.draft.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.draft.vo.DraftOpnVO;
+import kr.or.ddit.draft.vo.DraftUserVO;
+import kr.or.ddit.draft.vo.DraftVO;
+
+public interface DraftMapper {
+	/**
+	 * 사용자 한명의 기안을 올리기 위한 정보를 조회하는 메소드
+	 * @param userId 조회할 유저의 아이디
+	 * @return 유저 정보 + 휴가 정보
+	 */
+	DraftUserVO selectDraftUsesrInfo(String userId) throws Exception;
+	
+	/**
+	 * 기안 테이블에 기안 정보를 등록
+	 * @param draftVO 
+	 * @return 등록에 성공한 행 수
+	 */
+	int draftInsert(DraftVO draftVO) throws Exception;
+	
+	/**
+	 * 기안 의견 테이블에 기안 정보와 의견을 등록
+	 * @param draftVO
+	 * @return 등록에 성공한 행 수
+	 */
+	int draftOpnInsert(DraftVO draftVO) throws Exception;
+	
+	/**
+	 * 휴가문서 기안 시 휴가 테이블에 해당 휴가 사용 이력 등록
+	 * @param draftVO
+	 * @return 등록에 성공한 행 수
+	 */
+	int draftVacInsert(DraftVO draftVO) throws Exception;
+}

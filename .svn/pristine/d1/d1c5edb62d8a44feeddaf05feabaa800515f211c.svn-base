@@ -1,0 +1,30 @@
+/**
+ * 
+ */
+
+//채팅방 목록 불러오기
+$(document).on('click','#msg-list',()=>{
+	
+	$.ajax({
+		url:'/chat/list',
+		type:'get',
+		data:{
+			userId:userId,
+		},
+		success:(res)=>{
+			console.log(res);
+			let html = ``;
+			res.forEach((e,i)=>{
+				console.log("e.chatRmNo",e.chatRmNo);
+				html += `
+					<div>
+						<a class="btn btn-outline-secondary chat-room" data-rmno="`+e.chatRmNo+`">`+e.cahtRmNm+`</a>
+					</div>
+				`
+			})
+			$('#off-chat-list').html(html);
+		},
+	});
+	
+	$('#off-chatlist').offcanvas('show');
+});

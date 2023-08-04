@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.servey.mapper.ServeyMapper">
+
+	<!-- 보기별 참여인원 수 -->
+	<select id="selectUser" parameterType="kr.or.ddit.servey.vo.ServeyOptionVO" resultType="int">
+		SELECT
+	        NVL(COUNT(rspns_ct),0)
+	    FROM
+	        srvy_rspns
+		WHERE
+			srvy_no = #{srvyNo}
+		AND
+			qitem_no = #{qitemNo}
+		AND
+			rspns_ct = #{optnNo}
+	</select>
+	
+	<!-- 총 참여 인원수 -->
+	<select id="totalUser" parameterType="int" resultType="int">
+		SELECT
+		    NVL(count(DISTINCT user_id),0)
+		FROM
+		    srvy_rspns
+		WHERE
+			srvy_no = #{srvyNo}
+			
+	</select>
+
+	<insert id="serveyAnswer" parameterType="kr.or.ddit.servey.vo.ServeyResponseVO">
+    INSERT INTO srvy_rspns (
+        rspns_no
+        , srvy_no
+        , qitem_no
+        , user_id
+        , rspns_ct
+    ) VALUES (
+        (SELECT NVL(MAX(rspns_no), 0) + 1 FROM srvy_rspns),
+        #{srvyNo},
+        #{qitemNo},
+        #{userId},
+        #{rspnsCt}
+    )
+</insert>
+
+	<select id="serveyDateilBoki" resultType="kr.or.ddit.servey.vo.ServeyOptionVO">
+		SELECT
+		    optn_no
+		   ,qitem_no
+		   ,srvy_no
+		   ,optn_ct
+		FROM
+		    srvy_optn
+		
+		where qitem_no = #{qitem_no}   
+	
+	</select>
+
+	<select id="serveyDetailQuestion" resultType="kr.or.ddit.servey.vo.ServeyQItemVO">
+		SELECT
+		    qitem_no
+		   ,srvy_no
+		   ,qitem_ct
+		   ,input_type
+		FROM
+		    srvy_qitem
+		where srvy_no = #{srvyNo} 
+	</select>
+
+	<select id="serveyDetail" resultMap="serveyMap">
+		SELECT
+		    A.srvy_no
+		   ,A.user_id
+		   ,A.co_id
+		   ,A.srvy_ttl
+		   ,A.bgng_dt
+		   ,A.end_dt
+		   ,A.srvy_stts
+		   ,A.srvy_cn
+		   ,A.reg_dt
+		    ,B.qitem_no
+		   ,B.qitem_ct
+		   ,B.input_type  
+		   ,C.optn_no
+		   ,C.optn_ct
+		   
+		FROM
+		    srvy A
+		    
+		INNER JOIN SRVY_QITEM B
+		ON B.srvy_no = A.srvy_no
+		
+		INNER JOIN SRVY_OPTN C
+		ON C.QITEM_NO = B.QITEM_NO
+		    
+		WHERE A.srvy_no =  #{srvyNo}  
+	</select>
+
+
+	<select id="serveyList" resultType="kr.or.ddit.servey.vo.ServeyVO">
+		SELECT
+		    SRVY_NO
+		    ,SRVY_TTL
+		    ,BGNG_DT
+		    ,END_DT
+		    ,SRVY_STTS
+		FROM SRVY
+		ORDER BY BGNG_DT DESC
+	</select>
+
+
+	<insert id="serveyInsert"
+		parameterType="kr.or.ddit.servey.vo.ServeyVO">
+		INSERT INTO srvy (
+		srvy_no
+		,user_id
+		,co_id
+		,srvy_ttl
+		,bgng_dt
+		,end_dt
+		,srvy_stts
+		,srvy_cn
+		,reg_dt
+		) VALUES (
+		(SELECT
+		NVL(MAX(srvy_no),0)+1 FROM srvy)
+		,#{userId}
+		,#{coId}
+		,#{srvyTtl}
+		,#{bgngDt}
+		,#{endDt}
+		,'SV001'
+		,#{srvyCn}
+		,sysdate
+		)
+	</insert>
+
+	<insert id="serveyQItemInsert" parameterType="kr.or.ddit.servey.vo.ServeyQItemVO">
+		INSERT INTO srvy_qitem (
+		qitem_no
+		,srvy_no
+		,qitem_ct
+		,input_type
+		) VALUES 
+		(		
+		(SELECT NVL(MAX(qitem_no),0)+1 FROM srvy_qitem)
+		, (SELECT NVL(MAX(srvy_no),0) FROM srvy)
+		, #{qitemCt}
+		, #{inputType}
+		)
+	</insert>
+	
+	<update id="serveyOptionInsert" parameterType="kr.or.ddit.servey.vo.ServeyQItemVO">
+		<foreach collection="serveyOptionVOList" open="INSERT ALL" close="SELECT * FROM DUAL" item="item" separator=" " index="i">
+			INTO srvy_optn (optn_no, qitem_no, srvy_no, optn_ct) -->
+		      VALUES (
+		      (SELECT NVL(MAX(optn_no),0)+1 FROM srvy_optn) +#{i}
+		      , (SELECT NVL(MAX(qitem_no),0) FROM srvy_qitem)
+		      , (SELECT NVL(MAX(srvy_no),0) FROM srvy)
+		      , #{item.optnCt})
+		</foreach>
+	</update>
+
+<!-- 	<update id="serveyQOptionInsert" parameterType="kr.or.ddit.servey.vo.ServeyVO"> -->
+<!-- 	  <foreach collection="serveyQItemVOList" item="qItem" separator=" "> -->
+<!-- 	    INSERT INTO srvy_qitem (qitem_no, srvy_no, qitem_ct, input_type) -->
+<!-- 	    VALUES ( -->
+<!-- 	    NVL(MAX(qitem_no),0)+1 FROM srvy_qitem) -->
+<!-- 	    , NVL(MAX(srvy_no),0) FROM srvy), #{qItem.qitemCt}, #{qItem.inputType}) -->
+	    
+<!-- 	    <foreach collection="qItem.serveyOptionVOList" item="optionItem" separator=" "> -->
+<!-- 	      INSERT INTO srvy_optn (optn_no, qitem_no, srvy_no, optn_ct) -->
+<!-- 	      VALUES ( -->
+<!-- 	      (SELECT NVL(MAX(optn_no),0)+1 FROM srvy_optn) -->
+<!-- 	      , (SELECT NVL(MAX(qitem_no),0) FROM srvy_qitem) -->
+<!-- 	      , NVL(MAX(srvy_no),0) FROM srvy) -->
+<!-- 	      , #{optionItem.optnCt}) -->
+	      
+<!-- 	    </foreach> -->
+<!-- 	  </foreach> -->
+<!-- 	</update> -->
+
+<resultMap type="kr.or.ddit.servey.vo.ServeyVO" id="serveyMap">
+	<result property="srvyNo" column="SRVY_NO" />
+	<result property="userId" column="USER_ID" />
+	<result property="coId" column="CO_ID" />
+	<result property="srvyTtl" column="SRVY_TTL" />
+	<result property="bgngDt" column="BGNG_DT" />
+	<result property="endDt" column="END_DT" />
+	<result property="srvyStts" column="SRVY_STTS" />
+	<result property="srvyCn" column="SRVY_CN" />
+	<result property="regDt" column="REG_DT" />
+	<collection property="serveyQItemVOList" resultMap="serveyQItemMap"></collection>
+</resultMap>
+
+
+<resultMap type="kr.or.ddit.servey.vo.ServeyQItemVO" id="serveyQItemMap">
+	<result property="qitemNo" column="QITEM_NO" />
+	<result property="srvyNo" column="SRVY_NO" />
+	<result property="qitemCt" column="QITEM_CT" />
+	<result property="inputType" column="INPUT_TYPE" />
+	<collection property="serveyOptionVOList" resultMap="serveyOptionMap"></collection>
+</resultMap>
+
+<resultMap type="kr.or.ddit.servey.vo.ServeyOptionVO" id="serveyOptionMap">
+	<result property="optnNo" column="OPTN_NO" />
+	<result property="qitemNo" column="QITEM_NO" />
+	<result property="srvyNo" column="SRVY_NO" />
+	<result property="optnCt" column="OPTN_CT" />
+
+</resultMap>
+
+
+</mapper>

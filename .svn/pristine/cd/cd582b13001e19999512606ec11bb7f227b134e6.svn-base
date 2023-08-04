@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC
+        "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+
+    <!-- main layout -->
+    <definition name="tiles-layout" template="/WEB-INF/views/tiles/index.jsp">
+        <put-attribute name="header" value="/WEB-INF/views/tiles/header.jsp"/>
+        <put-attribute name="aside" value="/WEB-INF/views/tiles/aside.jsp"/>
+        <put-attribute name="body" value=""/>
+        <put-attribute name="footer" value="/WEB-INF/views/tiles/footer.jsp"/>
+    </definition>
+
+    <!--
+    mav.setViewName("book/create");
+    mav.setViewName("*/*");
+    mav.setViewName("1/2");
+    -->
+
+    <definition name="*/*" extends="tiles-layout">
+        <put-attribute name="body" value="/WEB-INF/views/{1}/{2}.jsp"/>
+    </definition>
+
+    <!-- main layout -->
+    <definition name="tiles-layout-one" template="/WEB-INF/views/tiles/index.jsp">
+        <put-attribute name="header" value="/WEB-INF/views/tiles/header.jsp"/>
+        <put-attribute name="aside" value="/WEB-INF/views/tiles/aside.jsp"/>
+        <put-attribute name="body" value=""/>
+        <put-attribute name="footer" value="/WEB-INF/views/tiles/footer.jsp"/>
+    </definition>
+
+    <!--
+    mav.setViewName("/create");
+    mav.setViewName("*");
+    mav.setViewName("1");
+    -->
+
+    <definition name="*" extends="tiles-layout-one">
+        <put-attribute name="body" value="/WEB-INF/views/{1}.jsp"/>
+    </definition>
+</tiles-definitions>

@@ -1,0 +1,477 @@
+package kr.or.ddit.empinfo.controller;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.gson.Gson;
+
+import kr.or.ddit.common.service.serviceImpl.CommonServiceImpl;
+import kr.or.ddit.empinfo.service.EmpInfoService;
+import kr.or.ddit.empinfo.vo.CrtfctVO;
+import kr.or.ddit.empinfo.vo.EmpInfoCertificationVO;
+import kr.or.ddit.empinfo.vo.EmpInfoVO;
+import kr.or.ddit.empinfo.vo.EmployeesVacVO;
+import kr.or.ddit.empinfo.vo.FamManageCodeVO;
+import kr.or.ddit.empinfo.vo.FamVO;
+import kr.or.ddit.empinfo.vo.HrRcrdVO;
+import kr.or.ddit.empinfo.vo.PaymentVO;
+import kr.or.ddit.empinfo.vo.VacationVO;
+import kr.or.ddit.security.CustomUser;
+import kr.or.ddit.user.vo.UserVO;
+
+
+@RequestMapping("/empinfo")
+@Controller
+@Secured({"ROLE_USER","ROLE_ADMIN"})
+public class EmpInfoController {
+	
+	@Autowired
+	EmpInfoService empInfoService;
+	
+	@Autowired
+	CommonServiceImpl commonServiceImpl;
+	
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	
+	/**
+	 * 인사정보 메인 페이지
+	 */
+	@RequestMapping("/empinfo")
+	public String mainEmpInfo(EmpInfoVO empInfoVO, Model model, Principal principal){
+		String userId = principal.getName();
+		empInfoVO.setUserId(userId);
+		log.info("mainEmpInfo userId : " + userId);
+		
+		empInfoVO = this.empInfoService.detail(empInfoVO);
+		log.info("crtfctVO empInfoVO : " + empInfoVO);
+		model.addAttribute("data",empInfoVO);
+		
+		
+		List<CrtfctVO> crtfctVO = this.empInfoService.selectCrtfct();
+		log.info("crtfctVO selectCrtfct : " + crtfctVO );
+		model.addAttribute("crtfct",crtfctVO);
+		
+		List<FamManageCodeVO> famManageCodeVO = this.empInfoService.selectFamManageCode();
+		log.info("famManageCodeVO selectFamManageCode : ",famManageCodeVO);
+		model.addAttribute("famManageCode",famManageCodeVO);
+		
+		return "empInfo/empInfo";
+	}
+	
+	
+	//인사정보 신상정보 수정
+	@ResponseBody
+	@PostMapping("/updatePersonal")
+	public String updatePersonalEmpInfo(@RequestBody EmpInfoVO empInfoVO, Model model) {
+		
+		log.info("updatePersonalEmpInfo empInfoVO : " + empInfoVO);
+		
+		int result = empInfoService.updatePersonal(empInfoVO);
+		if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+	
+	//인사정보 자격증 정보 삭제
+	@ResponseBody
+	@PostMapping("/deleteCrtfct")
+	public String deleteCrtfct(@RequestBody EmpInfoCertificationVO empInfoCertificationVO, Model model) {
+		
+		log.info("deleteCrtfct empInfoCertificationVO : " + empInfoCertificationVO);
+		
+		int result = empInfoService.deleteCrtfct(empInfoCertificationVO);
+		if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+	
+	//인사정보 자격증 정보 추가
+	@ResponseBody
+	@PostMapping("/insertCrtfct")
+	public String insertCrtfct(@RequestBody EmpInfoCertificationVO empInfoCertificationVO, Model model) {
+		
+		log.info("insertCrtfct empInfoCertificationVO : " + empInfoCertificationVO);
+		
+		int result = empInfoService.insertCrtfct(empInfoCertificationVO);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	
+	
+	
+	/**
+	 * 가족 리스트 삭제
+	 */
+	@ResponseBody
+	@PostMapping("/deleteFam")
+	public String deleteFam(@RequestBody FamVO famVO) {
+		log.info("deleteFam famVO : " + famVO);
+		
+		int result = empInfoService.deleteFam(famVO);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	
+	/*
+	 가족정보 변경 처리
+	 */
+	@PostMapping("/updateFam")
+	public String updateFam(@ModelAttribute EmpInfoVO empInfoVO) {
+		//EmpInfoVO(userId=NAVER_2014030001, coId=null, userPswd=null, userNm=null, userTelno=null, userEml=null, brthYmd=null, userZip=null, userAddr=null
+		//, userDaddr=null, userImg=null, signImg=null, gndrMf=null, hobby=null, spcabl=null, msngrStts=null, enabled=null, mngrYn=null, deptNo=0, 
+		//jbgdCd=null, jbgdCdNm=null, jbtlCd=null, jbtlCdNm=null, anslry=0, bankNm=null, actNo=0, jncmpYmd=null, rsgntnYmd=null, hdofCd=null, hdofCdNm=null, 
+		//mtrscCd=null, mtrscCdNm=null, coNm=null, deptNm=null, hrRcrdVO=null, 
+		//famVO=[FamVO(famNo=1, userId=NAVER_2014030001, famNm=홍길동, famRelCd=FM003, famRelCdNm=null, brthYmdFam=Fri May 12 00:00:00 KST 1967, gndrMfFam=M), 
+		//FamVO(famNo=2, userId=NAVER_2014030001, famNm=홍길자, famRelCd=FM004, famRelCdNm=null, brthYmdFam=Fri May 12 00:00:00 KST 1967, gndrMfFam=W), 
+		//FamVO(famNo=3, userId=NAVER_2014030001, famNm=ㅁㄴㅇㄹ, famRelCd=FM004, famRelCdNm=null, brthYmdFam=Mon Jul 03 00:00:00 KST 2023, gndrMfFam=W)]
+		//, empInfoCertificationVO=null, famManageCodeVO=null)
+		log.info("empInfoVO : " + empInfoVO);
+		
+		int result = this.empInfoService.deleteFamUserId(empInfoVO);
+		
+		return "redirect:/empinfo/empinfo";
+	}
+	
+	
+	
+	
+	@GetMapping("/vacinfopersonal")
+	public String vacInfoPersonal(Model model,Principal principal, VacationVO vacationVO){
+		String userId = principal.getName();
+		log.info("vacInfoEmployee userId : " + userId);
+		
+		vacationVO.setUserId(userId);
+		
+		log.info("mainEmpInfo userId : " + userId);
+		
+		
+		List<VacationVO> grantList = this.empInfoService.vacGrant(vacationVO);
+		log.info("vacInfoEmployee vacationVO" + grantList);
+		
+		model.addAttribute("grantList",grantList);
+		
+		//VacationVO(vacGrntNo=0, userId=NAVER_2014030001, vacTp=null, vacTpNm=null, vacGrntDays=0
+		//, vacGrntYmd=null, totalVacGrntDays=null, vldYmd=null, vacGrntExpln=null, remainDays=null)
+		log.info("vacInfoPersonal->vacationVO : " + vacationVO);
+		
+		VacationVO vacMainList = this.empInfoService.vacMain(vacationVO);
+		log.info("vacInfoEmployee vacMainList : " +vacMainList );
+		
+		model.addAttribute("vacMainList",vacMainList);
+		
+		List<Map<String, String>> selectMngCdList = commonServiceImpl.selectMngCdList("VA");
+		log.info("selectMngCdList : " + selectMngCdList);
+		
+		model.addAttribute("selectMngCdList",selectMngCdList);
+		
+		
+		List<VacationVO> detailUsedVac = this.empInfoService.detailUsedVac(vacationVO);
+		log.info("detailUsedVac : " + detailUsedVac);
+		model.addAttribute("detailUsedVac",detailUsedVac);
+		
+		VacationVO findJoinYear = this.empInfoService.findJoinYear(vacationVO);
+		log.info("vacInfoEmployee findJoinYear : " +findJoinYear );
+		
+		model.addAttribute("findJoinYear",findJoinYear);
+		
+		
+		return "empInfo/vacInfoPersonal";
+	}
+	
+	
+	@ResponseBody
+	@PostMapping("/showvacused")
+	public String showVacUsed (@RequestBody VacationVO vacationVO, Model model) {
+		log.info("showVacUsed vacationVO : " + vacationVO);
+		
+		List<VacationVO> showVacUsedvacationVO = this.empInfoService.showVacUsed(vacationVO);
+		log.info("showVacUsedvacationVO : " + showVacUsedvacationVO);
+		
+		//model.addAttribute("showVacUsedvacationVO",showVacUsedvacationVO);
+		
+		
+		
+		// 응답 데이터를 JSON 형태로 반환
+	    if (showVacUsedvacationVO != null) {
+	        return new Gson().toJson(showVacUsedvacationVO);
+	    } else {
+	        return "fail";
+	    }
+		
+		
+	}
+	
+	
+	
+
+	
+	@GetMapping("/vacinfoemployee")
+	public String vacInfoEmployee(Model model, Authentication authentication, EmployeesVacVO employeesVacVO,  VacationVO vacationVO){
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		UserVO userVO = customUser.getUserVO();
+		String coId = userVO.getCoId();
+		
+		log.info("vacinfoemployee coId : " + coId);
+
+	       
+		List<EmployeesVacVO> employeesVacVO1 = this.empInfoService.employeesVacVO(coId);
+		log.info("employeesVacVO1 : " + employeesVacVO1);
+		
+		model.addAttribute("data", employeesVacVO1);
+
+		return "empInfo/vacInfoEmployee";
+	}
+	
+	//모달 누르면 나오는 상세정보 가져오는 컨트롤러
+	@ResponseBody
+	@PostMapping("/vacinfoemployee")
+	public List<VacationVO> vacInfoEmployeePost(Model model, Authentication authentication, EmployeesVacVO employeesVacVO,  @RequestBody VacationVO vacationVO){
+		log.info("zzzzzzzzzzzzzzzzzzzzzzzzzzz");
+		log.info("vacationVO : " + vacationVO);
+		log.info(vacationVO.getUserId());
+		
+		
+		 String userId = vacationVO.getUserId();
+		    // 유저 아이디를 활용하여 vacMain 호출 및 데이터 조회
+		 List<VacationVO> usedList = empInfoService.detailUsedVac(vacationVO);
+		    log.info("usedList!!!!! : "+ usedList);
+
+		    return usedList;
+		
+		
+	
+	}
+	
+	
+	
+	
+	//전직원 엑셀 파일 저장
+	@GetMapping("/excelDown")
+	public void excelDownload( HttpServletResponse response, Authentication authentication, EmployeesVacVO employeesVacVO) throws IOException {
+	    log.info("왔나?!!!");
+	    
+	    CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		UserVO userVO = customUser.getUserVO();
+		String coId = userVO.getCoId();
+		log.info("vacinfoemployee coId : " + coId);
+
+		List<EmployeesVacVO> employeesVacVO1 = this.empInfoService.employeesVacVO(coId);
+		log.info("employeesVacVO1!!!!!! : " + employeesVacVO1);
+		
+	    
+		//employeesVacVO1
+		
+		// 엑셀 워크북 생성
+	    XSSFWorkbook wb = new XSSFWorkbook();
+	    Sheet sheet = wb.createSheet("mysheet이름");
+		
+		
+			// 헤더 생성
+	    Row headerRow = sheet.createRow(0);
+	    headerRow.createCell(0).setCellValue("이름");
+	    headerRow.createCell(1).setCellValue("부서명");
+	    headerRow.createCell(2).setCellValue("발생연차");
+	    headerRow.createCell(3).setCellValue("사용연차");
+	    headerRow.createCell(4).setCellValue("잔여연차");
+	    headerRow.createCell(5).setCellValue("근속 연수");
+	    headerRow.createCell(6).setCellValue("상태");
+	    
+	    
+		//  데이터 저장
+		int rowNum = 1;
+		for (EmployeesVacVO employee : employeesVacVO1) {
+		    Row dataRow = sheet.createRow(rowNum++);
+		    dataRow.createCell(0).setCellValue(employee.getUserNm());
+		    dataRow.createCell(1).setCellValue(employee.getDeptNoNm());
+		    dataRow.createCell(2).setCellValue(employee.getTotalVacGrntDays());
+		    dataRow.createCell(3).setCellValue(employee.getTotalCnyDay());
+		    dataRow.createCell(4).setCellValue(employee.getRemainDays());
+		    dataRow.createCell(5).setCellValue(employee.getWorkingYear());
+		    dataRow.createCell(6).setCellValue(employee.getHdofCdNm());
+		}
+	
+	
+		    
+		// 파일 다운로드를 위한 응답 헤더 설정
+	    response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	    response.setHeader("Content-Disposition", "attachment; filename=employeesVac.xlsx");
+	
+		response.setContentType("ms-vnd/excel");
+		response.setHeader("Content-Disposition", "attachment;filename=employeesVac.xlsx");  //파일이름지정.
+	    // response OutputStream에 엑셀 작성
+	    wb.write(response.getOutputStream());
+			
+			
+		    
+		  //  return "redirect:/empinfo/vacinfoemployee";
+	
+		}
+	
+	
+
+
+	@PostMapping("/sendSelectedEmployees")
+	public void sendSelectedEmployees(@RequestBody List<EmployeesVacVO> employeesVacVO, HttpServletResponse response) throws IOException {
+		// 선택된 직원 정보 처리 로직 작성
+		log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		log.info("@@@@@@@@@@@EmployeesVacVO : " + employeesVacVO);
+		
+		for (EmployeesVacVO selectedEmployee : employeesVacVO) {
+			log.info("zzzz" +selectedEmployee.getUserNm() );
+		}
+		
+		XSSFWorkbook wb = new XSSFWorkbook();
+		Sheet sheet = wb.createSheet("mysheet이름");
+		
+		// 헤더 생성
+		Row headerRow = sheet.createRow(0);
+		headerRow.createCell(0).setCellValue("이름");
+		headerRow.createCell(1).setCellValue("부서명");
+		headerRow.createCell(2).setCellValue("발생연차");
+		headerRow.createCell(3).setCellValue("사용연차");
+		headerRow.createCell(4).setCellValue("잔여연차");
+		headerRow.createCell(5).setCellValue("근속 연수");
+		headerRow.createCell(6).setCellValue("상태");
+		
+		log.debug("체킁:");
+		// 데이터 저장
+		int rowNum = 1;
+		for (EmployeesVacVO selectedEmployee : employeesVacVO) {
+			log.debug("pppp {}",selectedEmployee);
+			Row dataRow = sheet.createRow(rowNum++);
+			dataRow.createCell(0).setCellValue(selectedEmployee.getUserNm());
+			dataRow.createCell(1).setCellValue(selectedEmployee.getDeptNoNm());
+			dataRow.createCell(2).setCellValue(selectedEmployee.getTotalVacGrntDays());
+			dataRow.createCell(3).setCellValue(selectedEmployee.getTotalCnyDay());
+			dataRow.createCell(4).setCellValue(selectedEmployee.getRemainDays());
+			dataRow.createCell(5).setCellValue(selectedEmployee.getWorkingYear());
+			dataRow.createCell(6).setCellValue(selectedEmployee.getHdofCdNm());
+		}
+		
+		// 파일 다운로드를 위한 응답 헤더 설정
+		//response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		//response.setHeader("Content-Disposition", "attachment; filename=selected_employees.xlsx");
+		
+		//response.setContentType("ms-vnd/excel");
+		//response.setHeader("Content-Disposition", "attachment;filename=selected_employees.xlsx");  //파일이름지정.
+		// response OutputStream에 엑셀 작성
+		wb.write(response.getOutputStream());
+		
+		//return "success";
+	}
+	
+	
+	
+	
+	
+	//급여명세
+	@GetMapping("/payment")
+	public String payment(PaymentVO paymentVO, Model model, Authentication authentication, VacationVO vacationVO ) {
+		log.info("payment paymentVO : " + paymentVO);
+
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		UserVO userVO =  customUser.getUserVO();
+		String userId = userVO.getUserId();
+		String coId = userVO.getCoId();
+		log.info("payment userId : " + userId + " coId : " + coId);
+		
+		paymentVO.setUserId(userId);
+		vacationVO.setUserId(userId);
+		paymentVO.setCoId(coId);
+		paymentVO.setSelectYear(2023);
+		
+		log.info("paymentVO" , paymentVO);
+		
+		List<PaymentVO> paymentVOs = this.empInfoService.paymentVO(paymentVO);
+		log.info("payment paymentVOs : " + paymentVOs);
+		model.addAttribute("data" , paymentVOs);
+		
+		
+		VacationVO findJoinYear = this.empInfoService.findJoinYear(vacationVO);
+		log.info("payment findJoinYear : " +findJoinYear );
+		
+		model.addAttribute("findJoinYear",findJoinYear);
+		
+
+		return "/empInfo/payment";
+	}
+	
+	//급여 연도별 확인 하기
+	@ResponseBody
+	@PostMapping("/paymentPost")
+	public String paymentPost(@RequestBody PaymentVO paymentVO) {
+		
+		List<PaymentVO> paymentVOs = this.empInfoService.paymentVO(paymentVO);
+		log.info("paymentPost paymentVOs : " + paymentVOs);
+		
+		// 응답 데이터를 JSON 형태로 반환
+	    if (paymentVOs != null) {
+	        return new Gson().toJson(paymentVOs);
+	    } else {
+	        return "fail";
+	    }
+	}
+	
+	
+	//급여상세내역 조회하기
+	@ResponseBody
+	@PostMapping("/paymentDetail")
+	public PaymentVO paymentDetail(@RequestBody PaymentVO paymentVO, Model model) {
+		log.info("paymentDetail에 도착");
+		log.info("paymentVO : " + paymentVO);
+		
+		PaymentVO result = this.empInfoService.paymentDetail(paymentVO);
+		model.addAttribute("paymentDetail",result);
+		log.info("result : " + result);
+		
+		return result;
+		
+	}
+	
+	
+	
+	
+	
+}

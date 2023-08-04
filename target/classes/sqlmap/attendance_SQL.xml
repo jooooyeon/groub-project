@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.attendance.mapper.AttendanceMapper">
+
+	  <select id="list" parameterType="String" resultType="kr.or.ddit.attendance.vo.AttendanceVO">
+	    SELECT
+		   	  DCLZ_NO
+		    , USER_ID
+		    , ATTEND_DT
+		    , LVFFC_DT
+		    , DCLZ_STTS_CD
+		    , ROUND((LVFFC_DT - ATTEND_DT)*1440) AS WORK_HM
+		FROM
+   			DCLZ
+   		WHERE
+     	   USER_ID = #{userId}
+   		ORDER BY ATTEND_DT
+	  </select>
+	  
+	  <select id="slectToday" parameterType="String" resultType="kr.or.ddit.attendance.vo.AttendanceVO">
+		 SELECT
+		   	  DCLZ_NO
+		    , USER_ID
+		    , ATTEND_DT
+		    , LVFFC_DT
+		    , DCLZ_STTS_CD
+		    , ROUND((LVFFC_DT - ATTEND_DT)*1440) AS WORK_HM
+		FROM
+		    DCLZ
+		WHERE 
+		    USER_ID = #{userId}
+		AND TO_CHAR(ATTEND_DT, 'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD')      
+	  </select>	  
+	  
+	  <select id="checkToday" parameterType="String" resultType="int">
+		 SELECT
+		    COUNT(DCLZ_NO)
+		FROM
+		    DCLZ
+		WHERE 
+		    USER_ID = #{userId}
+		AND TO_CHAR(ATTEND_DT, 'YYYY-MM-DD') = TO_CHAR(SYSDATE,'YYYY-MM-DD') 
+	  </select>
+	  
+
+	  
+	  <insert id="insert" parameterType="kr.or.ddit.attendance.vo.AttendanceVO">
+		INSERT INTO DCLZ (
+		            DCLZ_NO
+		          , USER_ID
+		          , ATTEND_DT
+		          
+				) VALUES (
+				  	SEQ_DCLZ.NEXTVAL
+		          , #{userId}
+		          , SYSDATE
+		            
+				)
+	  </insert>
+	  
+	  
+	  <update id="update" parameterType="kr.or.ddit.attendance.vo.AttendanceVO">
+		UPDATE DCLZ
+		SET  
+			  USER_ID        = #{userId}
+          	, LVFFC_DT       = SYSDATE
+         	, WORK_HM 		 = ROUND((SYSDATE - ATTEND_DT)*1440)
+        WHERE DCLZ_NO        = #{dclzNo}
+	  </update>
+	  
+</mapper> 
+
+
+                
+
+
+
+
+

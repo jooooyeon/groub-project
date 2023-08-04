@@ -1,0 +1,68 @@
+package kr.or.ddit.empinfo.controller;
+
+import javax.inject.Inject;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.or.ddit.security.CustomUser;
+import kr.or.ddit.user.service.UserService;
+import kr.or.ddit.user.vo.UserVO;
+
+@Controller
+
+public class MyPageController {
+
+	@Inject
+	UserService userService;
+
+	@RequestMapping("/mypage")
+	public ModelAndView myPage(ModelAndView mav, Authentication authentication) {
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		UserVO userVO = customUser.getUserVO();
+
+		mav.setViewName("empInfo/myPage");
+		mav.addObject("userVO", userVO);
+
+		return mav;
+	}
+
+
+
+
+
+
+
+
+
+
+
+	/**
+	 * 계정의 얼굴인식 사용여부 상태 값을 변경한다.
+	 * @param userId 변경하고자 하는 대상
+	 * @return 결과 메시지
+	 */
+	@Transactional
+	@PostMapping("/mypage/faceAct")
+	@ResponseBody
+	public String accountAct(@RequestParam("userId") String userId) {
+	    int cnt = 0;
+	    String message = null;
+
+	    cnt = userService.faceAct(userId);
+
+	    if(cnt==1) {//계정 활성화
+	        message = "success";
+	    }else {
+	        message ="fail";
+	    }
+	    return message;
+	};
+
+}

@@ -1,0 +1,134 @@
+package kr.or.ddit.msg.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.mail.vo.MailVO;
+import kr.or.ddit.msg.service.MsgServiceImpl;
+import kr.or.ddit.msg.vo.MsgVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequestMapping("/msg")
+@Controller
+@Secured({"ROLE_USER","ROLE_ADMIN"})
+public class MsgController {
+	
+	@Autowired private MsgServiceImpl msgService;
+	
+	//쪽지를 보내면은 자동적으로 db에 저장
+	@ResponseBody
+	@PostMapping("/save")
+	public String save(MsgVO msg) {
+		int result = this.msgService.insert(msg);
+		return "success";
+	}
+	
+	//쪽지 보내는 페이지
+	@GetMapping("/compose")
+	public String compose(MsgVO msg,Model model) {
+		model.addAttribute("msg",msg);
+		return "msg/compose";
+	}
+	//쪽지함 페이지
+	@GetMapping("/inbox")
+	public String inbox() {
+		return "msg/inbox";
+	}
+	
+	//쪽지 발송
+	@PostMapping("/send")
+	public String send() throws InterruptedException {
+		Thread.sleep(1000);
+		return "redirect:/mail/inbox";
+	}
+	
+	//수신자가 받은 쪽지의 상세
+	@GetMapping("/detailReceiver")
+	public String detailReceiver(MsgVO msg, Model model) {
+		msg = this.msgService.detailReceiver(msg);
+		model.addAttribute("msg",msg);
+		return "mail/detail";
+	}
+	
+	//보낸이가 보낸 쪽지의 상세
+	@GetMapping("/detailSender")
+	public String detailSender(MsgVO msg, Model model) {
+		msg = this.msgService.detailSender(msg);
+		model.addAttribute("msg",msg);
+		return "mail/detail";
+	}
+	
+	//보낸 쪽지함
+	@ResponseBody
+	@PostMapping("/sender")
+	public List<MsgVO> sender(MsgVO msg){
+		return this.msgService.listSender(msg);
+	}
+	
+	//받은 쪽지함
+	@ResponseBody
+	@PostMapping("/receiver")
+	public List<MsgVO> receiver(MailVO mail, MsgVO msg){
+		return this.msgService.listReceiver(msg);
+	}
+	
+	//중요 쪽지함
+	@ResponseBody
+	@PostMapping("/importMsg")
+	public List<MsgVO> MsgImport(MsgVO msg){
+		msg.setStatCd("MM005");
+		return this.msgService.listReceiver(msg);
+	}
+	
+	//휴지통
+	@ResponseBody
+	@PostMapping("/trash")
+	public List<MsgVO> trash(MsgVO msg){
+		msg.setStatCd("MM003");
+		return this.msgService.trash(msg);
+	}
+	
+	//중요 쪽지 설정
+	@ResponseBody
+	@GetMapping("/importSet")
+	public String importSet(MsgVO msg) {
+		int result = this.msgService.importMsg(msg);
+		return "success";
+	}
+	
+	//휴지통 설정
+	@ResponseBody
+	@PostMapping("/trashSet")
+	public String trashSet(MsgVO msg) {
+		int result = this.msgService.trashSet(msg);
+		return "success";
+	}
+	
+	//삭제
+	@ResponseBody
+	@PostMapping("/delete")
+	public String delete(MsgVO msg) {
+		int result = this.msgService.delete(msg);
+		return "success";
+	}
+	
+	//복원하기
+	@ResponseBody
+	@GetMapping("/restore")
+	public String restore(MsgVO msg) {
+		int result = this.msgService.restore(msg);
+		return "success";
+	}
+	
+}

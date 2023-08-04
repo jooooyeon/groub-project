@@ -1,0 +1,67 @@
+package kr.or.ddit.alarm.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.stereotype.Controller;
+
+import kr.or.ddit.alarm.handler.WebsocketHandler;
+import kr.or.ddit.alarm.vo.AlarmVO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+public class AlarmController {
+
+	@Autowired
+	private SimpMessageSendingOperations simpMessageSendingOperations;
+
+	@Autowired
+	private WebsocketHandler websocketHandler;
+
+	// 쪽지 알림&쪽지 받는 입장 insert
+	@MessageMapping("/msg")
+	public void AlarmMsg(AlarmVO a) throws InterruptedException {
+		log.info("쪽지 알람>> "+a);
+		alarm(a, "쪽지");
+	}
+
+	// 메일 알림
+	@MessageMapping("/mail")
+	public void AlarmMail(AlarmVO a) throws InterruptedException {
+		log.info("메일 알람>> "+a);
+		alarm(a, "메일");
+	}
+
+	// 메신저 알림
+	@MessageMapping("/chat")
+	public void AlarmMessenger(AlarmVO a) throws InterruptedException {
+		log.info("메신저 알람>> "+a);
+		alarm(a, "매신저");
+	}
+
+	/**
+	 * WebSocketHandler 처리한 정보를 list에 담아 footer.jsp로 데이터 전달해주기
+	 */
+	@MessageMapping("/list")
+	public void list() {	
+		simpMessageSendingOperations.convertAndSend("/sub/userList", this.websocketHandler.getUser());
+	}
+
+	/**
+	 * 알람을 보내기 위한 공통 메서드
+	 * @param AlaramVO a
+	 * @param String s
+	 * @throws InterruptedException
+	 */
+	private void alarm(AlarmVO a, String s) throws InterruptedException {
+		Thread.sleep(5000);
+
+		if (a != null) {
+			String mess = String.format("%s님에게 " + s + " 왔어요", "");
+			simpMessageSendingOperations.convertAndSend(String.format("/sub/alarm/%s", a.getUserId()), mess);
+		}
+	}
+}

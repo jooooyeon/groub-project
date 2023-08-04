@@ -1,0 +1,224 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<script type="text/javascript" src="/resources/falcon/src/js/jquery-3.6.4.min.js"></script>
+
+<div class="col-lg-8 col-xxl-5 py-3 position-relative"><img class="bg-auth-circle-shape" src="/resources/falcon/public/assets/img/icons/spot-illustrations/bg-shape.png" alt="" width="250"><img class="bg-auth-circle-shape-2" src="/resources/falcon/public/assets/img/icons/spot-illustrations/shape-1.png" alt="" width="150">
+            <div class="card overflow-hidden z-1">
+              <div class="card-body p-0">
+                <div class="row g-0 h-100">
+                  <div class="col-md-5 text-center bg-card-gradient">
+                    <div class="position-relative p-4 pt-md-5 pb-md-7" data-bs-theme="light">
+                      <div class="bg-holder bg-auth-card-shape" style="background-image:url(/resources/falcon/public/assets/img/icons/spot-illustrations/half-circle.png);">
+                      </div>
+                      <!--/.bg-holder-->
+
+                      <div class="z-1 position-relative"><a class="link-light mb-4 font-sans-serif fs-4 d-inline-block fw-bolder" href="../../../index.html">${loginVO.coId}</a>
+                        <p class="opacity-75 text-white">기업정보에 본인들이 등록한 소개문구</p>
+               			<p class="login-box-msg">${error}</p>
+						<p class="login-box-msg">${logout}</p>
+                      </div>
+                    </div>
+                    <div class="mt-3 mb-4 mt-md-4 mb-md-5" data-bs-theme="light">
+                      <p class="mb-0 mt-4 mt-md-5 fs--1 fw-semi-bold text-white opacity-75">Read our <a class="text-decoration-underline text-white" href="#!">terms</a> and <a class="text-decoration-underline text-white" href="#!">conditions </a></p>
+                    </div>
+                  </div>
+                  <div class="col-md-7 d-flex flex-center">
+                    <div class="p-4 p-md-5 flex-grow-1">
+                      <div class="row flex-between-center">
+                        <div class="col-auto">
+                          <h3>로그인</h3>
+                        </div>
+                      </div>
+                      <form:form modelAttribute="userVO" action="/login" method="post">
+                        <div class="mb-3">
+                          <label class="form-label" for="username">사원번호</label>
+                          <input id="userIdLogin" class="form-control" name="username" type="text" value="NAVER_2014030001" />
+                        </div>
+                        <div class="mb-3">
+                          <div class="d-flex justify-content-between">
+                            <label class="form-label" for="password">비밀번호</label>
+                          </div>
+                          <input class="form-control" name="password" type="password" value="java" />
+                        </div>
+                        <div class="row flex-between-center">
+                          <div class="col-auto">
+                            <div class="form-check mb-0">
+                              <input class="form-check-input" type="checkbox" id="card-checkbox" />
+                              <label class="form-check-label mb-0" for="card-checkbox">Remember me</label>
+                            </div>
+                          </div>
+                          <div class="col-auto"><a class="fs--1" href="../../../pages/authentication/card/forgot-password.html">Forgot Password?</a></div>
+                        </div>
+                        <div class="mb-3">
+                          <button class="btn btn-primary d-block w-100 mt-3" type="submit" name="submit">Log in</button>
+                        </div>
+                        <sec:csrfInput />
+                      </form:form>
+                      <div class="position-relative mt-4">
+                        <hr>
+                        <div class="divider-content-center">or log in with</div>
+                      </div>
+                      <div class="row g-2 mt-2">
+	                  <div class="col-sm-6">
+	                  	<button type="button" id="faceAuth" data-bs-toggle="modal" data-bs-target="#error-modal" class="btn btn-outline-facebook btn-sm d-block w-100" ><span class="far fa-smile me-2" data-fa-transform="grow-8"></span>얼굴인증</button></div>
+	                  <div class="col-sm-6"><a class="btn btn-outline-facebook btn-sm d-block w-100" href="#"><span class="fas fa-microphone-alt me-2" data-fa-transform="grow-8"></span>음성인증</a></div>
+                      </div>
+                      <div class="row g-2 mt-2">
+	                      <button id="userChange1" class="btn btn-outline-primary me-1 mb-1" type="button">유저: NAVER_2014030001</button>
+	                      <button id="userChange2" class="btn btn-outline-primary me-1 mb-1" type="button">유저: NAVER_2023060001</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+<!-- 얼굴인식 로그인을 위한 모달창 -->
+
+<div class="modal fade" id="error-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="p-4 pb-0">
+          <form>
+            <div class="mb-3">
+              <label class="col-form-label" for="recipient-name">사원번호</label>
+              <input class="form-control" id="faceId" type="text" />
+            </div>
+            <div class="mb-3">
+              <label class="col-form-label" for="message-text">얼굴인식</label>
+              <video class="form-control" id="video" width="640" height="480" autoplay></video>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+        <button id="faceBtn" class="btn btn-primary" type="button">Understood </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+$("#faceAuth").on("click", function() {
+	var video = document.getElementById('video');
+    var faceBtn = document.getElementById('faceBtn');
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+    var userId = document.getElementById('userIdLogin').value;
+    var formData = new FormData();
+
+    document.getElementById('faceId').value = userId;
+
+    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+   	videoStream = stream;
+    video.srcObject = stream;
+    video.play();
+    })
+    .catch(function(error) {
+    	console.error(error);
+    });
+
+    faceBtn.addEventListener('click', function() {
+    	faceBtn.innerText = "얼굴인식중.. 잠시만 기다려주세요";
+	    captureAndSend();
+	});
+
+	function captureAndSend() {
+	    return new Promise(function(resolve, reject) {
+	    	function captureFrame() {
+			    canvas.width = video.videoWidth;
+			    canvas.height = video.videoHeight;
+			    console.log(canvas.width);
+			    console.log(canvas.height);
+			    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+			    canvas.toBlob(function(blob) {
+					formData.append('file', blob, 'login.jpg');
+					formData.append('memId', document.getElementById('faceId').value);
+			        $.ajax({
+			        	url: "http://localhost:5000/login.ajax",
+						processData: false,
+						contentType: false,
+						data: formData,
+						type: "POST",
+						success: function(response) {
+				        	console.log(response);
+ 				        	if (response == 'success') {
+				        		var data = {
+				  				    userId : document.getElementById('faceId').value
+				  				};
+					        	$.ajax({
+					  			    url: "http://localhost/ddit/sign/signin",
+					  			    data: JSON.stringify(data),
+					  			    type: "POST",
+					  			    contentType: 'application/json; charset=utf-8',
+					  			    success: function(response) {
+					  			        console.log(response);
+					  			        loginBtn.innerText = "인식 완료!";
+					  			        window.location.href = "http://localhost/ddit/sign/login";
+					  			    },
+					  			    error: function(xhr, status, error) {
+					  			        console.error(xhr, status, error);
+					  			    }
+					  			});//ajax끝
+
+				        	} else {
+					        	loginBtn.innerText = "인식 완료!";
+					        	setTimeout(function() {
+						            alert("로그인 실패ㅠ");
+						            location.href = 'signin';}, 1);
+				        	}
+				    	},
+				    	error: function(xhr, status, error) {
+				      		console.error(xhr, status, error);
+				      	}
+            		});//ajax끝
+            		resolve();
+	    		}, 'image/jpeg', 0.9);
+	    	}
+   			captureFrame();
+		});
+  	}
+});
+
+
+$("#error-modal").on("hidden.bs.modal", function() {
+    var video = document.getElementById('video');
+    if (videoStream) {
+        var tracks = videoStream.getTracks();
+        tracks.forEach(function(track) {
+            track.stop(); // 비디오 스트림의 트랙을 중지
+        });
+    }
+    video.srcObject = null;
+});
+</script>
+
+<script type="text/javascript">
+	const userIdLogin = $("#userIdLogin")[0];
+
+		$("#userChange1").on("click", function() {
+			userIdLogin.value = 'NAVER_2014030001';
+		});
+		$("#userChange2").on("click", function() {
+			userIdLogin.value = 'NAVER_2023060001';
+		});
+
+</script>
+

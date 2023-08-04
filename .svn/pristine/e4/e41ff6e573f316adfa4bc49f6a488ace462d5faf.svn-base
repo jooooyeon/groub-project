@@ -1,0 +1,106 @@
+package kr.or.ddit.admin.account.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.or.ddit.common.service.serviceImpl.CommonServiceImpl;
+import kr.or.ddit.security.CustomUser;
+import kr.or.ddit.user.service.impl.UserServiceImpl;
+import kr.or.ddit.user.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequestMapping("/admin/account")
+public class AccountController {
+
+	@Autowired
+	CommonServiceImpl commonServiceImpl;
+
+	@Inject
+	UserServiceImpl userServiceImpl;
+
+	@GetMapping("/create")
+	public ModelAndView accountCreate(ModelAndView mav, Authentication authentication) {
+		log.info("admin/account/create Get");
+		mav.setViewName("admin/account/create");
+
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		UserVO userVO = customUser.getUserVO();
+
+		String coId = userVO.getCoId();
+
+
+		List<Map<String, String>> jgList = commonServiceImpl.selectCstCdList("JG",coId);
+		List<Map<String, String>> jtList = commonServiceImpl.selectCstCdList("JT",coId);
+		List<Map<String, String>> deptList = commonServiceImpl.selectDeptNoList(coId);
+		List<Map<String, String>> mtrscList = commonServiceImpl.selectMngCdList("MT");
+
+
+        mav.addObject("jgList", jgList);
+        mav.addObject("jtList", jtList);
+        mav.addObject("deptList", deptList);
+        mav.addObject("mtrscList", mtrscList);
+
+		return mav;
+	};
+
+	@PostMapping("/create")
+	public String accountCreatePost() {
+		log.info("admin/account/create Post");
+
+		return "admin/account/create";
+	};
+
+	@PostMapping("/maxUserId")
+	@ResponseBody
+	public String maxUserId(@RequestParam("search") String search, @RequestParam("coId") String coId, @RequestParam("yearMonth") String yearMonth) {
+		log.info("admin/account/maxUserId Post Ajax");
+
+		String maxUserId = userServiceImpl.maxUserId(search);
+		String newUserId = "";
+		if(maxUserId == null) {
+			newUserId = coId+"_"+yearMonth+"0001";
+			log.info("newUserId" + newUserId);
+		} else {
+			String numberPart = maxUserId.substring(maxUserId.lastIndexOf("_") + 1);
+			int number = Integer.parseInt(numberPart);
+			number++;
+			// 증가한 숫자를 문자열로 변환하여 newUserId에 할당
+			newUserId = maxUserId.substring(0, maxUserId.lastIndexOf("_") + 1) + String.format("%04d", number);
+			log.info("newUserId" + newUserId);
+		}
+
+		return newUserId;
+	}
+
+	@PostMapping("/checkEmail")
+	@ResponseBody
+	public String maxUserId(@RequestParam("email") String email) {
+	    int cnt = 0;
+	    String message = null;
+
+	    cnt = userServiceImpl.checkEmail(email);
+
+	    if(cnt==0) {//사용할 수 있다. db에서 찾았는데없으니까
+	        message = "success";
+	    }else {//사용할 수 없다.
+	        message ="fail";
+	    }
+	    return message;
+	}
+
+}

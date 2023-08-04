@@ -1,0 +1,14 @@
+package kr.or.ddit.bbscommon;
+
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class BbsAtchVO {
+	private int pstNo;
+	private int bbsFileNo;
+	
+	private List<BbsAtchDetVO> bbsAtchDetVO; //게시판 첨부파일
+
+}

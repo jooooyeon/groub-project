@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="kr.or.ddit.ai.recommend.goodness.fit.mapper.FitMapper">
+
+	<!-- 자격증 불러오기 -->
+	<select id="crtfct"
+		resultType="kr.or.ddit.ai.recommend.goodness.fit.vo.FitVO">
+		SELECT AI_CRTFCT_NO, DEPT_NO, CRTFCT_NM
+		FROM AI_CRTFCT
+		<if test="deptNo != null and deptNo != ''">
+			WHERE DEPT_NO = #{deptNo}
+		</if>
+	</select>
+
+	<!-- 자격기술 불러오기 -->
+	<select id="qnsinfo"
+		resultType="kr.or.ddit.ai.recommend.goodness.fit.vo.FitVO">
+		SELECT QNSINFO_NO, DEPT_NO, SKILL_TP, SKILL_NM
+		FROM AI_QNSINFO
+		<if test="deptNo != null and deptNo != ''">
+			WHERE DEPT_NO = #{deptNo}
+		</if>
+	</select>
+
+	<!-- resultMap 정의 -->
+	<resultMap id="fitVO"
+		type="kr.or.ddit.ai.recommend.goodness.fit.vo.FitVO">
+		<id property="fitNo" column="fit_no" />
+		<result property="deptNo" column="dept_no" />
+		<result property="finalEdu" column="final_education" />
+		<result property="career" column="career" />
+		<result property="careerDtl" column="career_dtl" />
+		<collection property="crtfctNoList" resultMap="crtfctVOMap"></collection>
+		<collection property="skillNoList" resultMap="skillVOMap"></collection>
+	</resultMap>
+
+	<resultMap id="crtfctVOMap" type="kr.or.ddit.ai.recommend.goodness.fit.vo.CrtfctVO">
+		<result property="crtfctNo" column="CRFCT_NO" />
+		<result property="crtfctNm" column="CRTFCT_NM" />
+		<result property="crtfctSeq" column="CRTFCT_SEQ" />
+	</resultMap>
+
+	<resultMap id="skillVOMap" type="kr.or.ddit.ai.recommend.goodness.fit.vo.SkillVO">
+		<result property="skillNo" column="SKILL_NO" />
+		<result property="skillNm" column="SKILL_NM" />
+		<result property="skillSeq" column="SKILL_SEQ" />
+	</resultMap>
+
+	<!-- 1) -->
+	<insert id="insertFit"
+		parameterType="kr.or.ddit.ai.recommend.goodness.fit.vo.FitVO">
+		<selectKey order="BEFORE" resultType="int" keyProperty="fitNo">
+			SELECT NVL(MAX(fit_no), 0) + 1 FROM ai_dept_fit
+		</selectKey>
+		INSERT INTO ai_dept_fit (
+			fit_no
+			, dept_no
+			, final_edu
+			, career
+			, career_dtl
+			, final_edu_dtl
+			, fit_date
+		)
+		VALUES
+		(
+			#{fitNo}
+			, #{deptNo}
+			, #{finalEdu}
+			, #{career}
+			, #{careerDtl}
+			, #{finalEduDtl}
+			, sysdate
+		)
+	</insert>
+	<!-- 2) -->
+	<update id="insertCrtfct" parameterType="java.util.List">
+		<selectKey order="BEFORE" resultType="int" keyProperty="crtfctSeq">
+			SELECT 
+			    NVL(MAX(crtfct_seq), 0) + 1
+			FROM 
+				ai_dept_fit_crtfct
+		</selectKey>
+		<foreach collection="list" item="item" open="INSERT ALL" close="SELECT * FROM DUAL" separator=" " index="idx">
+			INTO ai_dept_fit_crtfct 
+			(
+				crtfct_no
+				, fit_no
+				, crtfct_nm
+				, crtfct_seq
+				)
+			VALUES
+			(
+				#{item.crtfctNo}
+				, #{item.fitNo}
+				, #{item.crtfctNm}
+				, #{crtfctSeq}+#{idx}
+			)
+		</foreach>
+	</update>
+	<!-- 3) -->
+	<update id="insertSkill" parameterType="java.util.List">
+		<selectKey order="BEFORE" resultType="int" keyProperty="skillSeq">
+			SELECT NVL(MAX(skill_seq), 0) + 1 FROM ai_dept_fit_skills
+		</selectKey>
+		<foreach collection="skillNoList" item="item" open="INSERT ALL" 
+			close="SELECT * FROM DUAL" separator=" " index="idx">
+			INTO
+				ai_dept_fit_skills
+				(
+				skill_no
+				, fit_no
+				, skill_nm
+				, skill_seq
+				)
+			VALUES
+				(
+				#{item.skillNo}
+				, #{item.fitNo}
+				, #{item.skillNm}
+				, #{skillSeq}+#{idx}
+				)
+		</foreach>
+	</update>
+
+	<select id="result"
+		resultType="kr.or.ddit.ai.recommend.goodness.fit.vo.FitVO">
+		SELECT fit_no, dept_no, final_education, career, career_dtl
+		FROM ai_dept_fit;
+	</select>
+</mapper>

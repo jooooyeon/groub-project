@@ -1,0 +1,26 @@
+package kr.or.ddit.notice.service;
+
+import java.util.List;
+
+import kr.or.ddit.notice.vo.NoticeVO;
+import kr.or.ddit.notice.vo.PstHdVO;
+
+public interface NoticeService {
+	
+	//목록
+	public List<NoticeVO> list();
+	
+	//상세보기
+	public NoticeVO detail(NoticeVO noticeVO);
+	
+	//조회수 카운트
+	public int inqCnt(int pstNo);
+	
+	//머릿말 가져오기
+	public List<PstHdVO> getHd(PstHdVO hd);
+	
+	//등록
+	public int register(NoticeVO noticeVO);
+
+
+}

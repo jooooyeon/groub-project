@@ -1,0 +1,14 @@
+package kr.or.ddit.ai.recommend.certification.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.ai.recommend.certification.vo.AiCrtfctRsltVO;
+
+public interface CertificationMapper {
+
+	
+	//리스트
+	public List<AiCrtfctRsltVO> list(String userId);
+	
+	
+}

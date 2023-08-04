@@ -1,0 +1,29 @@
+package kr.or.ddit.mail;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequestMapping("/mail")
+@Controller
+public class MailController {
+	
+	@GetMapping("/compose")
+	public String compose() {
+		return "mail/compose";
+	}
+	
+	@GetMapping("/inbox")
+	public String inbox() {
+		return "mail/inbox";
+	}
+	
+	@PostMapping("/send")
+	public String send() {
+		return "redirect:/mail/inbox";
+	}
+}

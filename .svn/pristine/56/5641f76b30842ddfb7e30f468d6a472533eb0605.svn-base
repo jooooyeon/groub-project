@@ -1,0 +1,68 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>게시글등록</title>
+<script type="text/javascript"></script>
+</head>
+<body>
+	register!
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<div class="min-vh-50">
+				<h5 class="mb-0">게시글 작성</h5>
+				<!-- 임시저장 -->
+				<div>
+					<button class="btn btn-outline-secondary me-1 mb-3" style="float: right" type="button">임시저장 불러오기</button>
+				</div>
+				<div style="clear: both;"></div>
+				<!-- 임시저장 끝 -->
+				<form action="/community/board/register" method="post" enctype="multipart/form-data">
+				<!-- 말머리 시작 -->
+				<div class="form-floating"
+					style="width: 18%; float: left; margin-right: 10px;">
+					<select class="form-select" name="pstHd" id=pstHd aria-label="Floating label select example" >
+						<option value="HE">추천</option>
+						<option value="HE">취미</option>
+						<option value="HE">정보</option>
+						<option value="HE">동호회모집</option>
+						<option value="HE">기타</option>
+					</select>
+					<label for="floatingSelect">말머리</label>
+				</div>
+				<!-- 말머리 끝 -->
+				<!-- 제목 시작 -->
+				<div class="form-floating mb-3" style="width: 80%; float: left">
+					<input class="form-control" name="pstTtl" id="floatingInput" type="title"	placeholder="제목을 입력해주세요" required />
+					<label for="floatingInput">제목</label>
+				</div>
+				<div style="clear: both;"></div>
+				<!-- 제목 끝 -->
+				<!-- 에디터 시작 -->
+				<div>
+					<textarea class="tinymce d-none" name="pstCn" data-tinymce="data-tinymce" placeholder="내용을 입력해주세요" required ></textarea>
+				</div>
+				<!-- 에디터 끝 -->
+				<!-- 첨부파일 시작 -->
+ 				<div class="mb-3">
+				  <label class="form-label" for="formFileMultiple"></label>
+				  <input class="form-control"  id="pictures" type="file" multiple="multiple" name="attachFiles" />
+				</div>
+				<!-- 첨부파일 끝 -->
+			</div><!-- 글작성 div끝 -->
+			
+			<div style="text-align: center;">
+				<button class="btn btn-outline-primary me-1 mb-1" type="submit">저장</button>
+				<a href="/community/board/list" class="btn btn-outline-secondary me-1 mb-1 btn-sm" type="button">임시저장</a>
+				<a href="/community/board/list" class="btn btn-outline-danger me-1 mb-1 btn-sm" type="button">취소</a>
+			</div>
+			
+			</form>
+		</div>
+	</div>
+</body>
+</html>

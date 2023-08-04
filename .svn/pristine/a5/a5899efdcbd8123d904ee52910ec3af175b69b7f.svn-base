@@ -1,0 +1,68 @@
+package kr.or.ddit.security;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+
+import javax.inject.Inject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+
+import kr.or.ddit.user.service.UserService;
+import kr.or.ddit.user.vo.UserLogVO;
+
+public class CustomLoginFailureHandler extends SimpleUrlAuthenticationFailureHandler {
+
+	@Inject
+	UserService userservice;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	private String error;
+    public CustomLoginFailureHandler() {
+        // 실패 URL 설정
+        setDefaultFailureUrl("/login?error="+error);
+    }
+
+	@Override
+	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException exception) throws IOException, ServletException {
+
+		String userId = request.getParameter("username");
+		String ipAddress = request.getRemoteAddr();
+
+		UserLogVO userLogVO = new UserLogVO();
+		userLogVO.setUserId(userId);
+		userLogVO.setIpAddr(ipAddress);
+		userLogVO.setNtnCd("KR");
+
+		if(userservice.checkId(userId) == 0) {
+			error = "접근 실패: 존재하지 않는 아이디입니다. 아이디를 확인하십시오";
+			userLogVO.setLogStts("NoID");
+			userservice.userLog(userLogVO);
+		} else if (userservice.checkIdEn(userId).equals("0")) {
+			error = "접근 실패: 잠긴 계정입니다. 관리자에게 문의하십시오";
+			userLogVO.setLogStts("LOCKED");
+			userservice.userLog(userLogVO);
+		} else {
+			error = "접근 실패: 비밀번호를 확인 하십시오.\n 로그인 시도";
+			userservice.logFailCntUp(userId);
+			error = error + (userservice.checkCntUp(userId) + "/5");
+			if(userservice.checkCntUp(userId) == 5){
+				userservice.accountAct(userId);
+				error = error + "/n 계정이 잠겼습니다. 관리자에게 문의하십시오";
+			};
+			userLogVO.setLogStts("FAIL");
+			userservice.userLog(userLogVO);
+		}
+
+	    setDefaultFailureUrl("/login?error="+ URLEncoder.encode(error, "utf-8")+"&userId="+userId);
+	    super.onAuthenticationFailure(request, response, exception);
+	}
+}

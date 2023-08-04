@@ -1,0 +1,47 @@
+package kr.or.ddit.servey.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.security.CustomUser;
+import kr.or.ddit.servey.mapper.ServeyMapper;
+import kr.or.ddit.servey.vo.ServeyQItemVO;
+import kr.or.ddit.servey.vo.ServeyVO;
+import kr.or.ddit.user.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class ServeyServiceImpl {
+
+	@Autowired
+	private ServeyMapper serveyMapper;
+	
+	@Transactional
+	public int serveyInsert(ServeyVO s) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		CustomUser cus = (CustomUser) auth.getPrincipal();
+		UserVO user = cus.getUserVO();
+		
+		s.setUserId(user.getUserId());
+		s.setCoId(user.getCoId());
+		
+		int rlt = this.serveyMapper.serveyInsert(s);
+		
+		List<ServeyQItemVO> qItemList = s.getServeyQItemVOList();
+		
+		for(int i=0; i<qItemList.size();i++) {
+			rlt += this.serveyMapper.serveyQItemInsert(qItemList.get(i));
+			rlt += this.serveyMapper.serveyOptionInsert(qItemList.get(i));
+		}
+		
+		log.info("result>> "+rlt);
+		
+		return rlt;
+	}
+}

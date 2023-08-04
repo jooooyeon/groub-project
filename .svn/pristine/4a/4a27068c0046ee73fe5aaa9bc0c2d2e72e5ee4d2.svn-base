@@ -1,0 +1,101 @@
+package kr.or.ddit.OrganizationChart;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.GsonBuilderUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
+import org.springframework.web.servlet.view.tiles3.TilesView;
+
+import kr.or.ddit.OrganizationChart.OrganizationChartService;
+import kr.or.ddit.OrganizationChart.OrganizationChartVO;
+
+import com.google.gson.Gson;
+import kr.or.ddit.OrganizationChart.OrganizationChartService;
+import kr.or.ddit.OrganizationChart.OrganizationChartVO;
+
+@RequestMapping("/organizationChart")
+@Controller
+public class OrganizationChartController {
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	@GetMapping("/list")
+	public String list() {
+
+		return "organizationChart/list";
+	}
+
+	@GetMapping("/update")
+	public String update() {
+
+		return "organizationChart/update";
+	}
+
+	@GetMapping("/create")
+	public String create() {
+
+		return "organizationChart/create";
+	}
+
+	@GetMapping("/bookmark")
+	public String bookmark() {
+
+		return "organizationChart/bookmark";
+	}
+
+	@RequestMapping("/js")
+	@Controller
+	public class ModuleController {
+		private final Logger log = LoggerFactory.getLogger(ModuleController.class);
+		@Autowired
+		OrganizationChartService orgachService;
+
+		@GetMapping("/tree")
+		public String jsTree(Model model) {
+			List<OrganizationChartVO> data = this.orgachService.list();
+			log.info("list=>data : " + data);
+			List<Map<String, Object>> nodes = new ArrayList();
+			for (OrganizationChartVO vo : data) {
+				Map<String, Object> node = new HashMap();
+				node.put("child", vo.getEName()); // child = 부서원
+				node.put("parent", vo.getDept()); // parent = 부서명
+				nodes.add(node);
+			}
+			Gson gson = new Gson();
+			String tree = gson.toJson(nodes); // json형태로 변환
+			model.addAttribute("tree", tree);
+			log.info("tree : " + tree);
+			return "js/tree";
+		}
+	}
+
+}

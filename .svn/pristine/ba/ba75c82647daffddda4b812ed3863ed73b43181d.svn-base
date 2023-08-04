@@ -1,0 +1,19 @@
+package kr.or.ddit.user.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.user.vo.UserVO;
+
+public interface UserMapper {
+	
+	public List<UserVO> list();
+	
+	public UserVO detail(UserVO userVO);
+	
+	public int register(UserVO userVO);
+	
+	public int update(UserVO userVO);
+	
+	public int delete(UserVO userVO);
+	
+}

@@ -1,0 +1,69 @@
+package kr.or.ddit.chat.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.chat.mapper.ChatMapper;
+import kr.or.ddit.chat.vo.ChatMsgVO;
+import kr.or.ddit.chat.vo.ChatRoomVO;
+import kr.or.ddit.chat.vo.ChatUserVO;
+import kr.or.ddit.chat.vo.ChatVO;
+import kr.or.ddit.user.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class ChatServiceImpl {
+	@Autowired
+	ChatMapper chatMapper;
+	
+	/**
+	 * 채팅방 등록
+	 * @param ChatVO chat
+	 * @return int 채팅방 등록 결과
+	 */
+	@Transactional
+	public int insertRoom(ChatVO cv) {
+		int rlt = this.chatMapper.chatRoomMerge(cv);
+		log.info("chatRoom inert 이후 cv>> "+cv);
+		List<ChatUserVO> userList = cv.getChatUserList();
+		for(ChatUserVO u : userList) {
+			if(u.getUserId().equals(cv.getChatRoomVO().getUserId())) u.setHostYn("Y");
+			else u.setHostYn("N");
+		}
+		rlt += this.chatMapper.chatRoomUserInsert(cv);
+		
+		return rlt;
+	}
+	
+	/**
+	 * 채팅방 목록
+	 * @param ChatUserVO cUser
+	 * @return List<ChatRoomVO>
+	 */
+	public List<ChatRoomVO> chatList(ChatUserVO cUser){
+		return this.chatMapper.chatList(cUser);
+	}
+	
+	/**
+	 * 채팅방 대화내역 리스트
+	 * @param ChatVO c
+	 * @return List<ChatMsgVO>
+	 */
+	public List<ChatMsgVO> msgList(ChatVO c){
+		return this.chatMapper.msgList(c);
+	}
+	
+	/**
+	 * 채팅방 대화목록 저장
+	 * @param ChatMsgVO msg
+	 * @return int
+	 */
+	public int msgInsert(ChatMsgVO msg) {
+		msg.setFileYn("N");
+		return this.chatMapper.msgInsert(msg);
+	}
+}

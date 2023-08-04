@@ -1,0 +1,110 @@
+/**
+ * 
+ */
+
+//방 번호
+let chatRmNo;
+//채팅 소켓 열기
+var chat = new SockJS("/chat");
+var stompChat = Stomp.over(chat);
+stompChat.debug = null;
+
+//채팅방 열기
+$(document).on('click','.chat-room',(e)=>{
+	chatRmNo = $(e.target).data('rmno');
+	console.log("e.target",$(e.target))
+	console.log("e.target.text()",$(e.target).text());
+	$('#offcanvasRight').offcanvas('hide');
+	console.log("$('#offcanvas-chat-header')",$('#offcanvas-chat-header'));
+	$('#offcanvas-chat-header').html($(e.target).text());
+	$('#offcanvas-chat').css('heigth','400px;');
+	$('#offcanvas-chat').offcanvas('show');
+	
+	
+	
+	//채팅 받아오기
+	stompChat.subscribe("/sub/chatRoom/"+chatRmNo,(chat)=>{
+        var content = JSON.parse(chat.body);
+        if(content){
+            console.log("content",content);
+			const dsptch = content.userId;
+			const chatMsgCn = content.chatMsgCn;
+			
+			let str = ``;
+			str += dsptch+`: `+chatMsgCn;
+			
+			$('#off-chat-msg').append(str);
+        }
+    });
+});
+
+//채팅 소켓 열기
+stompChat.connect({}, function() {
+	
+	if(userId!=null&&userId!='') stomp.send('/pub/userData',{}, JSON.stringify({}));
+	stompChat.subscribe("/sub/userData", function(chat) {
+		var content = JSON.parse(chat.body);
+		if (content) {
+			listView(content);
+		}		
+	});
+});
+
+
+//현재 온라인이 사용자 뿌려주기
+function listView(content){
+	let html = ``;
+	
+	const userSesstion = new Map(Object.entries(content));
+		html += `<div class="text-center">현재 접속 사용자 현황</div>`;
+	if(content.size<=1){
+		html += `
+			<div class="dropdown-item text-center">현재 접속 인원이 없습니다</div>
+		`
+	} else {
+		userSesstion.forEach((value, key, map)=>{
+			if(key==userId) return;
+			console.log("value,key",value,key)
+			const deptNm = value[0];
+			const jbgdNm = value[1];
+			const userNm = value[2];
+			
+			html += `
+					<li>
+						<button type="button" class="dropdown-item text-center chat-open" data-toggle="modal" data-target="#modal-list">
+							<div class="hover-actions-trigger chat-contact nav-item text-center d-flex align-items-center">
+								&nbsp&nbsp&nbsp`+deptNm+` `+userNm+` `+jbgdNm+`
+							</div>
+						</button>
+					</li>
+			`
+		});
+		html += `
+			<li class="d-flex align-items-center text-center">
+				<a class="dropdown-item btn btn-ouline-secondary btn-sm" data-toggle="modal" data-target="#user-list" id="user-list-btn">사용자 목록 보기</a>
+				<a class="dropdown-item btn btn-ouline-secondary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" id="chat-list">방 목록보기</a>
+			</li>
+		`
+	}
+	$('#drop-chat-list').html(html);
+}
+
+//채팅 전송
+$('#off-chat-send').on('click',()=>{
+	console.log("$('#chatMsgCn').val()",$('#chatMsgCn').val());
+	const msgCn = $('#chatMsgCn').val();
+	const dsptch = userId;
+	
+	stompChat.send('/pub/chatRoom',{}, JSON.stringify({
+		userId:dsptch,
+		chatRmNo:chatRmNo,
+		chatMsgCn:msgCn,
+	}));
+	
+	$('#chatMsgCn').val('');
+});
+
+//채팅창 닫기
+$('#off-chat-cancle').on('click',()=>{
+	$('#offcanvas-chat').offcanvas('hide');
+});

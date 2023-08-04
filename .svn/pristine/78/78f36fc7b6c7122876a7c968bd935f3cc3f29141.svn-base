@@ -1,0 +1,147 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+
+
+
+	<div class="card mb-2">
+		<div class="card-body">
+			<h5 class="card-title">급여정보</h5>
+			<sec:authorize access="isAuthenticated()">
+				<sec:authentication property="principal.userVO.userId" var="loginId" />
+				<sec:authentication property="principal.userVO.userNm"
+					var="loginName" />
+			</sec:authorize>
+			
+			<ul class="nav nav-tabs" id="myTab" role="tablist">
+			  <li class="nav-item"><a class="nav-link active" id="payment-tab" data-bs-toggle="tab" href="#tab-payment" role="tab" aria-controls="tab-payment" aria-selected="true">지급내역확인</a></li>
+			  <li class="nav-item"><a class="nav-link" id="bank-tab" data-bs-toggle="tab" href="#tab-bank" role="tab" aria-controls="tab-bank" aria-selected="false">급여계좌</a></li>
+			</ul>
+			<div class="tab-content border border-top-0 p-3" id="myTabContent">
+<!-- 지급내역확인 div -->
+			  <div class="tab-pane fade show active" id="tab-payment" role="tabpanel" aria-labelledby="payment-tab">
+			  	나는 지급내역이얌!!!
+			  	<div class="form-group">
+					<select class="form-select float-end mb-3" style="width: 150px"	name="myVacYear" id="myVacYear">
+						<c:forEach var="getYear" items="${data }" varStatus="stat">
+						<option class="opClass">${getYear.selectYear}</option>
+						</c:forEach>
+					</select>
+				</div>
+			  	
+			  	
+			  		<table class="table table-bordered align-middle text-align border border-2">
+							<colgroup>
+								<col width="17%">
+								<col width="8%">
+								<col width="18%">
+								<col width="18%">
+								<col width="18%">
+								<col width="20%">
+							</colgroup>
+							<tbody>
+								<tr>
+									<td class="bg-primary-subtle text-center">급여 연월</td>
+									<td class="bg-primary-subtle text-center">상세보기</td>
+									<td class="bg-primary-subtle text-center">공제 후 지급액</td>
+									<td class="bg-primary-subtle text-center">지급 항목 합계</td>
+									<td class="bg-primary-subtle text-center">공제 항목 합계</td>
+									<td class="bg-primary-subtle text-center">지급일</td>
+								</tr>
+								<c:forEach var="paymentVO" items="${data }" varStatus="stat">
+								<tr>
+									<td class="text-center workYm" id="workYm">${paymentVO.workYm }</td>
+									<td class="text-center" ><button class="fab fa-sistrix"></button> </td>
+									<td class="text-center pymntamt" id="pymntamt"><fmt:formatNumber pattern="###,###,###">${paymentVO.pymntamt }</fmt:formatNumber></td>
+									<td class="text-center totalPayment" id="totalPayment"><fmt:formatNumber pattern="###,###,###">${paymentVO.totalPayment }</fmt:formatNumber></td>
+									<td class="text-center totalTex" id="totalTex"><fmt:formatNumber pattern="###,###,###">${paymentVO.totalTex }</fmt:formatNumber></td>
+									<td class="text-center payYmd" id="payYmd">${paymentVO.payYmd }</td>
+								</tr>
+								</c:forEach>
+							</tbody>
+						</table>
+			  	
+			  </div>
+<!-- 지급내역확인 div 끝 -->
+<!-- 급여계좌 div 끝 -->
+			  <div class="tab-pane fade" id="tab-bank" role="tabpanel" aria-labelledby="bank-tab">
+			   나는 급여계좌얌 수정할수있지!
+			  </div>
+<!-- 급여계좌 div 끝 -->
+			</div>
+			
+			
+			
+			
+		</div>
+	</div>
+	
+	${data }
+	
+<script>
+
+
+//셀렉트 옵션 값 읽어오기
+var opClass = document.getElementsByClassName("opClass");
+years=[]
+for (var i = 0; i < opClass.length; i++) {
+  //console.log(opClass[i].value);
+  years.push(opClass[i].value);
+}
+console.log("years",years)
+//읽어온 값에서 중복 값 없이 배열 저장
+const yearsOfSet = [...new Set(years)];
+console.log(yearsOfSet)
+//셀렉트 옵션 값 삭제
+var selectElement = document.getElementById("myVacYear");
+while (selectElement.options.length > 0) {
+    selectElement.options.remove(0);
+}
+
+//중복값 제외한 내용 출력
+yearsOfSet.sort(function(a, b) {
+    if (a < b) return 1;
+    if (a > b) return -1;
+    return 0;
+});
+
+// 새로운 옵션 값 추가
+for (var i = 0; i < yearsOfSet.length; i++) {
+    var option = document.createElement("option");
+    option.text = yearsOfSet[i];
+    selectElement.add(option);
+}
+
+//셀렉트옵션 값 확인
+selectElement.addEventListener("change", function() {
+	  var selectedValue = selectElement.value;
+	  console.log("선택된 값: " + selectedValue);
+	});
+
+
+
+//급여 연월에 년과 월 넣기
+var workYmElements = document.getElementsByClassName("workYm");
+
+for (var i = 0; i < workYmElements.length; i++) {
+  var inputDate = workYmElements[i].textContent;
+  var year = inputDate.substring(0, 4);
+  var month = inputDate.substring(4, 6);
+  var formattedDate = year + "년 " + month + "월";
+  workYmElements[i].textContent = formattedDate;
+}
+//지급일에 / 넣기
+var payYmdElements = document.getElementsByClassName("payYmd");
+
+for (var i = 0; i < payYmdElements.length; i++) {
+  var inputDate = payYmdElements[i].textContent;
+  var year = inputDate.substring(0, 4);
+  var month = inputDate.substring(4, 6);
+  var day = inputDate.substring(6, 8);
+  var formattedDate = year + "년 " + month + "월" + day + "일";
+  payYmdElements[i].textContent = formattedDate;
+}
+</script>

@@ -1,0 +1,9 @@
+package kr.or.ddit.draft.service;
+
+import kr.or.ddit.draft.vo.DraftUserVO;
+
+public interface DraftService {
+
+	DraftUserVO selectDraftUsesrInfo(String userId);
+
+}

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mail.mapper.MailMapper">
+	<insert id="insertDsptch" parameterType="kr.or.ddit.mail.vo.MailVO">
+	<selectKey keyColumn="memo_no" resultType="kr.or.ddit.mail.vo.MailVO" keyProperty="emlNo">
+		SELECT NVL(MAX(eml_no),0)+1 FROM mail_dsptch
+	</selectKey>
+		INSERT INTO mail_dsptch (
+		    eml_no
+		  , dsptch_eml
+		  , eml_stts
+		  , dsptch_dt
+		  , eml_ttl
+		  , eml_cn
+		  , del_yn
+		  , del_dt
+		) VALUES (
+		    #{emlNo}
+		  ,#{dsptchEml}
+		  ,'MM001'
+		  ,sysdate
+		  ,#{emlTtl}
+		  ,#{emlCn}
+		  ,'N'
+		  ,sysdate+90
+		);
+	</insert>	
+		
+	<insert id="insertRcptn" parameterType="kr.or.ddit.mail.vo.MailVO">
+	<selectKey keyColumn="memo_no" resultType="kr.or.ddit.mail.vo.MailVO" keyProperty="emlNo">
+		SELECT NVL(MAX(eml_no),0)+1 FROM mail_rcptn
+	</selectKey>
+		INSERT INTO mail_rcptn (
+		    eml_no
+		  , rcptn_eml
+		  , eml_stts
+		  , open_dt
+		  , del_yn
+		  , del_dt
+		) VALUES (
+		    #{emlNo}
+		  , #{rcptnEml}
+		  , 'MM001'
+		  , null
+		  , 'N'
+		  , sysdate+90
+		);
+	</insert>
+	
+</mapper>

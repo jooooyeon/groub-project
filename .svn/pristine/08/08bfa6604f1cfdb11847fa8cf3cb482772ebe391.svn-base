@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.admin.log.mapper.LogMapper">
+
+	<!-- 로그 목록 -->
+	<select id="logList" parameterType="String" resultType="kr.or.ddit.user.vo.UserLogVO">
+		SELECT
+			A.LOG_NO
+			, A.USER_ID
+			, A.LOG_STTS
+			, A.LOG_YMD
+			, A.IP_ADDR
+			, A.NTN_CD
+			, B.CO_ID
+		FROM
+			USER_LOG A
+		INNER JOIN USERS B ON A.USER_ID = B.USER_ID
+		WHERE
+			B.CO_ID = #{coId}
+		ORDER BY A.LOG_NO DESC
+	</select>
+
+
+</mapper>

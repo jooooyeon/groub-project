@@ -1,0 +1,85 @@
+package kr.or.ddit.draft.controller;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.common.service.CommonService;
+import kr.or.ddit.draft.service.DraftService;
+import kr.or.ddit.draft.vo.DraftUserVO;
+import kr.or.ddit.draft.vo.DraftVO;
+import kr.or.ddit.draft.vo.DraftVacVO;
+import kr.or.ddit.security.CustomUser;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
+@Secured({ "ROLE_USER", "ROLE_ADMIN" })
+@Controller
+@Slf4j
+@RequestMapping("/draft")
+public class DraftController {
+
+
+	@Autowired
+	DraftService draftService;
+
+	@Autowired
+	CommonService commonService;
+
+	@GetMapping("/list")
+	public String draftMain(Model model, Principal principal) {
+
+		return "draft/draft_main";
+	}
+
+	@GetMapping("/form")
+	public String draftForm(Model model, Principal principal) {
+
+		return "draft/draft_form";
+	}
+
+	@GetMapping("/form/vac")
+	public String draftVacForm(Model model, Principal principal) throws Exception {
+
+		DraftUserVO draftUserVO = draftService.selectDraftUsesrInfo(principal.getName());
+		List<DraftVacVO> draftVacVOList = draftUserVO.getDraftVacVOList();
+		model.addAttribute("draftUserVO", draftUserVO);
+		model.addAttribute("draftVacVOList", draftVacVOList);
+
+		List<Map<String, String>> selectMngCdList = commonService.selectMngCdList("VU");
+		model.addAttribute("selectMngCdList", selectMngCdList);
+
+		return "draft/form/vacForm";
+	}
+
+	@PostMapping("/form/post")
+	public String MakeDraft(Principal principal, @ModelAttribute DraftVO draftVO) throws Exception{
+		
+		draftVO.setUserId(principal.getName());
+		log.debug("draftVO 확인하기: " + draftVO);
+
+		int draftInsert = draftService.draftInsert(draftVO);
+		
+		return "redirect:/draft/form";
+	}
+	
+	@GetMapping("/doc/mydraft")
+	public String ShowMyDraftList() { 
+		
+		return "draft/mydraft";
+	}
+
+}

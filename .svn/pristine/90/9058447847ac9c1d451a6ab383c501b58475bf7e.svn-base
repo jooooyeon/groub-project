@@ -1,0 +1,32 @@
+/**
+ * 
+ */
+//사용자 정보
+let userData;
+
+console.log("AlarmJs",userId);
+//알람
+var sockJs = new SockJS("/ws");
+var stomp = Stomp.over(sockJs);
+stomp.debug = null;
+
+var receiver = $('#receiver');
+
+stomp.connect({}, function() {
+
+	stomp.subscribe("/sub/alarm/" + userId, function(chat) {
+		var content = chat.body; 
+		if (content) {
+			$('.toast-body').html(content);
+			$('#liveToast').toast('show');
+		}
+	});
+	
+	stomp.subscribe("/sub/userData", function(chat) {
+		var content = chat.body; 
+		if (content) {
+			userData = content;
+			userDataSet(userData);
+		}
+	});
+});

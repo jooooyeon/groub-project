@@ -1,0 +1,19 @@
+package kr.or.ddit.community.board.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class BoardVO {
+	private int EMPNO;
+	private String ENAME;
+	private String JOB;
+	private int MGR;
+	private Date HIREDATE;
+	private int SAL;
+	private int COMM;
+	private int DEPTNO;
+	
+	
+}

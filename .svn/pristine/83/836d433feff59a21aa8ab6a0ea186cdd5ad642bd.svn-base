@@ -1,0 +1,13 @@
+package kr.or.ddit.mapper;
+
+import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
+import kr.or.ddit.OrganizationChart.OrganizationChartVO;
+
+@Mapper
+public interface OrganizationChartMapper {
+	
+	//조직도 목록 보기
+	public List<OrganizationChartVO> list();
+
+}

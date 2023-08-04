@@ -1,0 +1,12 @@
+package kr.or.ddit.chat.vo;
+
+import java.io.Serializable;
+
+import lombok.Data;
+
+@Data
+public class ChatUserVO implements Serializable {
+	private int chatRmNo;
+	private String userId;
+	private String hostYn;
+}

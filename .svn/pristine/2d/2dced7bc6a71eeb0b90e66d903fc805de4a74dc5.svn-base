@@ -1,0 +1,47 @@
+package kr.or.ddit.user.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import kr.or.ddit.admin.account.vo.UserRegisterVO;
+import kr.or.ddit.user.vo.UserVO;
+
+public interface UserMapper {
+
+	public List<UserVO> list(String coId);
+
+	public List<UserVO> hasAdminList(String coId);
+
+	public UserVO detail(UserVO userVO);
+
+	public UserVO detailUserAuth(UserVO userVO);
+
+	public int registerUser(UserRegisterVO userRegisterVO);
+
+	public int registerEmpInfo(UserRegisterVO userRegisterVO);
+
+	/* 사용자 계정 생성시 ROLE_USER 권한 부여 */
+	public int addAuth(@Param("auth") String auth, @Param("userId") String userId);
+
+	/* ROLE_ADMIN 권한 삭제 */
+	public int delAuth(@Param("auth") String auth, @Param("userId") String userId);
+
+	/* 사용자 정보 USERS 테이블 업데이트 */
+	public int updateUser(UserVO userVO);
+
+	/* 사용자 정보 EMP_INFO 테이블 업데이트 */
+	public int updateEmpInfo(UserVO userVO);
+
+	public int delete(UserVO userVO);
+
+	/* userId 자동생성 값 조건 조회 */
+	public String maxUserId(String search);
+
+	/* email 중복 체크 */
+	public int checkEmail(String email);
+
+	/* 계정 활성화 */
+	public int accountAct(String userId);
+
+}

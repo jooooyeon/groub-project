@@ -1,0 +1,30 @@
+package kr.or.ddit.chat.vo;
+
+import java.io.Serializable;
+import java.util.List;
+
+import lombok.Data;
+
+/**
+ * @author 김종명
+ *
+ */
+@Data
+public class ChatVO implements Serializable{
+	/**
+	 * 대화방 정보
+	 */
+	private ChatRoomVO chatRoomVO;
+	/**
+	 * 대화방 사용자 정보
+	 */
+	private List<ChatUserVO> chatUserList;
+	/**
+	 * 대화방 메시지 정보
+	 */
+	private List<ChatMsgVO> chatMsgList;
+	/**
+	 * 대화방 첨부파일 정보
+	 */
+	private List<ChatAtchVO> chatAtchList;
+}

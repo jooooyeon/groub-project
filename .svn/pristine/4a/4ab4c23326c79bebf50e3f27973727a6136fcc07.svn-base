@@ -1,0 +1,131 @@
+package kr.or.ddit.community.anonyBoard.controller;
+
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.common.BoardAttachVO;
+import kr.or.ddit.community.anonyBoard.service.AnonyBoardService;
+import kr.or.ddit.community.anonyBoard.vo.AnonyBoardVO;
+
+//익명게시판
+@RequestMapping("community/anonyboard")
+@Controller
+public class AnonyBoardcontroller {
+	
+	@Autowired
+	AnonyBoardService anonBoardService;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	
+	//익명게시판 리스트
+	@RequestMapping("/list")
+	public String list(Model model) {
+		
+		List<AnonyBoardVO> data = this.anonBoardService.list();
+//		log.info("data : " + data);
+		model.addAttribute("data",data);
+
+		return "community/anonyBoard/list";
+	}
+	
+	
+	//익명게시판 작성
+	@RequestMapping("/register")
+	public String register(Model model) {
+
+
+		return "community/anonyBoard/register";
+	}
+	
+	//익명게시판 작성
+	@PostMapping("/register")
+	public String registerPost(Model model,@ModelAttribute AnonyBoardVO baVO) {
+		//AnonyBoardVO(brdNo=0, memNo=null, brdHeader=추천, brdTitle=333, brdContent=<p>555</p>
+//		, brdPostDate=null, brdViewCount=0, brdCategory=null, isTemp=null
+//		, attachFiles=[org.springframework.web.multipart...]
+//		, boardAttachVO=null)
+		log.info("result: " + baVO);
+//		int result = 0;
+		int result = anonBoardService.register(baVO);
+		System.out.println("result : " + result);
+		
+		return "redirect:list";
+	}
+	
+	
+	//익명게시판 상세보기
+	@RequestMapping("/detail")
+	public String detail(AnonyBoardVO anonyBoardVO, Model model) {
+		log.info("anonyBoardVO : " + anonyBoardVO);
+		
+		anonyBoardVO = this.anonBoardService.detail(anonyBoardVO);
+		log.info("detail anonyBoardVO : " + anonyBoardVO );
+		
+		model.addAttribute("data",anonyBoardVO);
+		
+		return "community/anonyBoard/detail";
+	}
+	
+	
+	//익명게시판 수정
+	@RequestMapping("/update")
+	public String update(Model model,@ModelAttribute AnonyBoardVO anonyBoardVO) {
+		
+		anonyBoardVO = this.anonBoardService.detail(anonyBoardVO);
+		log.info("detail anonyBoardVO : " + anonyBoardVO );
+		
+		model.addAttribute("data",anonyBoardVO);
+		
+
+		return "community/anonyBoard/update";
+	}
+	
+	
+	
+	//익명게시판 수정
+	@PostMapping("/update")
+	public String updatePost(Model model, @ModelAttribute AnonyBoardVO anonyBoardVO) {
+		log.info("updatePost anonyBoardVO" + anonyBoardVO);
+		
+		int result = anonBoardService.update(anonyBoardVO);
+		System.out.println("result : " + result);
+		
+		
+
+		
+		return "redirect:list";
+	}
+	
+	@ResponseBody
+	@PostMapping("/delete")
+	public String delete(@RequestBody AnonyBoardVO anonyBoardVO) {
+		log.info("delete" + anonyBoardVO);
+		log.info("딜리트!");
+		
+//		int result = this.anonBoardService.delete(anonyBoardVO);
+//		if(result > 0) {
+//			return "success";
+//		}else {
+//			return "fail";
+//		}
+		
+		return "success";
+		
+	}
+	
+	
+}

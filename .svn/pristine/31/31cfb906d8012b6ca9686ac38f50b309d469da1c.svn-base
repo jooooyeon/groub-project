@@ -1,0 +1,10 @@
+package kr.or.ddit.OrganizationChart;
+
+import java.util.List;
+
+public interface OrganizationChartService {
+	
+	//목록보기
+	List<OrganizationChartVO> list();
+
+}

@@ -1,0 +1,18 @@
+package kr.or.ddit.bbscommon;
+
+import lombok.Data;
+
+
+// 삭제예정!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+@Data
+public class BoardAttachVO {
+//	private int brdFileNo;
+//	private int brdNo;
+//	private String brdFileName;
+//	private String brdFileUuid;
+//	private String brdFilePath;
+//	private String brdFileType;
+//	private String field;
+//	private String field32;
+}

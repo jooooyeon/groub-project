@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.schedule.mapper.ScheduleMapper">
+
+
+	<!-- 전체 일정 조회 -->
+	<select id="listAll" parameterType="String" resultType="kr.or.ddit.schedule.vo.ScheduleVO">
+		SELECT
+			A.SCHDL_NO
+			, A.USER_ID
+			, A.SCHDL_TTL
+			, A.SCHDL_CN
+			, A.REG_DT
+			, A.STRT_SCHDL_DT
+			, A.END_SCHDL_DT
+			, A.SCHDL_TP
+			, A.DEL_YN
+			, A.DEL_DT
+			, B.CO_ID
+			, C.DEPT_NO
+		FROM
+			SCHDL A
+		INNER JOIN USERS B ON B.USER_ID = A.USER_ID
+		INNER JOIN EMP_INFO C ON C.USER_ID = A.USER_ID
+		WHERE A.SCHDL_TP = #{schdlTp}
+	</select>
+
+
+</mapper>

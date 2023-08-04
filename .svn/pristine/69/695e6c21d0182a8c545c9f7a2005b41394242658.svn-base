@@ -1,0 +1,36 @@
+package kr.or.ddit.alarm;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.stereotype.Controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+public class AlarmController {
+	
+	@Autowired
+	private SimpMessageSendingOperations simpMessageSendingOperations;
+
+	
+	//메일 알림
+	@MessageMapping("/mail")
+	public void AlarmMail(AlarmVO alarm) throws InterruptedException {
+		log.info("alarm>> "+alarm);
+		Thread.sleep(5000);
+		simpMessageSendingOperations.convertAndSend("/sub/mail/"+alarm.getReceiver(), "메일 왔어요");
+	}
+	
+	//메신저 알림
+	@MessageMapping("/chat")
+	public void AlarmMessenger(AlarmVO alarm) throws InterruptedException {
+		log.info("alarm>> "+alarm);
+		Thread.sleep(5000);
+		simpMessageSendingOperations.convertAndSend("/sub/chat/"+alarm.getReceiver(), "메신저 왔어요");
+	}
+	
+}

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.reservation.mapper.VhclRsvtMapper">
+
+  <resultMap id="vhclRsvtMap" type="kr.or.ddit.reservation.vo.VhclRsvtVO">
+	<result property="vRsvtNo" column="V_RSVT_NO" />
+	<result property="userId" column="USER_ID" />
+	<result property="vhclNo" column="VHCL_NO" />
+	<result property="rsvtDt" column="RSVT_DT" />
+	<result property="strtRsvtDt" column="STRT_RSVT_DT" />
+	<result property="endRsvtDt" column="END_RSVT_DT" />
+	<result property="prps" column="PRPS" />
+  </resultMap>
+
+	<!-- 회사별 차량 예약 목록 조회 -->
+	<select id="getRsvtList" parameterType="kr.or.ddit.user.vo.UserVO" resultMap="vhclRsvtMap">
+		SELECT
+		    A.V_RSVT_NO
+		  , A.USER_ID
+		  , A.VHCL_NO
+		  , A.RSVT_DT
+		  , A.STRT_RSVT_DT
+		  , A.END_RSVT_DT
+		  , A.PRPS
+		FROM
+		    VHCL_RSVT A
+		INNER JOIN USERS B ON B.USER_ID = A.USER_ID
+		WHERE
+		    B.CO_ID = #{coId}
+	</select>
+
+	<!-- 특정 차량 예약 목록 조회 -->
+	<select id="getRsvtListVchlNo" parameterType="String" resultType="kr.or.ddit.reservation.vo.VhclRsvtVO">
+		SELECT
+		    V_RSVT_NO
+		  , USER_ID
+		  , VHCL_NO
+		  , RSVT_DT
+		  , STRT_RSVT_DT
+		  , END_RSVT_DT
+		  , PRPS
+		FROM
+		    VHCL_RSVT
+		WHERE VHCL_NO = #{vhclNo}
+	</select>
+
+	<!-- 차량 예약 등록 -->
+	<insert id="insert" parameterType="kr.or.ddit.reservation.vo.VhclRsvtVO">
+	<selectKey order="BEFORE" keyProperty="vRsvtNo" resultType="int">
+		SELECT SEQ_VHCL.NEXTVAL FROM DUAL
+	</selectKey>
+		INSERT INTO VHCL_RSVT (
+		    V_RSVT_NO
+		  , USER_ID
+		  , VHCL_NO
+		  , STRT_RSVT_DT
+		  , END_RSVT_DT
+		  , PRPS
+		) VALUES (
+		    #{vRsvtNo}
+		  , #{userId}
+		  , #{vhclNo}
+		  , to_date(#{strtRsvtDt},'yyyy-MM-dd HH24:MI')
+		  , to_date(#{endRsvtDt},'yyyy-MM-dd HH24:MI')
+		  , #{prps}
+		)
+	</insert>
+
+	<!-- 회사별 보유 차량 목록 조회 -->
+	<select id="getVhcl" parameterType="kr.or.ddit.user.vo.UserVO" resultType="kr.or.ddit.reservation.vo.VhclVO">
+		SELECT
+		    VHCL_NO
+		  , RDCPCT_CNT
+		  , VHCL_NM
+		  , VHCL_YMD
+		  , VHCL_MC
+		  , FUEL_TYPE
+		FROM
+		    VHCL
+		WHERE
+		    CO_ID = #{coId}
+	</select>
+
+
+	<!-- 예약 시간 변경 -->
+	<update id="update" parameterType="kr.or.ddit.reservation.vo.VhclRsvtVO">
+		UPDATE VHCL_RSVT
+		   SET
+		        STRT_RSVT_DT = TO_DATE(#{strtRsvtDt}, 'YYYYMMDD HH24:MI:SS'),
+		        END_RSVT_DT = TO_DATE(#{endRsvtDt}, 'YYYYMMDD HH24:MI:SS'),
+		        RSVT_DT = SYSDATE
+		WHERE
+		        V_RSVT_NO = #{vRsvtNo}
+	</update>
+
+	<!-- 예약 삭제 -->
+	<delete id="delete" parameterType="String">
+		DELETE FROM VHCL_RSVT
+		WHERE
+		    V_RSVT_NO = #{vRsvtNo}
+	</delete>
+
+	<!-- 내 예약현황 조회. 현재 시간 이후 예약-->
+	<select id="getMylistFute" parameterType="String" resultType="kr.or.ddit.reservation.vo.VhclRsvtVO" >
+		SELECT
+		    V_RSVT_NO
+		  , USER_ID
+		  , VHCL_NO
+		  , RSVT_DT
+		  , TO_CHAR(STRT_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS STRT_RSVT_DT
+		  , TO_CHAR(END_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS END_RSVT_DT
+		  , PRPS
+		FROM
+		    VHCL_RSVT
+		WHERE USER_ID = #{userId}
+		<![CDATA[ AND STRT_RSVT_DT > SYSDATE ]]>
+		ORDER BY STRT_RSVT_DT DESC
+	</select>
+
+	<!-- 내 예약현황 조회. 현재 진행 -->
+	<select id="getMylistIng" parameterType="String" resultType="kr.or.ddit.reservation.vo.VhclRsvtVO" >
+		SELECT
+		    V_RSVT_NO
+		  , USER_ID
+		  , VHCL_NO
+		  , RSVT_DT
+		  , TO_CHAR(STRT_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS STRT_RSVT_DT
+		  , TO_CHAR(END_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS END_RSVT_DT
+		  , PRPS
+		FROM
+		    VHCL_RSVT
+		WHERE USER_ID = #{userId}
+		<![CDATA[ AND STRT_RSVT_DT < SYSDATE ]]>
+		<![CDATA[ AND END_RSVT_DT > SYSDATE ]]>
+		ORDER BY STRT_RSVT_DT DESC
+	</select>
+
+	<!-- 내 예약현황 조회. 현재 시간 이전 예약-->
+	<select id="getMylistEnd" parameterType="String" resultType="kr.or.ddit.reservation.vo.VhclRsvtVO" >
+		SELECT
+		    V_RSVT_NO
+		  , USER_ID
+		  , VHCL_NO
+		  , RSVT_DT
+		  , TO_CHAR(STRT_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS STRT_RSVT_DT
+		  , TO_CHAR(END_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS END_RSVT_DT
+		  , PRPS
+		FROM
+		    VHCL_RSVT
+		WHERE USER_ID = #{userId}
+		<![CDATA[ AND END_RSVT_DT < SYSDATE ]]>
+		ORDER BY STRT_RSVT_DT DESC
+	</select>
+
+	<!-- 내 예약현황 조회. 오늘 예약 조회-->
+	<select id="getMylistToday" parameterType="String" resultType="kr.or.ddit.reservation.vo.VhclRsvtVO" >
+		SELECT
+		    V_RSVT_NO
+		  , USER_ID
+		  , VHCL_NO
+		  , RSVT_DT
+		  , TO_CHAR(STRT_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS STRT_RSVT_DT
+		  , TO_CHAR(END_RSVT_DT, 'YYYY-MM-DD HH24:MI') AS END_RSVT_DT
+		  , PRPS
+		FROM
+		    VHCL_RSVT
+		WHERE USER_ID = #{userId}
+		AND TRUNC(STRT_RSVT_DT) = TRUNC(SYSDATE)
+		ORDER BY STRT_RSVT_DT DESC
+	</select>
+
+	<!-- 예약 중복 조회 -->
+	<select id="reserveCheck" parameterType="String" resultType="kr.or.ddit.reservation.vo.VhclRsvtVO" >
+	    SELECT
+	        VHCL_NO
+	      , STRT_RSVT_DT
+	      , END_RSVT_DT
+	    FROM
+	        VHCL_RSVT
+	    WHERE VHCL_NO = #{vhclNo}
+	    <![CDATA[AND END_RSVT_DT > TO_DATE(#{strtRsvtDt}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+
+	INTERSECT
+
+	    SELECT
+	        VHCL_NO
+	      , STRT_RSVT_DT
+	      , END_RSVT_DT
+	    FROM
+	        VHCL_RSVT
+	    WHERE VHCL_NO = #{vhclNo}
+	    <![CDATA[AND STRT_RSVT_DT < TO_DATE(#{endRsvtDt}, 'YYYY-MM-DD HH24:MI:SS') ]]>
+	</select>
+
+
+
+</mapper>

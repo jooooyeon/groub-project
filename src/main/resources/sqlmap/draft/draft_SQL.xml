@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.draft.mapper.DraftMapper">
+
+	<resultMap type="kr.or.ddit.draft.vo.DraftUserVO" id="draftUserMap">
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="userNm" column="USER_NM" />
+		<result property="userEml" column="USER_EML" />
+		<result property="userImg" column="USER_IMG" />
+		<result property="signImg" column="SIGN_IMG" />
+		<result property="deptNo" column="DEPT_NO" />
+		<result property="deptNm" column="DEPT_NM" />
+		<result property="jbgdCd" column="JBGD_CD" />
+		<result property="jbgdNm" column="JBGD_NM" />
+		<result property="jbtlCd" column="JBTL_CD" />
+		<result property="jbtlNm" column="JBTL_NM" />
+		<collection property="draftVacVOList" resultMap="draftVacMap"></collection>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftVacVO" id="draftVacMap">
+		<result property="vacGrntNo" column="VAC_GRNT_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="vacTp" column="VAC_TP" />
+		<result property="vacNm" column="VAC_NM" />
+		<result property="vacGrntYmd" column="VAC_GRNT_YMD" />
+		<result property="vacGrntDays" column="VAC_GRNT_DAYS" />
+		<result property="vldYmd" column="VLD_YMD" />
+		<result property="vacUseDays" column="VAC_USE_DAYS" />
+		<result property="remainVacDays" column="REMAIN_VAC_DAYS" />
+		<result property="vacRsn" column="VAC_RSN" />
+		<result property="vacUseNo" column="VAC_USE_NO" />
+		<result property="cnyDay" column="CNY_DAY" />
+		<result property="bgngDt" column="BGNG_DT" />
+		<result property="endDt" column="END_DT" />
+		<result property="vacUseDays" column="VAC_USE_DAYS" />
+	</resultMap>
+	
+
+
+	<select id="selectDraftUsesrInfo" resultMap="draftUserMap">
+		SELECT
+			u.USER_ID
+			, u.CO_ID
+			, u.USER_NM
+			, u.USER_EML
+			, u.USER_IMG
+			, u.SIGN_IMG
+			, ei.DEPT_NO
+			, FN_GET_DEPT_NO_NM(ei.DEPT_NO, u.CO_ID) AS DEPT_NM
+			, ei.JBGD_CD 
+			, FN_GET_CST_CD_NM2CO(ei.JBGD_CD, u.CO_ID) AS JBGD_NM
+			, ei.JBTL_CD
+			, FN_GET_CST_CD_NM2CO(ei.JBTL_CD, u.CO_ID) AS JBTL_NM
+			, vg.VAC_GRNT_NO
+			, vg.VAC_TP 
+			, FN_GET_MNG_CD_NM(vg.VAC_TP ) AS VAC_NM
+			, vg.VAC_GRNT_YMD
+			, vg.VAC_GRNT_DAYS 
+			, vg.VLD_YMD 
+			, vu.VAC_USE_DAYS
+			, vg.VAC_GRNT_DAYS - NVL(vu.VAC_USE_DAYS, 0) AS REMAIN_VAC_DAYS
+		FROM 
+			(SELECT * FROM USERS
+			WHERE USER_ID = #{userId} ) u
+		INNER JOIN EMP_INFO ei 
+		ON ei.USER_ID = u.USER_ID 
+		LEFT JOIN 
+			(SELECT * FROM VAC_GRNT
+			WHERE 
+				VLD_YMD >= SYSDATE
+				AND VAC_GRNT_YMD <![CDATA[<=]]> SYSDATE
+				AND VLD_YMD >= SYSDATE ) vg 
+		ON vg.USER_ID = u.USER_ID
+		LEFT JOIN 
+			(SELECT
+					NVL(sum(vu.CNY_DAY), 0) AS VAC_USE_DAYS
+					, vu.USER_ID
+					, vu.VAC_GRNT_NO
+				FROM 
+					VAC_USE vu
+				GROUP BY 
+					USER_ID
+					, vu.VAC_GRNT_NO ) vu
+		ON vu.USER_ID = u.USER_ID AND vu.VAC_GRNT_NO = vg.VAC_GRNT_NO
+	</select>
+	
+	
+	
+	<insert id="draftInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+	
+		<selectKey resultType="int" order="BEFORE" keyProperty="drNo">
+			SELECT NVL(MAX(DR_NO), 0) + 1 FROM DRFT
+		</selectKey>
+		
+		INSERT INTO DRFT (
+			DR_NO
+			, USER_ID
+			, DR_STTS_CD
+			, DR_STRG
+			, DR_DT
+			, DRFT_TITLE)
+		VALUES(
+			#{drNo}
+			, #{userId}
+			, #{drSttsCd}
+			, #{drStrg}
+			, SYSDATE
+			, #{drftTitle})
+			
+	</insert>
+	
+	<update id="draftOpnInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="drOpnNo">
+			SELECT NVL(MAX(DR_OPN_NO), 0) + 1 FROM DRFT_OPN
+		</selectKey>
+		
+		<foreach collection="draftOpnVOList" item="item"
+			open="INSERT ALL " close="SELECT * FROM DUAL" separator=" " index="idx">
+			
+			INTO DRFT_OPN (
+				DR_OPN_NO
+				, DR_NO
+				, USER_ID
+				, OPNN_CN
+				, DR_OPNN_DT )
+			VALUES(
+				#{drOpnNo} + #{idx}
+				, #{drNo}
+				, #{item.userId}
+				, #{item.opnnCn}
+				, #{item.drOpnnDt} )
+				
+		</foreach>
+	</update>
+	
+	<insert id="draftVacInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+	
+		<selectKey resultType="int" order="BEFORE" keyProperty="draftVacVO.vacUseNo">
+			SELECT NVL(MAX(VAC_USE_NO), 0) + 1 FROM VAC_USE
+		</selectKey>
+		
+		INSERT INTO VAC_USE (
+			VAC_USE_NO
+				, USER_ID
+				, DR_NO
+				, CNY_DAY
+				, VAC_TP
+				, BGNG_DT
+				, END_DT
+				, VAC_GRNT_NO
+				, VAC_RSN )
+			VALUES(
+			#{draftVacVO.vacUseNo}
+			, #{userId}
+			, #{drNo}
+			, #{draftVacVO.cnyDay}
+			, #{draftVacVO.vacTp}
+			, #{draftVacVO.bgngDt}
+			, #{draftVacVO.endDt}
+			, #{draftVacVO.vacGrntNo}
+			, #{draftVacVO.vacRsn} )
+	</insert>
+	
+	<update id="draftAtchInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="drftFlNo">
+			SELECT NVL(MAX(DRFT_FL_NO), 0) + 1 FROM DRFT_ATCH
+		</selectKey>
+		
+		<foreach collection="draftAttachVOList" item="item"
+			open="INSERT ALL " close="SELECT * FROM DUAL" separator=" " index="idx">
+				
+			INTO DRFT_ATCH (
+				DRFT_FL_NO
+				, DR_NO
+				, FILE_NM
+				, FILE_UUID
+				, FILE_PATH
+				, FILE_EXTN
+				, FILE_SIZE )
+			VALUES (
+				#{drftFlNo} + #{idx}
+				, #{drNo}
+				, #{item.fileNm}
+				, #{item.fileUuid}
+				, #{item.filePath}
+				, #{item.fileExtn}
+				, #{item.fileSize} )
+				
+		</foreach>
+	</update>
+	
+	<update id="draftAtrzInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+		<foreach collection="draftAtrzVOList" item="draftAtrzVO"
+			open="INSERT ALL " close="SELECT * FROM DUAL" separator=" " index="idx">
+
+			INTO DRFT_ATRZ (
+				DR_NO
+				, USER_ID
+				, ATRZ_SN
+				, ATRZ_CD
+				, ATRZ_STTS_CD
+				, ATRZ_DT )
+			VALUES (
+				#{drNo}
+				, #{draftAtrzVO.userId}
+				, #{draftAtrzVO.atrzSn}
+				, #{draftAtrzVO.atrzCd}
+				, #{draftAtrzVO.atrzSttsCd}
+				, NULL )
+				
+		</foreach>
+	</update>
+	
+	
+		<resultMap type="kr.or.ddit.draft.vo.DraftVO" id="draftVOMap">
+		<result property="drNo" column="DR_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="userNm" column="USER_NM" />
+		<result property="deptNm" column="DEPT_NM" />
+		<result property="drSttsCd" column="DR_STTS_CD" />
+		<result property="fnshDt" column="FNSH_DT" />
+		<result property="drStrg" column="DR_STRG" jdbcType="CLOB" javaType="java.lang.String" />
+		<result property="drDt" column="DR_DT" />
+		<result property="delYn" column="DEL_YN" />
+		<result property="delDt" column="DEL_DT" />
+		<result property="drftTitle" column="DRFT_TITLE" />
+		<collection property="draftVacVO" resultMap="draftVacMap"></collection>
+		<collection property="draftOpnVOList" resultMap="draftOpnVOMap"></collection>
+		<collection property="draftAttachVOList" resultMap="draftAttachVOMap"></collection>
+		<collection property="draftAtrzVOList" resultMap="draftAtrzVOMap"></collection>
+	</resultMap>
+	
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftOpnVO" id="draftOpnVOMap">
+		<result property="drOpnNo" column="DR_OPN_NO" />
+		<result property="drNo" column="DR_NO" />
+		<result property="userId" column="DRFT_OPN_USER_ID" />
+		<result property="opnnCn" column="OPNN_CN" />
+		<result property="drOpnnDt" column="DR_OPNN_DT" />
+		<result property="delYn" column="DRFT_OPN_DEL_YN" />
+		<result property="delDt" column="DRFT_OPN_DEL_DT" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftAtrzVO" id="draftAtrzVOMap">
+		<result property="drNo" column="DR_NO" />
+		<result property="userId" column="DRFT_ATRZ_USER_ID" />
+		<result property="atrzSn" column="ATRZ_SN" />
+		<result property="atrzCd" column="ATRZ_CD" />
+		<result property="atrzSttsCd" column="ATRZ_STTS_CD" />
+		<result property="atrzDt" column="ATRZ_DT" />
+		<result property="userNm" column="ATRZ_USER_NM" />
+		<result property="deptNm" column="ATRZ_DEPT_NM" />
+		<result property="jbgdNm" column="JBGD_NM" />
+		<result property="userImg" column="USER_IMG" />
+		<result property="signImg" column="SIGN_IMG" />
+		<result property="maxAtrzSn" column="MAX_ATRZ_SN" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftAttachVO" id="draftAttachVOMap">
+		<result property="drftFlNo" column="DRFT_FL_NO" />
+		<result property="drNo" column="DR_NO" />
+		<result property="fileNm" column="FILE_NM" />
+		<result property="fileUuid" column="FILE_UUID" />
+		<result property="filePath" column="FILE_PATH" />
+		<result property="fileExtn" column="FILE_EXTN" />
+		<result property="fileSize" column="FILE_SIZE" />
+	</resultMap>
+	
+		
+	<select id="draftSelect" parameterType="map" resultMap="draftVOMap">
+		SELECT
+			d.DR_NO
+			, d.USER_ID
+			, d.DR_STTS_CD
+			, d.DR_STRG
+			, d.DR_DT
+			, d.DEL_YN
+			, d.DEL_DT
+			, d.DRFT_TITLE
+			, do.DR_OPN_NO
+			, do.USER_ID AS DRFT_OPN_USER_ID
+			, do.OPNN_CN
+			, do.DR_OPNN_DT
+			, do.DEL_YN AS DRFT_OPN_DEL_YN
+			, do.DEL_DT AS DRFT_OPN_DEL_DT
+			, da.DRFT_FL_NO
+			, da.FILE_NM
+			, da.FILE_UUID
+			, da.FILE_PATH
+			, da.FILE_EXTN
+			, da.FILE_SIZE
+			, da2.USER_ID AS DRFT_ATRZ_USER_ID
+			, da2.ATRZ_SN
+			, da2.ATRZ_CD
+			, da2.ATRZ_STTS_CD
+			, da2.ATRZ_DT
+			, u.USER_NM AS ATRZ_USER_NM
+			, FN_GET_DEPT_NO_NM(ei.DEPT_NO, u.CO_ID) AS ATRZ_DEPT_NM
+			, FN_GET_CST_CD_NM2CO(ei.JBGD_CD, u.CO_ID) AS JBGD_NM
+			, u.USER_IMG
+			, u.SIGN_IMG
+		FROM (
+			SELECT *
+			FROM DRFT d2
+			WHERE d2.DR_NO = #{drNo} ) d 
+		LEFT JOIN DRFT_OPN do 
+		ON do.DR_NO = d.DR_NO 
+		LEFT JOIN DRFT_ATCH da
+		ON da.DR_NO = d.DR_NO 
+		INNER JOIN DRFT_ATRZ da2 
+		ON da2.DR_NO = d.DR_NO 
+		INNER JOIN EMP_INFO ei
+		ON ei.USER_ID = da2.USER_ID
+		INNER JOIN USERS u
+		ON u.USER_ID = da2.USER_ID 
+		ORDER BY d.DR_NO, da2.ATRZ_SN
+		
+	</select>
+	
+	<select id="draftMySelectList" parameterType="map" resultType="kr.or.ddit.draft.vo.DraftVO">
+			SELECT 
+				DR_NO
+				, USER_ID
+				, DR_STTS_CD
+				, DR_DT
+				, DEL_YN
+				, DEL_DT
+				, DRFT_TITLE
+				, FNSH_DT
+			FROM DRFT d2
+			WHERE d2.USER_ID = #{userId}
+			AND d2.DEL_YN = 'N'
+			<if test="drSttsCd != null and drSttsCd !=''">
+		      AND DR_STTS_CD = #{drSttsCd}
+		    </if>
+			ORDER BY DR_NO DESC
+	</select>
+	
+	
+	<update id="draftLogicalDel" parameterType="kr.or.ddit.draft.vo.DraftVO">
+		UPDATE DRFT
+		SET
+			DEL_YN = 'Y'
+			, DEL_DT = SYSDATE
+		WHERE
+			DR_NO = #{drNo}
+	</update>
+	
+	<select id="mydraftAtrzList" resultMap="draftVOMap">
+		WITH T AS (
+		    SELECT
+		        da.DR_NO
+		        , da.USER_ID
+		        , da.ATRZ_SN
+		        , da.ATRZ_CD
+		        , da.ATRZ_STTS_CD
+		        , da.ATRZ_DT
+		    FROM (
+		        SELECT *
+		        FROM
+		            DRFT_ATRZ
+		        WHERE 
+		            ATRZ_CD = 'DR001'
+		        AND 
+		       		USER_ID = #{userId}
+		       	AND 
+	        		ATRZ_STTS_CD IS NULL 
+		    ) da
+		    INNER JOIN (
+		        SELECT *
+		        FROM DRFT_ATRZ
+		        WHERE ATRZ_STTS_CD = 'DS001'
+		       )da3
+		    ON da3.DR_NO = da.DR_NO
+		    AND da3.ATRZ_SN IN da.ATRZ_SN - 1
+		    UNION 
+		    SELECT 
+		        DR_NO
+		        , USER_ID
+		        , ATRZ_SN
+		        , ATRZ_CD
+		        , ATRZ_STTS_CD
+		        , ATRZ_DT
+		    FROM (
+		        SELECT *
+		        FROM DRFT_ATRZ
+		        WHERE ATRZ_SN = 1
+		        AND USER_ID = #{userId} 
+		    ) da
+		), F AS (
+		    SELECT 
+		         d.DR_NO
+		        , d.USER_ID
+		        , FN_GET_USER_NM(d.USER_ID) AS USER_NM
+		        , d2.DEPT_NM 
+		        , d.DR_STTS_CD
+		        , d.DR_DT
+		        , d.DEL_YN
+		        , d.DRFT_TITLE
+		    FROM DRFT d
+		    INNER JOIN EMP_INFO ei
+		    ON ei.USER_ID = d.USER_ID
+		    INNER JOIN DEPT d2
+		    ON d2.DEPT_NO = ei.DEPT_NO
+		),  J AS (
+		    SELECT 
+		        da.DR_NO
+		        , MAX(da.ATRZ_SN) AS MAX_ATRZ_SN
+		    FROM DRFT_ATRZ da
+		    GROUP BY da.DR_NO
+		)
+		SELECT 
+		    F.DR_NO
+		    , F.USER_ID
+		    , F.DR_STTS_CD
+		    , F.USER_NM
+		    , F.DEPT_NM
+		    , F.DR_STTS_CD
+		    , F.DR_DT
+		    , F.DEL_YN
+		    , F.DRFT_TITLE
+		    , T.USER_ID AS DRFT_ATRZ_USER_ID
+		    , T.ATRZ_SN
+		    , T.ATRZ_CD
+		    , T.ATRZ_STTS_CD
+		    , T.ATRZ_DT
+		    , J.MAX_ATRZ_SN
+		FROM T
+		LEFT JOIN F
+		ON F.DR_NO = T.DR_NO
+		LEFT JOIN J
+		ON J.DR_NO = T.DR_NO
+		ORDER BY F.DR_NO DESC
+	</select>
+	
+	<update id="updateAtrzStts" parameterType="kr.or.ddit.draft.vo.DraftVO">
+		UPDATE
+			DRFT_ATRZ
+		SET
+			ATRZ_STTS_CD = #{draftAtrzVOList[0].atrzSttsCd}
+			, ATRZ_DT = SYSDATE
+		WHERE
+			DR_NO = #{drNo}
+			AND USER_ID = #{draftAtrzVOList[0].userId}
+	</update>
+	
+	<update id="updateDraftStts" parameterType="kr.or.ddit.draft.vo.DraftVO">
+		UPDATE
+			DRFT
+		SET
+			DR_STTS_CD = #{drSttsCd}
+			, FNSH_DT = SYSDATE
+		WHERE
+			DR_NO = #{drNo}
+	</update>
+	
+</mapper>

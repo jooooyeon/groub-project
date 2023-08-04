@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.community.board.mapper.BoardMapper">
+
+	<select id="list" resultType="boardVO" >
+		select * from bbs
+	</select>
+
+	
+	
+	
+	<!-- 상세보기 -->
+	<resultMap type="boardVO" id="boardMap">
+		<result property="pstNo" column="PST_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="delrNm" column="DELR_NM" />
+		<result property="mdfrNm" column="MDFR_NM" />
+		<result property="pstHd" column="PST_HD" />
+		<result property="pstTtl" column="PST_TTL" />
+		<result property="pstCn" column="PST_CN" />
+		<result property="regDt" column="REG_DT" />
+		<result property="mdfcnDt" column="MDFCN_DT" />
+		<result property="inqCnt" column="INQ_CNT" />
+		<result property="bbsClsf" column="BBS_CLSF" />
+		<result property="tempYn" column="TEMP_YN" />
+		<result property="delYn" column="DEL_YN" />
+		<result property="delDt" column="DEL_DT" />
+		<collection property="bbsAtchVO" resultMap="bbsAtchMap"></collection>
+	</resultMap>
+	
+	<resultMap type="bbsAtchVO" id="bbsAtchMap">
+		<result property="bbsFlNo" column="BBS_FL_NO" />
+		<result property="fileNm" column="FILE_NM" />
+		<result property="fileUuid" column="FILE_UUID" />
+		<result property="filePath" column="FILE_PATH" />
+		<result property="fileExtn" column="FILE_EXTN" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="pstNo" column="PST_NO" />
+	</resultMap>
+	
+	
+	<!-- 상세보기 -->
+	<select id="detail" parameterType="boardVO" resultMap="boardMap">
+		SELECT
+		     A.pst_no
+		   , A.user_id
+		   , A.co_id
+		   , A.delr_nm
+		   , A.mdfr_nm
+		   , A.pst_hd
+		   , A.pst_ttl
+		   , A.pst_cn
+		   , A.reg_dt
+		   , A.mdfcn_dt
+		   , A.inq_cnt
+		   , A.bbs_clsf
+		   , A.temp_yn
+		   , A.del_yn
+		   , A.del_dt
+		   , B.bbs_fl_no
+		   , B.file_nm
+		   , B.file_uuid
+		   , B.file_path
+		   , B.file_extn
+		   , B.file_size
+		   , B.pst_no
+		FROM BBS A, BBS_ATCH B
+		WHERE A.pst_no = #{pstNo}
+		AND A.pst_no = B.pst_no(+)
+	</select>
+	
+	
+	<!-- 첨부파일 업로드 -->
+	<update id="insertAttachFiles" parameterType="java.util.List">
+		<foreach collection="list" item="bbsAtchVO"
+		open="INSERT ALL" close="SELECT * FROM DUAL" separator=" ">
+		INTO BBS_ATCH(
+			BBS_FL_NO, FILE_NM, FILE_UUID, FILE_PATH, FILE_EXTN, FILE_SIZE, PST_NO
+		VALUES(
+			  #{bbsAtchVO.bbsFlNo}
+			, #{bbsAtchVO.fileNm}
+			, #{bbsAtchVO.fileUuid}
+			, #{bbsAtchVO.filePath}
+			, #{bbsAtchVO.fileExtn}
+			, #{bbsAtchVO.fileSize}
+			, #{bbsAtchVO.pstNo})
+		</foreach>
+	</update>
+	
+	
+	<insert id="register" parameterType="boardVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="pstNo">
+			SELECT SEQUENCE1.NEXTVAL FROM DUAL
+		</selectKey>
+			
+			INSERT INTO BBS(
+				 pst_no
+			   , user_id
+			   , co_id
+			   , delr_nm
+			   , mdfr_nm
+			   , pst_hd
+			   , pst_ttl
+			   , pst_cn
+			   , reg_dt
+			   , mdfcn_dt
+			   , inq_cnt
+			   , bbs_clsf
+			   , temp_yn
+			   , del_yn
+				)
+			VALUES (
+				  #{pstNo}
+				, 'a002'
+				, '회사'
+				, 'NONE'
+				, 'NONE'
+				, 'HE'
+				, #{pstTtl}
+				, #{pstCn}
+				, SYSDATE
+				, SYSDATE
+				, #{inqCnt}
+				, 'CO'
+				, 'N'
+				, 'N'
+				)
+	</insert>
+	
+	
+<!-- 	<update id="update" parameterType="boardVO">
+		UPDATE BBS
+		SET 
+		    USER_ID=#{userId}
+		   ,CO_ID=#{coId}
+		   ,DELR_NM=#{delrNm}
+		   ,MDFR_NM=#{mdfrNm}
+		   ,PST_HD=#{pstHd}
+		   ,PST_TTL=#{pstTtl}
+		   ,PST_CN=#{pstCn}
+		   ,REG_DT=#{regDt}
+		   ,MDFCN_DT=SYSDATE
+		   ,INQ_CNT=#{inqCnt}
+		   ,BBS_CLSF=#{bbsClsf}
+		   ,TEMP_YN='N'
+		   ,DEL_YN='N'
+		WHERE PST_NO=#{}
+	</update> -->
+
+
+
+<!-- 	<select id="bbsList" resultMap="bbsMap"> -->
+<!-- 		SELECT A.PST_NO
+					, A.USER_ID
+					, A.CO_ID
+					, A.DELR_NM
+					, A.MDFR_NM -->
+<!-- 		     , A.PST_HD, A.PST_TTL, A.PST_CN, A.REG_DT, A.MDFCN_DT -->
+<!-- 		     , A.INQ_CNT, A.BBS_CLSF, A.TEMP_YN, A.DEL_YN, A.DEL_DT -->
+<!-- 		     , B.BBS_FL_NO, B.FILE_NM, B.FILE_UUID, B.FILE_PATH, B.FILE_EXTN, B.FILE_SIZE -->
+<!-- 		FROM   BBS A, BBS_ATCH_DET B -->
+<!-- 		WHERE  A.PST_NO = B.PST_NO(+) -->
+<!-- 	</select> -->
+
+</mapper>

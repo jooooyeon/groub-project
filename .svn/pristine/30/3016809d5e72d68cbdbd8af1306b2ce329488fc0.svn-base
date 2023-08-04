@@ -1,0 +1,45 @@
+package kr.or.ddit.draft.controller;
+
+import java.security.Principal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.draft.service.DraftService;
+import kr.or.ddit.draft.vo.DraftUserVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@Slf4j
+@RequestMapping("/draft")
+public class DraftController {
+	
+	@Autowired
+	DraftService draftService;
+	
+	@GetMapping("/list")
+	public String draftMain(Model model, Principal principal) {
+		
+		return "draft/draft_main";
+	}
+	
+	@GetMapping("/form")
+	public String draftForm(Model model, Principal principal) {
+		
+		return "draft/draft_form";
+	}
+	
+	@GetMapping("/form/vac")
+	public String draftVacForm(Model model, Principal principal) {
+		
+		DraftUserVO data = draftService.selectDraftUsesrInfo(principal.getName());
+		log.debug("나는야 케챱될꺼야~ " + data);
+		log.debug("나는야 케챱될꺼야2~ " + data.getDraftVacVOList());
+		model.addAttribute("data", data);
+		return "draft/form/vacForm";
+	}
+
+}

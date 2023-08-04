@@ -1,0 +1,45 @@
+package kr.or.ddit.chat.vo;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import kr.or.ddit.alarm.vo.AlarmVO;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @author 김종명
+ *
+ */
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ChatMsgVO implements Serializable {
+	/**
+	 * 대화글 관리번호
+	 */
+	private int chatMsgNo;
+	/**
+	 * 대화방 관리번호
+	 */
+	private int chatRmNo;
+	/**
+	 * 사용자 아이디
+	 */
+	private String userId;
+	/**
+	 * 전송된 대화 내용
+	 */
+	private String chatMsgCn;
+	/**
+	 * 입력된 대화의 전송일시
+	 */
+	private Date reg_dt;
+	/**
+	 * 파일여부 판별
+	 */
+	private String fileYn;
+}

@@ -1,0 +1,24 @@
+package kr.or.ddit.draft.service.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.draft.mapper.DraftMapper;
+import kr.or.ddit.draft.service.DraftService;
+import kr.or.ddit.draft.vo.DraftUserVO;
+
+@Service
+public class DarftServiceImpl implements DraftService {
+	
+	@Inject
+	DraftMapper draftMapper;
+	
+	@Override
+	public DraftUserVO selectDraftUsesrInfo(String userId) {
+		return draftMapper.selectDraftUsesrInfo(userId);
+	}
+
+}

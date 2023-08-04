@@ -1,0 +1,20 @@
+package kr.or.ddit.reservation.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class OffmRsvtVO {
+
+	private int oRsvtNo;
+	private String onoStr;
+	private String userId;
+	private String offmNo;
+	private Date rsvtDt;
+	private String strtRsvtDt;
+	private String endRsvtDt;
+	private String prps;
+	private String offmNm;
+
+}

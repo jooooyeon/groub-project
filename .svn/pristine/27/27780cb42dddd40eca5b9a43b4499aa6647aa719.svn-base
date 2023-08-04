@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.ai.module.article.mapper.ArticleMapper">
+	<select id="list" resultType="kr.or.ddit.ai.module.article.vo.ArticleVO">
+		<![CDATA[
+		SELECT
+		    A.arti_no
+		  , A.arti_ttl
+		  , A.arti_cn
+		  , ROWNUM
+		  , A.url
+		FROM
+		    (SELECT
+				    arti_no
+				  , arti_ttl
+				  , arti_cn
+				  , url
+				FROM
+				    ai_arti_summary
+				ORDER BY
+				    arti_no DESC) A
+		WHERE
+			rownum <= 5
+		ORDER BY
+			rownum ASC
+			]]>
+	</select>
+</mapper>

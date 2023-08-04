@@ -1,0 +1,36 @@
+package kr.or.ddit.ai.recommend.certification.vo;
+
+import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AiCrtfctRsltVO {
+	private int rsltNo;
+    private String userId;
+    private String certification1;
+    private String certification2;
+    private String certification3;
+    private String certification4;
+    private String certification5;
+    private String description1;
+    private String description2;
+    private String description3;
+    private String description4;
+    private String description5;
+    private String url1;
+    private String url2;
+    private String url3;
+    private String url4;
+    private String url5;
+    
+	
+
+	
+	
+	
+}

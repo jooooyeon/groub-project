@@ -1,0 +1,72 @@
+package kr.or.ddit.user.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Param;
+
+import kr.or.ddit.admin.account.vo.UserRegisterVO;
+import kr.or.ddit.user.vo.UserLogVO;
+import kr.or.ddit.user.vo.UserVO;
+
+public interface UserMapper {
+
+	public List<UserVO> list(String coId);
+
+	public List<UserVO> hasAdminList(String coId);
+
+	public UserVO detail(UserVO userVO);
+
+	public UserVO detailUserAuth(UserVO userVO);
+
+	public int registerUser(UserRegisterVO userRegisterVO);
+
+	public int registerEmpInfo(UserRegisterVO userRegisterVO);
+
+	/* 사용자 계정 생성시 ROLE_USER 권한 부여 */
+	public int addAuth(@Param("auth") String auth, @Param("userId") String userId);
+
+	/* ROLE_ADMIN 권한 삭제 */
+	public int delAuth(@Param("auth") String auth, @Param("userId") String userId);
+
+	/* 사용자 정보 USERS 테이블 업데이트 */
+	public int updateUser(UserVO userVO);
+
+	/* 사용자 정보 EMP_INFO 테이블 업데이트 */
+	public int updateEmpInfo(UserVO userVO);
+
+	public int delete(UserVO userVO);
+
+	/* userId 자동생성 값 조건 조회 */
+	public String maxUserId(String search);
+
+	/* email 중복 체크 */
+	public int checkEmail(String email);
+
+	/* 계정 활성화 */
+	public int accountAct(String userId);
+
+	/* 얼굴인식 활성화 */
+	public int faceAct(String userId);
+
+	/* 접속 로그 기록 */
+	public int userLog(UserLogVO userLogVO);
+
+	/* 접속 성공시 실패횟수 초기화 */
+	public int logSuccessZero(String userId);
+
+	/* 접속 실패시 실패횟수 증가 */
+	public int logFailCntUp(String userId);
+
+	/* 실패 카운트 조회 */
+	public int checkCntUp(String userId);
+
+	/* 사용자 계정 존재 여부 확인 */
+	public int checkId(String userId);
+
+	/* 사용자 계정 존재 여부 확인 */
+	public String checkIdEn(String userId);
+
+	/* 계정에 등록된 이메일 확인 */
+	public String checkEmlId(String userId);
+
+}

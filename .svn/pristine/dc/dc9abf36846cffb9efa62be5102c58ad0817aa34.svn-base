@@ -1,0 +1,24 @@
+package kr.or.ddit.msg.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.msg.vo.MsgVO;
+
+public interface MsgMapper {
+
+	//쪽지 발송시 db에 추가
+	public int insertSender(MsgVO msg);
+	public int insertReceiver(MsgVO msg);
+	
+	//보낸 쪽지/받은 쪽지
+	public List<MsgVO> listSender(MsgVO msg);
+	public List<MsgVO> listReceiver(MsgVO msg);
+	
+	//쪽지 상세보기
+	public MsgVO detailSender(MsgVO msg);
+	public MsgVO detailReceiver(MsgVO msg);
+	
+	//휴지통, 삭제, 복원, 중요(받는 입장에서만)
+	public int updateReceiver(MsgVO msg);
+	public int updateSender(MsgVO msg);
+}

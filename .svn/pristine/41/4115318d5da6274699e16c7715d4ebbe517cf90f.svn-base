@@ -1,0 +1,10 @@
+package kr.or.ddit.community.board.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.community.board.vo.BoardVO;
+
+public interface BoardMapper {
+
+	public List<BoardVO> list();
+}

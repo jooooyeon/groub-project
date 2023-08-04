@@ -1,0 +1,44 @@
+package kr.or.ddit.reservation.controller;
+
+import java.security.Principal;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import kr.or.ddit.reservation.service.VhclRsvtService;
+import kr.or.ddit.reservation.vo.VhclRsvtVO;
+
+@Controller
+@RequestMapping("/reservation")
+public class MyRsvtController {
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	@Inject
+	private VhclRsvtService vhclRsvtService;
+
+	@GetMapping("/mylist")
+	public ModelAndView mylist(ModelAndView mav, Principal principal) throws Exception {
+
+		String userId = principal.getName();
+
+		List<VhclRsvtVO> vhclRsvtFute = vhclRsvtService.getMylistFute(userId);
+		List<VhclRsvtVO> vhclRsvEnd = vhclRsvtService.getMylistEnd(userId);
+		List<VhclRsvtVO> vhclRsvIng = vhclRsvtService.getMylistIng(userId);
+
+		mav.addObject("data1",vhclRsvIng);
+		mav.addObject("data2",vhclRsvtFute);
+		mav.addObject("data3",vhclRsvEnd);
+		mav.setViewName("reservation/mylist");
+
+		return mav;
+	}
+
+}

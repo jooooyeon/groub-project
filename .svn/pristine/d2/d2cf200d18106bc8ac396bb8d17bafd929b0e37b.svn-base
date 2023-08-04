@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.msg.mapper.MsgMapper">
+
+	<!-- 사용자 기업 찾기 -->
+	<select id="selectCoId" resultType="kr.or.ddit.msg.vo.MsgVO">
+		SELECT
+		    co_id
+		FROM
+		    users
+		WHERE
+		    user_id = #{sender}
+	</select>
+
+	<!-- 기업 내 모든 사용자 -->
+	<select id="coUserList" parameterType="kr.or.ddit.msg.vo.MsgVO" resultType="kr.or.ddit.user.vo.UserVO">
+		SELECT
+		    user_id
+		    , co_id
+		FROM
+		    users
+		WHERE
+		    co_id = #{coId}
+		
+	</select>
+	
+	<!-- 전체 알람 목록 모두 읽음 표시하기 -->
+	<update id="readAllUpdate" parameterType="kr.or.ddit.msg.vo.MsgVO">
+	    UPDATE 
+	    	memo_rcptn
+	    SET
+	    	stat_cd = 'MM007'
+	    WHERE 
+	    	1=1
+	    AND
+	    	user_id = #{userId}
+	    AND
+	    	stat_cd = #{statCd}
+	</update>
+	
+	<!-- 보낸 쪽지 -->
+	<select id="listSender" resultType="kr.or.ddit.msg.vo.MsgVO">
+		SELECT
+              A.memo_no
+            , A.user_id
+            , A.memo_ttl
+            , A.memo_cn
+            , A.dsptch_dt
+            , A.stat_cd
+            , A.stat_chg_dt
+            , C.user_nm
+            , C.user_img
+			, G.dept_nm
+            , F.cst_cd_nm
+            , H.mng_cd_nm1
+        FROM
+            memo_dsptch A
+        INNER JOIN
+            memo_rcptn B on B.memo_no = A.memo_no
+        INNER JOIN
+            users C on C.user_id = B.user_id
+        INNER JOIN
+            emp_info D on D.user_id = C.user_id
+        INNER JOIN
+            custome_code F on F.cst_cd = D.jbgd_cd
+		INNER JOIN
+			dept G on G.dept_no = D.dept_no
+		INNER JOIN
+			manage_code H on H.mng_cd = A.stat_cd
+		WHERE
+			1=1
+		<if test="statCd!=null and statCd!=''">
+		AND
+			A.stat_cd = #{statCd}
+		</if>
+		<if test="userId!=null and userId!=''">
+		AND
+			A.user_id = #{userId}
+		</if>
+		ORDER BY
+			A.memo_no DESC
+	</select>
+
+	<!-- 보낸 쪽지 추가할 때 -->
+	<insert id="insertSender" parameterType="kr.or.ddit.msg.vo.MsgVO">
+		<selectKey resultType="int" order="BEFORE"
+			keyProperty="memoNo">
+			SELECT NVL(MAX(memo_no),0)+1 FROM memo_dsptch
+		</selectKey>
+			INSERT INTO memo_dsptch
+			(
+			  memo_no
+			, user_id
+			, memo_ttl
+			, memo_cn
+			, dsptch_dt
+			, stat_cd
+			, stat_chg_dt
+	
+			) VALUES (
+			  #{memoNo}
+			, #{sender}
+			, #{memoTtl}
+			, #{memoCn}
+			, sysdate
+			, #{statCd}
+			, sysdate
+			)
+	</insert>
+
+	<!-- 보낸 쪽지 상세내용 -->
+	<select id="detailSender" parameterType="kr.or.ddit.msg.vo.MsgVO">
+		SELECT
+		  A.memo_no
+		, A.user_id
+		, A.memo_ttl
+		, A.memo_cn
+		, A.dsptch_dt
+		, A.stat_cd
+		, A.stat_chg_dt
+		, B.user_nm
+		, B.user_img
+		FROM
+			memo_dsptch A
+		INNER JOIN
+			users B ON A.user_id = B.user_id
+		WHERE
+			memo_no = #{memoNo}
+	</select>
+
+	<!-- 받은 쪽지 -->
+	<select id="listReceiver" resultType="kr.or.ddit.msg.vo.MsgVO">
+		SELECT
+    		  A.memo_no
+  			, A.user_id
+  			, A.stat_cd
+  			, A.stat_chg_dt
+  			, B.user_nm
+  			, B.user_img
+  			, C.memo_ttl
+  			, C.memo_cn
+  			, C.dsptch_dt
+  			, F.cst_cd_nm
+  			, G.dept_nm
+  			, H.mng_cd_nm1
+		FROM
+		    memo_rcptn A
+		INNER JOIN
+			users B on A.user_id = B.user_id
+		INNER JOIN
+			memo_dsptch C on A.memo_no = C.memo_no
+		INNER JOIN
+			emp_info D on A.user_id = D.user_id
+		INNER JOIN
+			custome_code F on D.jbgd_cd = F.cst_cd
+		INNER JOIN
+			dept G on G.dept_no = D.dept_no
+		INNER JOIN
+			manage_code H on H.mng_cd = A.stat_cd
+		WHERE
+			1=1
+		<if test="statCd!=null and statCd!=''">
+		AND
+			A.stat_cd = #{statCd}
+		</if>
+		<if test="userId!=null and userId!=''">
+		AND
+			A.user_id = #{userId}
+		</if>
+		
+		ORDER BY
+			A.memo_no DESC
+	</select>
+
+	<!-- 받은 쪽지 추가할 때 -->
+	<insert id="insertReceiver" parameterType="kr.or.ddit.msg.vo.MsgVO">
+		<!-- 최대 숫자 가져오기 -->
+		<selectKey resultType="int" order="BEFORE"
+			keyProperty="memoNo">
+			SELECT 
+				NVL(MAX(memo_no),0)+1 
+			FROM
+				memo_rcptn
+		</selectKey>
+
+		INSERT INTO memo_rcptn (
+		  memo_no
+		, user_id
+		, stat_cd
+		, stat_chg_dt
+		) VALUES
+		(
+		  #{memoNo}
+		, #{userId}
+		, #{statCd}
+		, sysdate
+		)
+	</insert>
+	<!-- 받은 쪽지 상세내용 -->
+	<select id="detailReceiver" parameterType="kr.or.ddit.msg.vo.MsgVO" resultType="kr.or.ddit.msg.vo.MsgVO">
+		SELECT
+    		  A.memo_no
+  			, C.user_id
+  			, B.user_img
+  			, A.stat_cd
+  			, A.stat_chg_dt
+  			, B.user_nm
+  			, C.memo_ttl
+  			, C.memo_cn
+  			, C.dsptch_dt
+  			, F.cst_cd_nm
+  			, G.dept_nm
+  			, H.mng_cd_nm1
+		FROM
+		    memo_rcptn A
+		INNER JOIN
+			memo_dsptch C on A.memo_no = C.memo_no
+		INNER JOIN
+			users B on C.user_id = B.user_id
+		INNER JOIN
+			emp_info D on C.user_id = D.user_id
+		INNER JOIN
+			custome_code F on D.jbgd_cd = F.cst_cd
+		INNER JOIN
+			dept G on G.dept_no = D.dept_no
+		INNER JOIN
+			manage_code H on H.mng_cd = A.stat_cd
+		WHERE
+			A.memo_no = #{memoNo}
+	</select>
+	
+	<!-- 받은 쪽지 휴지통,삭제,복원,중요 -->
+	<update id="updateReceiver" parameterType="kr.or.ddit.msg.vo.MsgVO">
+		UPDATE
+		    MEMO_RCPTN
+		SET
+		      STAT_CD = #{statCd}
+		    , STAT_CHG_DT = SYSDATE
+		WHERE
+		    MEMO_NO = #{memoNo}
+	</update>
+	
+	<!-- 보낸 쪽지 휴지통,삭제,복원 -->
+	<update id="updateSender" parameterType="kr.or.ddit.msg.vo.MsgVO">
+		UPDATE
+		    MEMO_DSPTCH
+		SET
+		      STAT_CD = #{statCd}
+		    , STAT_CHG_DT = SYSDATE
+		WHERE
+		    MEMO_NO = #{memoNo}
+	</update>
+	
+</mapper>

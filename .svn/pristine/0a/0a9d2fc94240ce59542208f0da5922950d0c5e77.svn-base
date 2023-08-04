@@ -1,0 +1,23 @@
+package kr.or.ddit.OrganizationChart;
+
+
+import java.util.List;
+import javax.inject.Inject;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.mapper.OrganizationChartMapper;
+
+
+@Service
+public class OrganizationChartServiceImpl implements OrganizationChartService {
+	
+	@Inject
+	OrganizationChartMapper orgachMapper;
+
+	//목록 보기
+	@Override
+	public List<OrganizationChartVO> list(){
+		return this.orgachMapper.list();		
+	}
+	
+}

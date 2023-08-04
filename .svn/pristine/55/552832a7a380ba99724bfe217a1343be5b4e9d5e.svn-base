@@ -1,0 +1,38 @@
+package kr.or.ddit.user.service;
+
+import java.util.List;
+
+import kr.or.ddit.user.vo.UserVO;
+
+public interface UserService {
+	/**
+	 * 유저 목록
+	 */
+	public List<UserVO> list();
+
+	/**
+	 * 유저 검색
+	 */
+	public UserVO detail(UserVO userVO);
+
+	/**
+	 * 유저 권한 검색
+	 */
+	public UserVO detailUserAuth(UserVO userVO);
+
+	/**
+	 * 유저 등록
+	 */
+	public int register(UserVO userVO);
+
+	/**
+	 * 유저 수정
+	 */
+	public int update(UserVO userVO);
+
+	/**
+	 * 유저 삭제
+	 */
+	public int delete(UserVO userVO);
+
+}

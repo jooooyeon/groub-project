@@ -1,0 +1,96 @@
+package kr.or.ddit.alarm.handler;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Component;
+import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+
+import kr.or.ddit.security.CustomUser;
+import kr.or.ddit.user.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+public class WebsocketHandler implements Serializable {
+
+	@Autowired
+	private SimpMessagingTemplate simpleMessagingTemplate;
+
+	/**
+	 * user에 대한 정보를 담은 map
+	 */
+	private Map<String, List<String>> user = new ConcurrentHashMap<>();
+	/**
+	 * user의 webSocketSession 정보를 담은 map
+	 */
+	private Map<String, String> userSession = new ConcurrentHashMap<String, String>();
+
+	public Map<String, String> getUserSession() {
+		return userSession;
+	}
+
+	public void setUserSession(Map<String, String> userSession) {
+		this.userSession = userSession;
+	}
+
+	public Map<String, List<String>> getUser() {
+		return user;
+	}
+
+	public void setUser(Map<String, List<String>> user) {
+		this.user = user;
+	}
+
+	/**
+	 * Session이 연결될 때 실행함
+	 * @param SessionConnectEvent event
+	 * @throws InterruptedException
+	 */
+	@EventListener
+	public void handleWebSocketConnectListener(SessionConnectEvent event) throws InterruptedException {
+		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) event.getUser();
+		CustomUser customUser = (CustomUser) authenticationToken.getPrincipal();
+		UserVO user = (UserVO) customUser.getUserVO();
+		String userId = user.getUserId();
+		String userNm = user.getUserNm();
+		String userEml = user.getUserEml();
+		
+		List<String> userData = new ArrayList<String>();
+		
+		userData.add(userNm);
+		userData.add(userEml);
+		userData.add(userId);
+		
+		this.user.put(userId,userData);
+		this.user.put(userEml,userData);
+		
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.wrap(event.getMessage());
+		String sessionId = headers.getSessionId();
+		
+		this.userSession.put(userId,sessionId);
+	}
+
+	@EventListener
+	public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) event.getUser();
+		CustomUser customUser = (CustomUser) authenticationToken.getPrincipal();
+		UserVO user = (UserVO) customUser.getUserVO();
+		String userId = user.getUserId();
+		
+		this.user.remove(userId);
+		this.userSession.remove(userId);
+
+		simpleMessagingTemplate.convertAndSend("/sub/userData", this.user);
+		simpleMessagingTemplate.convertAndSend("/sub/userList", this.userSession);
+	}
+}

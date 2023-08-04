@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.ddit.draft.mapper.DraftMapper">
+
+	<resultMap type="kr.or.ddit.draft.vo.DraftUserVO" id="draftUserMap">
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="userNm" column="USER_NM" />
+		<result property="userEml" column="USER_EML" />
+		<result property="userImg" column="USER_IMG" />
+		<result property="signImg" column="SIGN_IMG" />
+		<result property="deptNo" column="DEPT_NO" />
+		<result property="deptNm" column="DEPT_NM" />
+		<result property="jbgdCd" column="JBGD_CD" />
+		<result property="jbgdNm" column="JBGD_NM" />
+		<result property="jbtlCd" column="JBTL_CD" />
+		<result property="jbtlNm" column="JBTL_NM" />
+		<collection property="draftVacVOList" resultMap="draftVacMap"></collection>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftVacVO" id="draftVacMap">
+		<result property="vacGrntNo" column="VAC_GRNT_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="vacTp" column="VAC_TP" />
+		<result property="vacNm" column="VAC_NM" />
+		<result property="vacGrntYmd" column="VAC_GRNT_YMD" />
+		<result property="vacGrntDays" column="VAC_GRNT_DAYS" />
+		<result property="vldYmd" column="VLD_YMD" />
+		<result property="vacUseDays" column="VAC_USE_DAYS" />
+		<result property="remainVacDays" column="REMAIN_VAC_DAYS" />
+		<result property="vacRsn" column="VAC_RSN" />
+		<result property="vacUseNo" column="VAC_USE_NO" />
+		<result property="cnyDay" column="CNY_DAY" />
+		<result property="bgngDt" column="BGNG_DT" />
+		<result property="endDt" column="END_DT" />
+		<result property="vacUseDays" column="VAC_USE_DAYS" />
+	</resultMap>
+	
+
+
+	<select id="selectDraftUsesrInfo" resultMap="draftUserMap">
+		SELECT
+			u.USER_ID
+			, u.CO_ID
+			, u.USER_NM
+			, u.USER_EML
+			, u.USER_IMG
+			, u.SIGN_IMG
+			, ei.DEPT_NO
+			, FN_GET_DEPT_NO_NM(ei.DEPT_NO, u.CO_ID) AS DEPT_NM
+			, ei.JBGD_CD 
+			, FN_GET_CST_CD_NM2CO(ei.JBGD_CD, u.CO_ID) AS JBGD_NM
+			, ei.JBTL_CD
+			, FN_GET_CST_CD_NM2CO(ei.JBTL_CD, u.CO_ID) AS JBTL_NM
+			, vg.VAC_GRNT_NO
+			, vg.VAC_TP 
+			, FN_GET_MNG_CD_NM(vg.VAC_TP ) AS VAC_NM
+			, vg.VAC_GRNT_YMD
+			, vg.VAC_GRNT_DAYS 
+			, vg.VLD_YMD 
+			, vu.VAC_USE_DAYS
+			, vg.VAC_GRNT_DAYS - NVL(vu.VAC_USE_DAYS, 0) AS REMAIN_VAC_DAYS
+		FROM 
+			(SELECT * FROM USERS
+			WHERE USER_ID = #{userId} ) u
+		INNER JOIN EMP_INFO ei 
+		ON ei.USER_ID = u.USER_ID 
+		LEFT JOIN 
+			(SELECT * FROM VAC_GRNT
+			WHERE 
+				VLD_YMD >= SYSDATE
+				AND VAC_GRNT_YMD <![CDATA[<=]]> SYSDATE
+				AND VLD_YMD >= SYSDATE ) vg 
+		ON vg.USER_ID = u.USER_ID
+		LEFT JOIN 
+			(SELECT
+					NVL(sum(vut.CNY_DAY), 0) AS VAC_USE_DAYS
+					, vut.USER_ID
+					, vut.VAC_GRNT_NO
+				FROM 
+					VAC_USE_TEST vut
+				GROUP BY 
+					USER_ID
+					, vut.VAC_GRNT_NO ) vu
+		ON vu.USER_ID = u.USER_ID AND vu.VAC_GRNT_NO = vg.VAC_GRNT_NO
+	</select>
+	
+	
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftVO" id="draftVOMap">
+		<result property="drNo" column="DR_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="drSttsCd" column="DR_STTS_CD" />
+		<result property="drStrg" column="DR_STRG" jdbcType="CLOB" javaType="java.lang.String" />
+		<result property="drDt" column="DR_DT" />
+		<result property="delYn" column="DEL_YN" />
+		<result property="delDt" column="DEL_DT" />
+		<result property="drftTitle" column="DRFT_TITLE" />
+		<collection property="draftVacVO" resultMap="draftVacMap"></collection>
+		<collection property="draftOpnVOList" resultMap="draftOpnVOMap"></collection>
+		<collection property="draftAttachVOList" resultMap="draftAttachVOMap"></collection>
+		<collection property="draftAtrzVOList" resultMap="draftAtrzVOMap"></collection>
+	</resultMap>
+	
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftOpnVO" id="draftOpnVOMap">
+		<result property="drOpnNo" column="DR_OPN_NO" />
+		<result property="drNo" column="DR_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="opnnCn" column="OPNN_CN" />
+		<result property="drOpnnDt" column="DR_OPNN_DT" />
+		<result property="delYn" column="DEL_YN" />
+		<result property="delDt" column="DEL_DT" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftAtrzVO" id="draftAtrzVOMap">
+		<result property="drNo" column="DR_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="atrzSn" column="ATRZ_SN" />
+		<result property="atrzCd" column="ATRZ_CD" />
+		<result property="atrzSttsCd" column="ATRZ_STTS_CD" />
+		<result property="atrzDt" column="ATRZ_DT" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.draft.vo.DraftAttachVO" id="draftAttachVOMap">
+		<result property="drftFlNo" column="DRFT_FL_NO" />
+		<result property="drNo" column="DR_NO" />
+		<result property="fileNm" column="FILE_NM" />
+		<result property="fileUuid" column="FILE_UUID" />
+		<result property="filePath" column="FILE_PATH" />
+		<result property="fileExtn" column="FILE_EXTN" />
+		<result property="fileSize" column="FILE_SIZE" />
+	</resultMap>
+	
+	
+	
+	<insert id="draftInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+	
+		<selectKey resultType="int" order="BEFORE" keyProperty="drNo">
+			SELECT NVL(MAX(DR_NO), 0) + 1 FROM DRFT
+		</selectKey>
+		
+		INSERT INTO DRFT (
+			DR_NO
+			, USER_ID
+			, DR_STTS_CD
+			, DR_STRG
+			, DR_DT
+			, DRFT_TITLE)
+		VALUES(
+			#{drNo}
+			, #{userId}
+			, #{drSttsCd}
+			, #{drStrg}
+			, SYSDATE
+			, #{drftTitle})
+			
+	</insert>
+	
+	<update id="draftOpnInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="drOpnNo">
+			SELECT NVL(MAX(DR_OPN_NO), 0) + 1 FROM DRFT_OPN
+		</selectKey>
+		
+		<foreach collection="draftOpnVOList" item="item"
+			open="INSERT ALL " close="SELECT * FROM DUAL" separator=" " index="idx">
+			
+			INTO DRFT_OPN (
+				DR_OPN_NO
+				, DR_NO
+				, USER_ID
+				, OPNN_CN
+				, DR_OPNN_DT )
+			VALUES(
+				#{drOpnNo} + #{idx}
+				, #{drNo}
+				, #{item.userId}
+				, #{item.opnnCn}
+				, #{item.drOpnnDt} )
+				
+		</foreach>
+	</update>
+	
+	<insert id="draftVacInsert" parameterType="kr.or.ddit.draft.vo.DraftVO">
+	
+		<selectKey resultType="int" order="BEFORE" keyProperty="draftVacVO.vacUseNo">
+			SELECT NVL(MAX(VAC_USE_TEST_NO), 0) + 1 FROM VAC_USE_TEST
+		</selectKey>
+		
+		INSERT INTO VAC_USE_TEST (
+			VAC_USE_TEST_NO
+				, USER_ID
+				, DR_NO
+				, CNY_DAY
+				, VAC_TP
+				, BGNG_DT
+				, END_DT
+				, VAC_GRNT_NO
+				, VAC_RSN )
+			VALUES(
+			#{draftVacVO.vacUseNo}
+			, #{userId}
+			, #{drNo}
+			, #{draftVacVO.cnyDay}
+			, #{draftVacVO.vacTp}
+			, #{draftVacVO.bgngDt}
+			, #{draftVacVO.endDt}
+			, #{draftVacVO.vacGrntNo}
+			, #{draftVacVO.vacRsn} )
+	</insert>
+
+</mapper>

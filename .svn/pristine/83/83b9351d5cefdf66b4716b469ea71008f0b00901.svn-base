@@ -1,0 +1,13 @@
+package kr.or.ddit.OrganizationChart;
+
+import lombok.Data;
+
+@Data
+public class OrganizationChartVO {
+	
+	private String eId;
+	private String eName;
+	private String dept;
+	
+
+}

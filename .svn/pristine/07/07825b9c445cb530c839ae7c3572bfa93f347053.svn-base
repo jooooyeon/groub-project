@@ -1,0 +1,106 @@
+package kr.or.ddit.community.anonyBoard.service.impl;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.common.BoardAttachVO;
+import kr.or.ddit.community.anonyBoard.mapper.AnonyBoardMapper;
+import kr.or.ddit.community.anonyBoard.service.AnonyBoardService;
+import kr.or.ddit.community.anonyBoard.vo.AnonyBoardVO;
+import kr.or.ddit.util.CommonFile;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class AnonyBoardServiceImpl implements AnonyBoardService {
+	
+	@Inject
+	AnonyBoardMapper anonBoardMapper;
+	
+	@Override
+	
+	public List<AnonyBoardVO> list(){
+		return this.anonBoardMapper.list();
+	}
+	
+	@Override
+	public int register(AnonyBoardVO anonyBoardVO){
+		int result = this.anonBoardMapper.register(anonyBoardVO);
+		
+		MultipartFile[] multipartFiles = anonyBoardVO.getAttachFiles(); 
+		
+		//연월일 폴더 생성
+		File savePath = new File(CommonFile.uploadFolder,CommonFile.getFolder());
+		if(savePath.exists()==false) {
+			savePath.mkdirs();
+		}
+		
+		List<BoardAttachVO> boardAttachVO = new ArrayList<BoardAttachVO>();
+		//AnonyBoardVO(brdNo=0, memNo=null, brdHeader=추천, brdTitle=333, brdContent=<p>555</p>
+//		, brdPostDate=null, brdViewCount=0, brdCategory=null, isTemp=null
+//		, attachFiles=[org.springframework.web.multipart...]
+//		, boardAttachVO=null)
+		int seq = 1;
+		for(MultipartFile file : multipartFiles) {
+			BoardAttachVO vo = new BoardAttachVO();
+			
+			vo.setBrdNo(anonyBoardVO.getBrdNo());
+			vo.setBrdFileNo(seq++);
+			vo.setBrdFileName(file.getOriginalFilename());
+			UUID uuid = UUID.randomUUID();
+			//asfldksaj_개똥이.png
+			vo.setBrdFileUuid(uuid.toString() + "_" + file.getOriginalFilename());
+			// /2023/06/22/asfldksaj_개똥이.png
+			vo.setBrdFilePath("/" + CommonFile.getFolder().replace("\\", "/") + "/" + uuid.toString() + "_" + file.getOriginalFilename());
+			vo.setBrdFileType(file.getContentType());
+			
+			boardAttachVO.add(vo);
+			
+			String path = CommonFile.uploadFolder + "/" + CommonFile.getFolder().replace("\\", "/") + "/" + uuid.toString() + "_" + file.getOriginalFilename();
+			//설계
+			File f = new File(path);
+			
+			try {
+				//파일 복사 실행
+				file.transferTo(f);
+			} catch (IllegalStateException | IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		log.info("boardAttachVO.get(0).getBrdFileName().length()>0 : " + boardAttachVO.get(0).getBrdFileName().length());
+		
+		if(boardAttachVO.get(0).getBrdFileName().length()>0) {
+			anonyBoardVO.setBoardAttachVO(boardAttachVO);
+			
+			log.info("anonyBoardVO : " + anonyBoardVO);
+			
+			result += this.anonBoardMapper.insertAttachFiles(boardAttachVO);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public AnonyBoardVO detail(AnonyBoardVO anonyBoardVO) {
+		return this.anonBoardMapper.detail(anonyBoardVO);
+	}
+
+	@Override
+	public int update(AnonyBoardVO anonyBoardVO) {
+		return this.anonBoardMapper.update(anonyBoardVO);
+	}
+
+	@Override
+	public int delete(AnonyBoardVO anonyBoardVO) {
+		return this.anonBoardMapper.delete(anonyBoardVO);
+	}
+}

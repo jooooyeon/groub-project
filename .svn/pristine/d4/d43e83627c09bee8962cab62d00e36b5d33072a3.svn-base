@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+namespace : xml 파일이 여러개일 수 있음
+이를 구별하기 위한 식별 용도로 사용됨
+ -->
+
+<mapper namespace="attendance">
+
+	  <select id="list" parameterType="String" resultType="kr.or.ddit.attendance.vo.AttendanceVO">
+	    SELECT
+		    DCLZ_NO, USER_ID, ATTEND_DT, LVFFC_DT, DCLZ_STTS_CD
+		FROM
+   			DCLZ
+	  </select>
+	  
+	  <insert id="insert" parameterType="kr.or.ddit.attendance.vo.AttendanceVO">
+	  	INSERT INTO DCLZ (
+		    DCLZ_NO, USER_ID, ATTEND_DT, LVFFC_DT, DCLZ_STTS_CD
+		) VALUES (
+		  	SEQ_DCLZ.NEXTVAL,#{userId},#{attendDt},#{lvffcDt},#{dclzSttsCd}
+		)
+	  </insert>
+	  
+</mapper> 
+
+
+                
+
+
+
+
+

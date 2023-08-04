@@ -1,0 +1,51 @@
+package kr.or.ddit.notice.service;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.notice.mapper.NoticeMapper;
+import kr.or.ddit.notice.vo.NoticeVO;
+import kr.or.ddit.notice.vo.PstHdVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class NoticeServiceImpl implements NoticeService {
+
+	@Inject
+	NoticeMapper noticeMapper;
+
+	// 목록
+	@Override
+	public List<NoticeVO> list() {
+		return this.noticeMapper.list();
+	}
+
+	// 상세보기
+	@Override
+	public NoticeVO detail(NoticeVO noticeVO) {
+		return this.noticeMapper.detail(noticeVO);
+	}
+
+	// 조회수 가져오기
+	@Override
+	public int inqCnt(int pstNo) {
+		return this.noticeMapper.inqCnt(pstNo);
+	}
+	
+	//머릿말가져오기
+	@Override
+	public List<PstHdVO> getHd(PstHdVO hd) {
+		return this.noticeMapper.getHd(hd);
+	}
+	
+	// 등록
+	@Override
+	public int register(NoticeVO noticeVO) {
+		return this.noticeMapper.register(noticeVO);
+	}
+
+}

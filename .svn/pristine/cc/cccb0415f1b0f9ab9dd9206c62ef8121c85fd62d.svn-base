@@ -1,0 +1,63 @@
+package kr.or.ddit.security;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+
+import kr.or.ddit.user.service.UserService;
+import kr.or.ddit.user.vo.UserLogVO;
+import kr.or.ddit.user.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
+
+public class CustomLoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	@Inject
+	UserService userservice;
+
+	@Override
+	public void onAuthenticationSuccess(HttpServletRequest request,
+			HttpServletResponse response, Authentication authentication)
+			throws ServletException, IOException {
+		log.warn("onAuthenticationSuccess");
+
+		String ipAddress = request.getRemoteAddr();
+
+		CustomUser customUser = (CustomUser) authentication.getPrincipal();
+		UserVO userVO = customUser.getUserVO();
+
+		String userId = userVO.getUserId();
+		String message = "SUCCESS";
+
+		log.info("ipAddress : " + ipAddress);
+
+		int result;
+
+		UserLogVO userLogVO = new UserLogVO();
+		userLogVO.setUserId(userId);
+		userLogVO.setIpAddr(ipAddress);
+		userLogVO.setLogStts(message);
+		userLogVO.setNtnCd("KR");
+		userLogVO.setFailCnt(0);
+
+		userservice.userLog(userLogVO);
+		userservice.logSuccessZero(userId);
+
+		//사용자 아이디를 리턴
+		log.info(customUser.getUsername());
+		//부모(super)에게 반납
+		super.onAuthenticationSuccess(request, response, authentication);
+	}
+}

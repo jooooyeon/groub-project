@@ -1,0 +1,109 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+
+<h4>적합도 설정</h4>
+<div class="card mb-3 w-50">
+	<div class="card-body d-flex justify-content-between bg-light">
+		<div>자격증</div>
+		<div>
+			<button href="#" id="add-certificate" data-toggle="modal"
+				data-target="#exampleModal"
+				class="btn btn-outline-primary btn-sm border border-light">추가하기</button>
+		</div>
+	</div>
+</div>
+<div id="certificate" class="w-50 border border-gray bg-white"
+	style="height: 250px;"></div>
+
+<br />
+
+<div class="card mb-3 w-50">
+	<div class="card-body d-flex justify-content-between bg-light">
+		<div>자격 기술</div>
+		<div>
+			<button href="#" id="add-tech" data-toggle="modal"
+				data-target="#exampleModal"
+				class="btn btn-outline-primary btn-sm border border-light">추가하기</button>
+		</div>
+	</div>
+</div>
+<div id="tech" class="w-50 border border-gray bg-white"
+	style="height: 250px;"></div>
+
+
+<br />
+
+
+<div class="w-50 card-body ">
+	<div class="d-flex justify-content-between bg-light"
+		style="height: 95px;">
+		<div class="border-gray">
+			<div class="mt-3 bg-light" style="margin-left: 20px;">최종 학력</div>
+			<div class="mt-2" style="margin-left: 10px;">
+				<select class="form-select">
+					<option>____</option>
+					<option>대학교 4년제(졸업)</option>
+					<option>대학교 2년제(졸업)</option>
+					<option>고등학교(졸업)</option>
+					<option>대학원 석사</option>
+					<option>대학원 박사</option>
+				</select>
+			</div>
+		</div>
+		<div class="border-gray mx-auto">
+			<div class="mt-3" style="margin-left: 10px;">경력</div>
+			<div class="mt-2">
+				<select class="form-select">
+					<option>___</option>
+					<option>신입(무관)</option>
+					<option>1~2년</option>
+					<option>2~3년</option>
+					<option>3~4년</option>
+					<option>5~10년</option>
+					<option>10년 이상</option>
+				</select>
+			</div>
+		</div>
+		<div class="border-gray mx-auto">
+			<div class="mt-3" style="margin-left: 10px;">부서</div>
+			<div class="mt-2">
+				<select class="form-select">
+					<option>__</option>
+					<option>영업</option>
+					<option>개발</option>
+					<option>인사</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+	aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+				<button type="button" id="close" class="btn btn-outline btn-sm" data-dismiss="modal" aria-label="Close">x</button>
+			</div>
+			<div class="modal-body">...</div>
+			<div class="modal-footer"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$('#add-certificate').on('click', function() {
+		$('#exampleModalLabel').html("자격증");
+		$("#exampleModal").modal('show');
+	})
+	
+	$('#add-tech').on('click', function() {
+		$('#exampleModalLabel').html("자격기술");
+		$("#exampleModal").modal('show');
+	})
+	
+	$('#close').on('click',function(){
+		$('#exampleModal').modal('hide');
+	});
+</script>

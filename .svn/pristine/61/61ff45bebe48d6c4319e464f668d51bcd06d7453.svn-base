@@ -1,0 +1,22 @@
+package kr.or.ddit.community.anonyBoard.service;
+
+
+import java.util.List;
+
+import kr.or.ddit.community.anonyBoard.vo.AnonyBoardVO;
+
+public interface AnonyBoardService {
+	
+	public List<AnonyBoardVO> list();
+
+	public int register(AnonyBoardVO anonyBoardVO);
+
+	public AnonyBoardVO detail(AnonyBoardVO anonyBoardVO);
+
+	public int update(AnonyBoardVO anonyBoardVO);
+
+	public int delete(AnonyBoardVO anonyBoardVO);
+	
+	
+	
+}

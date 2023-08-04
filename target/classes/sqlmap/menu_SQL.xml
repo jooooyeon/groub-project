@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+namespace : xml 파일이 여러개일 수 있음
+이를 구별하기 위한 식별 용도로 사용됨
+ -->
+
+<mapper namespace="kr.or.ddit.ai.recommend.menu.mapper.MenuMapper">
+
+	  <select id="list" parameterType="String" resultType="kr.or.ddit.ai.recommend.menu.vo.MenuVO">
+			SELECT A.USER_ID
+                 , A.BRTH_YMD
+                 , B.E_DATE
+                 , B.M_ID
+             FROM USERS A
+             INNER JOIN DIET B
+                ON A.USER_ID = B.USER_ID
+           	 ORDER BY B.E_DATE
+	  </select>
+	  
+</mapper> 
+
+
+                
+
+
+
+
+

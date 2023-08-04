@@ -1,0 +1,17 @@
+package kr.or.ddit.alarm.vo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class AlarmVO {
+	//보내는 사람
+	private String sender;
+	//받는 사람
+	private String userId;
+}

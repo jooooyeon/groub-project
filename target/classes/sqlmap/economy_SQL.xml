@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.ai.recommend.economy.mapper.EconomyMapper">
+
+	<!-- 전 종목의 가격 목록 -->
+	<select id="list" resultType="kr.or.ddit.ai.recommend.economy.vo.EconomyVO">
+			SELECT
+			    A.ECNM_DT
+			  , A.SYMBOL
+			  , A.OPEN
+			  , A.CLOSE
+			  , A.HIGH
+			  , A.LOW
+			  , A.PRED
+			  , B.DETAIL
+			  , B.CTGR
+			FROM
+			    ECNM_PRICE A
+			INNER JOIN ECNM_SYMBOL B ON A.SYMBOL = B.SYMBOL
+	</select>
+
+	<!-- 특정일 이후의 가격 목록 -->
+	<select id="listAtfDt" parameterType="String" resultType="kr.or.ddit.ai.recommend.economy.vo.EconomyVO">
+			SELECT
+			    A.ECNM_DT
+			  , A.SYMBOL
+			  , A.OPEN
+			  , A.CLOSE
+			  , A.HIGH
+			  , A.LOW
+			  , A.PRED
+			  , B.DETAIL
+			  , B.CTGR
+			FROM
+			    ECNM_PRICE A
+			INNER JOIN ECNM_SYMBOL B ON A.SYMBOL = B.SYMBOL
+			WHERE TO_DATE(A.ECNM_DT, 'YYYY-MM-DD') >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+	</select>
+
+	<!-- 특정일 이후의 종목 가격 -->
+	<select id="symbolPrices" parameterType="map" resultType="kr.or.ddit.ai.recommend.economy.vo.EconomyVO">
+			SELECT
+			    A.ECNM_DT
+			  , A.SYMBOL
+			  , A.CLOSE
+			  , A.PRED
+			  , B.DETAIL
+			  , B.CTGR
+			FROM
+			    ECNM_PRICE A
+			INNER JOIN ECNM_SYMBOL B ON A.SYMBOL = B.SYMBOL
+			WHERE TO_DATE(A.ECNM_DT, 'YYYY-MM-DD') >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			AND A.SYMBOL = #{symbol}
+			ORDER BY TO_DATE(A.ECNM_DT, 'YYYY-MM-DD') DESC
+	</select>
+
+</mapper>

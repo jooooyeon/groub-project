@@ -1,0 +1,38 @@
+package kr.or.ddit.schedule.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.schedule.vo.ScheduleVO;
+
+/**
+ * @author PC-06
+ *
+ */
+public interface ScheduleMapper {
+
+	/**
+	 * 전체 일정 조회
+	 * @param userId
+	 */
+	public List<ScheduleVO> listAll(String schdlTp);
+
+	/**
+	 * 일정 등록
+	 * @param scheduleVO 등록될 일정 정보
+	 */
+	public int registSchdl(ScheduleVO scheduleVO);
+
+	/**
+	 * 일정 시간 변경
+	 * @param scheduleVO 변경될 일정 정보
+	 */
+	public int dragDropUpdate(ScheduleVO scheduleVO);
+
+	/**
+	 * 일정 삭제
+	 * @param schdlNo 삭제될 일정 번호
+	 */
+	public int deleteSchdl(String schdlNo);
+
+
+}

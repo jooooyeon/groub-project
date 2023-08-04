@@ -1,0 +1,33 @@
+package kr.or.ddit.reservation;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/reservation")
+public class RsvtController {
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	@GetMapping("/car")
+	public String car() {
+		log.info("reservation/car링크");
+		return "reservation/car";
+	}
+
+	@GetMapping("/office")
+	public String office() {
+		log.info("reservation/office링크");
+		return "reservation/office";
+	}
+
+	@GetMapping("/mylist")
+	public String mylist() {
+		log.info("reservation/mylist링크");
+		return "reservation/mylist";
+	}
+}

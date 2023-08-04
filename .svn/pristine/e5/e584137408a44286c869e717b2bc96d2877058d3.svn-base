@@ -1,0 +1,87 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>게시글수정</title>
+<script type="text/javascript">
+	
+</script>
+</head>
+<body>
+	update!
+	${data }
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<div class="min-vh-50">
+				<h5 class="mb-0">게시글 수정</h5>
+				<form action="/community/anonyboard/update" method="post"
+					enctype="multipart/form-data">
+					<!-- 말머리시작 -->
+					<div class="form-floating"
+						style="width: 15%; float: left; margin-right: 10px;">
+						<select class="form-select" name="brdHeader" id=brdHeader
+							aria-label="Floating label select example">
+							
+							<option value="recom"
+								<c:if test="${data.brdHeader=='recom'}">selected</c:if>>
+								추천
+							</option>
+							<option value="hobby"
+								<c:if test="${data.brdHeader=='hobby'}">selected</c:if>
+							>취미</option>
+							<option value="information"
+								<c:if test="${data.brdHeader=='information'}">selected</c:if>
+							>정보</option>
+							<option value="club"
+								<c:if test="${data.brdHeader=='club'}">selected</c:if>
+							>동호회모집</option>
+							<option value="etc"
+								<c:if test="${data.brdHeader=='etc'}">selected</c:if>
+							>기타</option>
+						</select> <label for="floatingSelect">말머리</label>
+					</div>
+					<!-- 말머리끝 -->
+					<!-- broNO전달 시작 -->
+					<input type="hidden" name="brdNo" id="brdNo" value="${data.brdNo}" />
+					<!-- broNO전달 끝 -->
+					
+					<!-- 제목  시작-->
+					<div class="form-floating mb-3" style="width: 83%; float: left">
+						<input class="form-control" name="brdTitle" id="floatingInput"
+							type="title" placeholder="제목을 입력해주세요" value="${data.brdTitle}" required /> 
+							<label for="floatingInput">제목</label>
+					</div>
+					<div style="clear: both;"></div>
+					<!-- 제목  끝-->
+
+					<!-- 에디터 -->
+					<div>
+						<textarea class="tinymce d-none" name="brdContent"
+							data-tinymce="data-tinymce" name="content" required
+							placeholder="내용을 입력해주세요">${data.brdContent} </textarea>
+					</div>
+					<!-- 첨부파일 시작 -->
+					<div class="mb-3">
+						<label class="form-label" for="formFileMultiple"></label> <input
+							class="form-control" id="pictures" type="file"
+							multiple="multiple" name="attachFiles" value ="${data.boardAttachVO}" />
+					</div>
+					<!-- 첨부파일 끝 -->
+			</div>
+			<div style="text-align: center;">	
+				<button class="btn btn-outline-primary me-1 mb-1" type="submit">저장</button>
+<!-- 				<a href="/community/anonyboard/list" -->
+<!-- 					class="btn btn-outline-secondary me-1 mb-1 btn-sm" type="button">임시저장</a> -->
+				<a href="/community/anonyboard/list"
+					class="btn btn-outline-danger me-1 mb-1 btn-sm" type="button">취소</a>
+			</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

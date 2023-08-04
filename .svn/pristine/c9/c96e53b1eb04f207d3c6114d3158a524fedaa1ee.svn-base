@@ -1,0 +1,19 @@
+package kr.or.ddit.ai.recommend.acquisition.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+
+//자격증 추천
+@Controller
+public class AcquisitionController {
+
+	
+	@RequestMapping("/acquisition")
+	public String recom() {
+		
+		return "ai/recommend/acquisition";
+	}
+	
+	
+}

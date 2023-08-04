@@ -1,0 +1,37 @@
+package kr.or.ddit.mail.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.mail.service.MailServiceImpl;
+import kr.or.ddit.mail.vo.MailVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequestMapping("/mail")
+@Controller
+public class MailController {
+	@Autowired
+	private MailServiceImpl mailServiceImpl;
+	
+	@GetMapping("/compose")
+	public String compose() {
+		return "mail/compose";
+	}
+	
+	@GetMapping("/inbox")
+	public String inbox() {
+		return "mail/inbox";
+	}
+	
+	@PostMapping("/send")
+	public String send(MailVO mail) {
+		log.info("mail>> "+mail);
+		this.mailServiceImpl.sendMail(mail);
+		return "redirect:/mail/inbox";
+	}
+	
+}

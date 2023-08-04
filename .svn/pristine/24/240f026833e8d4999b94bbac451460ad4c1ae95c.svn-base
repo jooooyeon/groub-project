@@ -1,0 +1,40 @@
+package kr.or.ddit.reservation.vo;
+
+public class OffmFxtrsVO {
+
+	private int oFxtrsNo;
+	private int offmNo;
+	private String fxtrsNm;
+	private String fxtrsExpln;
+	public int getoFxtrsNo() {
+		return oFxtrsNo;
+	}
+	public void setoFxtrsNo(int oFxtrsNo) {
+		this.oFxtrsNo = oFxtrsNo;
+	}
+	public int getOffmNo() {
+		return offmNo;
+	}
+	public void setOffmNo(int offmNo) {
+		this.offmNo = offmNo;
+	}
+	public String getFxtrsNm() {
+		return fxtrsNm;
+	}
+	public void setFxtrsNm(String fxtrsNm) {
+		this.fxtrsNm = fxtrsNm;
+	}
+	public String getFxtrsExpln() {
+		return fxtrsExpln;
+	}
+	public void setFxtrsExpln(String fxtrsExpln) {
+		this.fxtrsExpln = fxtrsExpln;
+	}
+
+	@Override
+	public String toString() {
+		return "OffmFxtrsVO [oFxtrsNo=" + oFxtrsNo + ", offmNo=" + offmNo + ", fxtrsNm=" + fxtrsNm + ", fxtrsExpln="
+				+ fxtrsExpln + "]";
+	}
+
+}

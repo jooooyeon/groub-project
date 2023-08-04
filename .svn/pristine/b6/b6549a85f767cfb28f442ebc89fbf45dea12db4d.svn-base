@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!--
+	[마이바티스] 스프링에서 "_"를 사용한 컬럼명을 사용 시(BOOK 테이블의 BOOK_ID)
+	카멜케이스로 읽어줌(bookId)
+	ex) 테이블 컬러명이 member_id인 경우 jsp화면단에서 이 값을 사용 시 memberId로 사용
+	-->
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+	<!-- 자주 사용하는 타입의 별칭을 세팅 -->
+	<typeAliases>
+
+		<!-- 아현찌 변경하고나서 이거 지워 주세욤 -->
+		<!-- 게시판 공통 -->
+		<typeAlias type="kr.or.ddit.bbscommon.BbsAtchVO" alias="bbsAtchVO" />
+
+
+		<!-- 주석처리는 오류난거 없는지 확인하고 지울게요!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+		<!-- 커뮤니티의 자유게시판 -->
+		<typeAlias type="kr.or.ddit.community.board.vo.BoardVO" alias="boardVO" />
+ 		<typeAlias type="kr.or.ddit.community.board.vo.PstHdVO" alias="pstHdVO" />
+ 		<typeAlias type="kr.or.ddit.community.board.vo.CmntVO" alias="cmntVO" />
+		<!-- 커뮤니티 익명게시판 -->
+		<typeAlias type="kr.or.ddit.community.anonyboard.vo.AnonyBoardVO" alias="anonyBoardVO" />
+		<typeAlias type="kr.or.ddit.community.anonyboard.vo.AnonyPstHdVO" alias="anonyPstHdVO" />
+		<typeAlias type="kr.or.ddit.community.anonyboard.vo.AnonyCmntVO" alias="anonyCmntVO" />
+		<!-- ai추천 -->
+		<typeAlias type="kr.or.ddit.ai.recommend.certification.vo.AiCrtfctRsltVO" alias="aiCrtfctRsltVO" />
+	</typeAliases>
+</configuration>
+
+
+
+
+
+
+

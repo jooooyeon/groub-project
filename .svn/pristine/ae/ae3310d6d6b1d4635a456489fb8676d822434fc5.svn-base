@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.community.board.mapper.BoardMapper">
+
+	<select id="list" resultType="kr.or.ddit.community.board.vo.BoardVO" >
+		SELECT
+		    A.pst_no
+		   ,A.user_id
+		   ,A.co_id
+		   ,A.delr_nm
+		   ,A.mdfr_nm
+		   ,A.pst_hd
+		   ,A.pst_ttl
+		   ,A.pst_cn
+		   ,A.reg_dt
+		   ,A.mdfcn_dt
+		   ,A.inq_cnt
+		   ,A.bbs_clsf
+		   ,A.temp_yn
+		   ,A.del_yn
+		   ,A.del_dt
+		   ,B.user_nm 
+		   ,f.CST_CD_NM AS header_as_kor
+		FROM
+		    bbs A
+		INNER JOIN USERS B
+		ON A.USER_ID = B.USER_ID AND A.BBS_CLSF = 'BB002' AND A.DEL_YN = 'N'
+		INNER JOIN CUSTOME_CODE F
+        ON a.PST_HD = F.CST_CD
+		
+		ORDER BY PST_NO DESC
+	</select>
+
+	
+	
+	
+	<!-- 상세보기 -->
+	<resultMap type="kr.or.ddit.community.board.vo.BoardVO" id="boardMap">
+		<result property="pstNo" column="PST_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="delrNm" column="DELR_NM" />
+		<result property="mdfrNm" column="MDFR_NM" />
+		<result property="pstHd" column="PST_HD" />
+		<result property="pstTtl" column="PST_TTL" />
+		<result property="pstCn" column="PST_CN" />
+		<result property="regDt" column="REG_DT" />
+		<result property="mdfcnDt" column="MDFCN_DT" />
+		<result property="inqCnt" column="INQ_CNT" />
+		<result property="bbsClsf" column="BBS_CLSF" />
+		<result property="tempYn" column="TEMP_YN" />
+		<result property="delYn" column="DEL_YN" />
+		<result property="delDt" column="DEL_DT" />
+		<result property="userNm" column="USER_NM" />
+		<result property="cstCdNm" column="CST_CD_NM" />
+		<result property="headerAsKor" column="HEADER_AS_KOR" />
+		<collection property="pstHdVO" resultMap="pstHdMap"></collection>
+		<collection property="bbsAtchVO" resultMap="bbsAtchMap"></collection>
+	</resultMap>
+	
+	
+	<resultMap type="kr.or.ddit.community.board.vo.PstHdVO" id="pstHdMap">
+		<result property="cstCd" column="CST_CD" />
+		<result property="coId" column="CO_ID" />
+		<result property="grCd" column="GR_CD" />
+		<result property="cstCdNm" column="CST_CD_NM" />
+		<result property="userId" column="USER_ID" />
+		<result property="regDt" column="REG_DT" />
+		<result property="useYn" column="USE_YN" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.bbscommon.BbsAtchVO" id="bbsAtchMap">
+		<result property="bbsFlNo" column="BBS_FL_NO" />
+		<result property="fileNm" column="FILE_NM" />
+		<result property="fileUuid" column="FILE_UUID" />
+		<result property="filePath" column="FILE_PATH" />
+		<result property="fileExtn" column="FILE_EXTN" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="pstNo" column="PST_NO" />
+		<result property="fileExist" column="FILE_EXIST" />
+	</resultMap>
+	
+	
+	
+	
+	<!-- 상세보기 -->
+	<select id="detail" parameterType="kr.or.ddit.community.board.vo.BoardVO" resultMap="boardMap">
+        SELECT
+		     A.pst_no
+		   , A.user_id
+		   , A.co_id
+		   , A.delr_nm
+		   , A.mdfr_nm
+		   , A.pst_hd
+           , F.CST_CD_NM AS header_as_kor
+		   , A.pst_ttl
+		   , A.pst_cn
+		   , A.reg_dt
+		   , A.mdfcn_dt
+		   , A.inq_cnt
+		   , A.bbs_clsf
+		   , A.temp_yn
+		   , A.del_yn
+		   , A.del_dt
+		   , B.bbs_fl_no
+		   , B.file_nm
+		   , B.file_uuid
+		   , B.file_path
+		   , B.file_extn
+		   , B.file_size
+		   , B.pst_no
+           , C.user_nm
+           , D.JBGD_CD
+           , E.CST_CD_NM AS CST_CD_NM
+           , B.FILE_EXIST
+           
+		FROM BBS A
+        
+        LEFT JOIN BBS_ATCH B
+        ON A.pst_no = B.pst_no
+        
+        INNER JOIN USERS C
+        ON A.USER_ID = C.USER_ID
+        
+       INNER JOIN EMP_INFO D
+        ON A.USER_ID = D.USER_ID
+        
+       INNER JOIN CUSTOME_CODE E
+        ON D.JBGD_CD = E.CST_CD        
+        
+        INNER JOIN CUSTOME_CODE F
+        ON A.PST_HD = F.CST_CD
+        
+		WHERE A.pst_no = #{pstNo}
+	</select>
+	
+	<!-- BBS_ATCH테이블의 기본키 데이터 + 1 -->
+	<select id="getNextBbsFlNo" resultType="int">
+		SELECT NVL(MAX(BBS_FL_NO),0)+1 FROM BBS_ATCH
+	</select>
+	
+	<!-- 첨부파일 업로드
+	//BoardVO(pstNo=39, userId=null, coId=null, delrNm=null, mdfrNm=null, pstHd=HE, pstTtl=연습!2
+	//, pstCn=<p>33</p>, regDt=null, mdfcnDt=null, inqCnt=0, bbsClsf=null, tempYn=null, delYn=null
+	//, delDt=null, attachFiles=[org.springframework.web.multipart.support.StandardMultipartHttpServletRequest$StandardMultipartFile@3c675c3f]
+	//, bbsAtchVO=[BbsAtchVO(bbsFlNo=1, fileNm=1111.jpg, fileUuid=81396d07-b5be-4481-aa71-6a44eab4027a_1111.jpg
+	//, filePath=/2023/06/27/81396d07-b5be-4481-aa71-6a44eab4027a_1111.jpg, fileExtn=image/jpeg
+	//, fileSize=1747209, pstNo=39)])
+	
+	//List<BbsAtchVO> bbsAtchVO
+	 -->
+	<update id="insertAttachFiles" parameterType="java.util.List">
+		<foreach collection="list" item="bbsAtchVO"
+		open="INSERT ALL " close="SELECT * FROM DUAL" separator=" " index="idx">
+		INTO BBS_ATCH(
+			BBS_FL_NO, FILE_NM, FILE_UUID, FILE_PATH, FILE_EXTN, FILE_SIZE, PST_NO, FILE_EXIST) 
+		VALUES(
+			  #{bbsAtchVO.bbsFlNo}+#{idx}
+			, #{bbsAtchVO.fileNm}
+			, #{bbsAtchVO.fileUuid}
+			, #{bbsAtchVO.filePath}
+			, #{bbsAtchVO.fileExtn}
+			, #{bbsAtchVO.fileSize}
+			, #{bbsAtchVO.pstNo}
+			, 'Y')
+		</foreach>
+	</update>
+	
+	
+	<insert id="register" parameterType="kr.or.ddit.community.board.vo.BoardVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="pstNo">
+			SELECT SEQ_BBS.NEXTVAL FROM DUAL
+		</selectKey>
+			
+			INSERT INTO BBS(
+				 pst_no
+			   , user_id
+			   , co_id
+			   , delr_nm
+			   , mdfr_nm
+			   , pst_hd
+			   , pst_ttl
+			   , pst_cn
+			   , reg_dt
+			   , mdfcn_dt
+			   , inq_cnt
+			   , bbs_clsf
+			   , temp_yn
+			   , del_yn
+				)
+			VALUES (
+				  #{pstNo}
+				, #{userId}
+				, #{coId}
+				, null
+				, #{userId}
+				, #{pstHd}
+				, #{pstTtl}
+				, #{pstCn}
+				, SYSDATE
+				, SYSDATE
+				, #{inqCnt}
+				, 'BB002'
+				, 'N'
+				, 'N'
+				)
+	</insert>
+	
+	<select id="getHd" parameterType="kr.or.ddit.community.board.vo.PstHdVO" resultType="kr.or.ddit.community.board.vo.PstHdVO" >
+		SELECT CST_CD, CO_ID, GR_CD, CST_CD_NM, USER_ID, REG_DT, USE_YN FROM CUSTOME_CODE
+		WHERE GR_CD = #{grCd}
+	</select>
+	
+	
+	<update id="inqCnt">
+		update
+			bbs
+		set
+			INQ_CNT = INQ_CNT + 1
+		where 
+			pst_no = #{pstNo}
+			
+	</update>
+	
+	<!-- /board/update에서 파일업로드 상태 변경(N) -->
+	<update id="updateFileExist" parameterType="kr.or.ddit.bbscommon.BbsAtchVO">
+		UPDATE BBS_ATCH
+		SET FILE_EXIST = #{fileExist}
+		WHERE BBS_FL_NO = #{bbsFlNo}
+	</update>
+	
+	<!-- /board/update에서 파일업로드 상태 변경(All Y) -->
+	<update id="updateFileExistCancel" parameterType="kr.or.ddit.bbscommon.BbsAtchVO">
+		UPDATE BBS_ATCH
+		SET FILE_EXIST = 'Y'
+		WHERE PST_NO = #{pstNo}
+	</update>
+	
+	<!-- /board/update에서 N인것 delete -->
+	<update id="updateFileExistDel" parameterType="kr.or.ddit.bbscommon.BbsAtchVO">
+		DELETE FROM BBS_ATCH
+		WHERE  PST_NO = #{pstNo}
+		AND    FILE_EXIST = 'N'
+	</update>
+
+	<update id="update" parameterType="kr.or.ddit.community.board.vo.BoardVO">
+		UPDATE bbs
+	    SET
+	         USER_ID = #{userId}
+	        , CO_ID = #{coId}
+	        , MDFR_NM = #{userId}
+	        , PST_HD = #{pstHd}
+	        , PST_TTL = #{pstTtl}
+	        , PST_CN = #{pstCn}
+	        , MDFCN_DT = SYSDATE
+	        , INQ_CNT = #{inqCnt}
+	        , BBS_CLSF = 'BB002'
+	        , TEMP_YN = 'N'
+	        , DEL_YN = 'N'
+		WHERE PST_NO = #{pstNo}
+	</update>
+	
+	<update id="deletePost" parameterType="kr.or.ddit.community.board.vo.BoardVO">
+		UPDATE BBS
+		SET
+			DELR_NM=#{userId}
+			, DEL_YN = 'Y'
+			, DEL_DT = SYSDATE
+		WHERE PST_NO = #{pstNo} 
+	</update>
+	
+	
+	<!-- 댓글 입력 -->
+	<insert id="commentRegister" parameterType="kr.or.ddit.community.board.vo.CmntVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="cmntNo">
+			SELECT SEQ_CMNT.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO cmnt (
+			    cmnt_no
+			   ,pst_no
+			   ,user_id
+			   ,cmnt_cn
+			   ,reg_dt
+			   ,mdfcn_dt
+			) VALUES (
+			    #{cmntNo}
+			   , #{pstNo}
+			   , #{userId}
+			   , #{cmntCn}
+			   , SYSDATE
+			   , SYSDATE
+			)
+	</insert>
+	
+	<!-- 대댓글 입력 -->
+	<insert id="commentInCommentRegister" parameterType="kr.or.ddit.community.board.vo.CmntVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="cmntNo">
+			SELECT SEQ_CMNT.NEXTVAL FROM DUAL
+		</selectKey>
+			INSERT INTO cmnt (
+			    cmnt_no
+			   , pst_no
+			   , user_id
+			   , cmnt_cn
+			   , reg_dt
+			   , mdfcn_dt
+			   , up_cmnt_no
+			   , cmnt_lv
+			) VALUES (
+			    #{cmntNo}
+			   , #{pstNo}
+			   , #{userId}
+			   , #{cmntCn}
+			   , SYSDATE
+			   , SYSDATE
+			   , #{upCmntNo}
+			   , #{cmntLv} + 1 )
+	</insert>
+	
+	
+	<!-- 	댓글보기 -->
+	<select id="commentSelect" resultType="kr.or.ddit.community.board.vo.CmntVO" >
+		SELECT
+		    A.cmnt_no
+		    , A.pst_no
+		    , A.user_id
+		    , B.USER_NM
+		    , A.cmnt_cn
+		    , A.reg_dt
+		    , A.mdfcn_dt
+		    , A.del_dt
+		    , A.delr_nm
+		    , A.up_cmnt_no
+		    , A.cmnt_lv
+		FROM
+		    (SELECT * FROM cmnt START WITH cmnt_lv = 0 CONNECT BY PRIOR CMNT_NO = UP_CMNT_NO) A
+		INNER JOIN users B ON A.user_id = B.user_id
+		WHERE A.PST_NO = #{pstNo}
+	</select>
+	
+	<!-- 댓글 삭제 -->
+	<update id="deleteComment" parameterType="kr.or.ddit.community.board.vo.CmntVO">
+		UPDATE CMNT
+		SET
+		    DEL_DT=SYSDATE
+		    , DELR_NM = #{delrNm}
+		WHERE cmnt_no = #{cmntNo} 
+	</update>
+	
+	<!-- 댓글 수정 -->
+	<update id="commentModify" parameterType="kr.or.ddit.community.board.vo.CmntVO">
+		UPDATE CMNT
+		SET
+		MDFCN_DT = SYSDATE
+		, CMNT_CN = #{cmntCn}
+		WHERE cmnt_no = #{cmntNo}
+	
+	</update>
+
+
+</mapper>

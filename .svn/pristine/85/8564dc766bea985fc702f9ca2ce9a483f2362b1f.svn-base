@@ -1,0 +1,41 @@
+package kr.or.ddit.draft.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+/**
+ * @author 정시윤
+ * 기안에 속한 결재
+ */
+@Data
+public class DraftAtrzVO {
+	
+	/**
+	 * 결재의 순번을 구분
+	 */
+	private int atrzSn;
+	
+	private int drNo;
+	/**
+	 * 결재권자의 아이디
+	 */
+	private String userId;
+	
+	/**
+	 * 결재자/ 수신자/ 회람자/ 대결자 등의 역할을 의미
+	 */
+	private String atrzCd;
+	/**
+	 * 승인 / 반려와 같은 결재 상태 코드
+	 */
+	private String atrzSttsCd;
+	/**
+	 * 결재 상태 코드 명
+	 */
+	private String atrzSttsNm;
+	/**
+	 * 결재, 반려 등을 시행한 일시
+	 */
+	private Date atrzDt;
+}

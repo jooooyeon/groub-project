@@ -1,0 +1,175 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+
+
+<!-- 사원 정보 모달 창 -->
+<div class="modal fade" id="myModal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" >
+  <div class="modal-dialog modal-lg mt-6" role="document" >
+    <div class="modal-content border-0">
+      <div class="modal-header">
+        <h5 class="modal-title">제목</h5>
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" p-0" >
+        <p>내용</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">야호</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<style>
+#search {
+	width: 200px;
+	height: 25px;
+	border: 0;
+	border-radius: 5px;
+	font-size: 15px;
+	background-color: #E1ECFF;
+}
+
+#searchBox {
+	width: 200px;
+	font-size: 10px;
+}
+
+#jstree {
+	width: 20rem;
+}
+
+
+</style>
+<!-- 바깥쪽 카드 -->
+<div class="card mb-3">
+	<div class="card" id="searchBox">
+		<i class="fa-solid fa-magnifying-glass"> 사원을 검색하세요.</i> <input
+			type="text" id="search" placeholder="이름을 입력하세요." />
+	</div>
+	<br /> <label> 그룹 조직도 </label>
+	<div class="card scrollbar-overlay" id="jstree"></div>
+</div>
+
+
+<script type="text/javascript">
+$(function(){
+// 	console.log("왔다");
+	
+	// DB에서 조직 정보 가져오기
+	$.ajax({
+		url:"/organization/jsonList",
+		type:"post",
+		dataType:"json",
+		beforeSend: function(xhr) {
+            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+        },
+		success:function(result){
+			//[{"userId":"NAVER_2023060009","userNm":"김윤아","userTelno":"01029949383","userEml":"2023060009@naver.com","userImg":"NULL","deptNo":1,"jbgdCd":"JG001","jbtlCd":"JT001"}
+// 			console.log("result : " + JSON.stringify(result));
+		 	const data = [];
+		 	let nodes = result;
+		 	// parent 기준으로 데이터 정리
+		 	const parents = {};
+		 	nodes.forEach(node => {
+		 	  if (!parents[node.parent]) {
+		 	    parents[node.parent] = [];
+		 	  }
+		 	  parents[node.parent].push(node.child);
+		 	});
+			
+		 	// jstree에서 사용할 수 있는 형태로 데이터 변환
+		 	Object.keys(parents).forEach(parent => {
+		 	  const children = parents[parent].map(child => {
+		 	    return {text: child};
+		 	  });
+		 	  data.push({
+		 	    text: parent,
+		 	    children: children
+		 	  });
+		 	});
+			
+		 	// ajax data 받아오기 
+		 	$('#jstree').jstree({
+		 		'core': {
+		 			"check_callback" : true,
+		 			'data': data
+		 			},
+		 		"types" :{
+		 			"default" : {
+		 				"icon" : "fa-solid fa-folder"
+		 			},
+		 			"file" : {
+		 				"icon" : "fa-solid fa-folder-tree"
+		 			}
+		 		},	
+		 		"plugins" : ["types", "dnd", "search"]
+		 	});
+		 	
+			}
+        
+		 	
+		});
+		 	
+		 	// 조직도 내 검색 기능
+		 	$('#search').on('keyup', function () {
+		 	    var searchString = $(this).val();
+		 	    $('#jstree').jstree(true).search(searchString);
+		 	    
+		 	});
+		 	
+		 	
+			// 자식 노드를 클릭했을 때 모달 창 열기
+		 	$('#jstree').on('click','.jstree-leaf', function (e, data) {
+		 	  var nodeText = $(this).text();
+		 	  var modalTitle = '제목';
+		 	  var modalContent = '사원 정보: ' + nodeText;
+		 	  
+		 	  
+		 	  
+		 	  $('.modal-title').text(modalTitle);
+		 	  $('.modal-body').html(modalContent);
+		 	  
+		 	  $('#myModal').modal('show');
+		 	  
+		 	});
+			
+// 			//모달창에 사원 정보를 가져오기 위해 서버로 ajax 요청 보내기
+// 			$.ajax({
+// 				url:"/organization/jsonList",
+// 				type:"post",
+// 				dataType:"json",
+// 				beforeSend: function(xhr) {
+// 		            xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+// 		        },
+// 		        success:function(result){
+// 		        	console.log("result : " + JSON.stringify(result));
+// 				}
+		        
+// 			});//사원정보를 가져오는 아작스 종료
+	
+			
+});
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+

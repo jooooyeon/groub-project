@@ -1,0 +1,127 @@
+package kr.or.ddit.user.service;
+
+import java.util.List;
+
+import kr.or.ddit.admin.account.vo.UserRegisterVO;
+import kr.or.ddit.user.vo.UserLogVO;
+import kr.or.ddit.user.vo.UserVO;
+
+/**
+ * @author PC-06
+ *
+ */
+public interface UserService {
+	/**
+	 * 유저 목록
+	 */
+	public List<UserVO> list(String coId);
+
+	/**
+	 * ROLE_ADMIN 권한 보유 유저 목록
+	 */
+	public List<UserVO> hasAdminList(String coId);
+
+	/**
+	 * 유저 검색
+	 */
+	public UserVO detail(UserVO userVO);
+
+	/**
+	 * 유저 권한 검색
+	 */
+	public UserVO detailUserAuth(UserVO userVO);
+
+	/**
+	 * 계정 등록
+	 */
+	public int registerUser(UserRegisterVO userRegisterVO);
+
+	/**
+	 * 사원 정보 등록
+	 */
+	public int registerEmpInfo(UserRegisterVO userRegisterVO);
+
+	/**
+	 * 사용자 계정 생성시 ROLE_USER 권한 부여
+	 */
+	public int addAuth(String auth, String userId);
+
+	/**
+	 * ROLE_ADMIN 권한 삭제
+	 */
+	public int delAuth(String auth, String userId);
+
+	/**
+	 * 유저 수정
+	 */
+	public int update(UserVO userVO);
+
+	/**
+	 * 유저 삭제
+	 */
+	public int delete(UserVO userVO);
+
+	/**
+	 * userId 자동생성 값 조건 조회
+	 */
+	public String maxUserId(String search);
+
+	/**
+	 * email 중복 체크
+	 */
+	public int checkEmail(String email);
+
+	/**
+	 * 계정 활성화
+	 */
+	public int accountAct(String userId);
+
+	/**
+	 * 얼굴인식 활성화
+	 */
+	public int faceAct(String userId);
+
+
+	/**
+	 * 접속 로그 기록
+	 * @param userLogVO
+	 */
+	public int userLog(UserLogVO userLogVO);
+
+
+	/**
+	 * 접속 성공시 실패횟수 초기화
+	 * @param userId 로그 대상 아이디
+	 */
+	public int logSuccessZero(String userId);
+
+	/**
+	 * 접속 실패시 실패횟수 증가
+	 * @param userId 로그 대상 아이디
+	 */
+	public int logFailCntUp(String userId);
+
+	/**
+	 * 접속 시도하는 계정의 존재 유무 확인
+	 * @param userId 로그 대상 아이디
+	 */
+	public int checkId(String userId);
+
+	/**
+	 * 접속 시도하는 계정의 존재 유무 확인
+	 * @param userId 로그 대상 아이디
+	 */
+	public String checkIdEn(String userId);
+
+	/**
+	 * 실패 카운트 조회
+	 * @param userId 로그 대상 아이디
+	 */
+	public int checkCntUp(String userId);
+
+	/**
+	 * 계정에 등록된 이메일 확인
+	 * @param userId 로그 대상 아이디
+	 */
+	public String checkEmlId(String userId);
+}

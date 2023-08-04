@@ -1,0 +1,28 @@
+package kr.or.ddit.draft.controller;
+
+import java.security.Principal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.ai.recommend.book.service.BookService;
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+@Slf4j
+@RequestMapping("/draft")
+public class testContr {
+	
+//	@Autowired
+//	BookService bookService;
+	
+	@GetMapping("/test")
+	public String draftVacForm(Model model, Principal principal) {
+		
+		return "draft/form/mytest";
+	}
+
+}

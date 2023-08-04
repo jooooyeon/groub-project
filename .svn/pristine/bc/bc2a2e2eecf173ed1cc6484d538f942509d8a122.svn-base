@@ -1,0 +1,93 @@
+package kr.or.ddit.alarm.controller;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.logging.log4j.message.SimpleMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.stereotype.Controller;
+
+import kr.or.ddit.alarm.handler.WebsocketHandler;
+import kr.or.ddit.alarm.vo.AlarmVO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+public class AlarmController {
+
+	@Autowired
+	private SimpMessageSendingOperations simpMessageSendingOperations;
+
+	@Autowired
+	private WebsocketHandler websocketHandler;
+
+	/**
+	 * 쪽지 알람
+	 * @param a
+	 * @throws InterruptedException
+	 */
+	@MessageMapping("/msg")
+	public void AlarmMsg(AlarmVO a) throws InterruptedException {
+		log.info("쪽지 알람>> "+a);
+		alarm(a, "쪽지");
+	}
+
+	/**
+	 * 메일 알람
+	 * @param AlarmVO a
+	 * @throws InterruptedException
+	 */
+	@MessageMapping("/mail")
+	public void AlarmMail(AlarmVO a) throws InterruptedException {
+		log.info("메일 알람>> "+a);
+		alarm(a, "메일");
+	}
+
+	/**
+	 * 메신저 알람
+	 * @param AlarmVO a
+	 * @throws InterruptedException
+	 */
+	@MessageMapping("/chat")
+	public void AlarmMessenger(AlarmVO a) throws InterruptedException {
+		log.info("메신저 알람>> "+a);
+		alarm(a, "매신저");
+	}
+
+	/**
+	 * WebSocketHandler 처리한 userData를 footer에 보냄
+	 */
+	@MessageMapping("/userData")
+	public void userData() {
+		simpMessageSendingOperations.convertAndSend("/sub/userData", this.websocketHandler.getUser());
+	}
+	
+	/**
+	 * WebSocketHandler에서 처리한 userSession data를 list에 보냄
+	 */
+	@MessageMapping("/userList")
+	public void userList() {
+		simpMessageSendingOperations.convertAndSend("/sub/userList", this.websocketHandler.getUserSession());
+	}
+	
+	/**
+	 * 알람을 보내기 위한 공통 메서드
+	 * @param AlaramVO a
+	 * @param String s
+	 * @throws InterruptedException
+	 */
+	private void alarm(AlarmVO a, String s) throws InterruptedException {
+		Thread.sleep(1000);
+		if (a != null) {
+			String mess = String.format("%s님에게 " + s + " 왔어요", a.getSender());
+			simpMessageSendingOperations.convertAndSend(String.format("/sub/alarm/%s", a.getUserId()), mess);
+		}
+	}
+}

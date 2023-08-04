@@ -1,0 +1,70 @@
+package kr.or.ddit.alarm.handler;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.messaging.SessionConnectEvent;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+
+import kr.or.ddit.security.CustomUser;
+import kr.or.ddit.user.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+public class WebsocketHandler {
+
+	@Autowired
+	private SimpMessagingTemplate simpleMessagingTemplate;
+
+	private Map<String, List<String>> user = new ConcurrentHashMap<>();
+
+	public Map<String, List<String>> getUser() {
+		return user;
+	}
+
+	public void setUser(Map<String, List<String>> user) {
+		this.user = user;
+	}
+
+	@EventListener
+	public void handleWebSocketConnectListener(SessionConnectEvent event) throws InterruptedException {
+		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) event.getUser();
+		CustomUser customUser = (CustomUser) authenticationToken.getPrincipal();
+		UserVO user = (UserVO) customUser.getUserVO();
+		String userId = user.getUserId();
+		String userNm = user.getUserNm();
+		String userEml = user.getUserEml();
+		
+		List<String> userData = new ArrayList<String>();
+		
+		userData.add(userNm);
+		userData.add(userEml);
+		userData.add(userId);
+		
+		this.user.put(userId,userData);
+		this.user.put(userEml,userData);
+		
+	}
+
+	@EventListener
+	public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
+		UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) event.getUser();
+		CustomUser customUser = (CustomUser) authenticationToken.getPrincipal();
+		UserVO user = (UserVO) customUser.getUserVO();
+		String userId = user.getUserId();
+		
+		this.user.remove(userId);
+
+		simpleMessagingTemplate.convertAndSend("/sub/userList", this.user);
+	}
+}

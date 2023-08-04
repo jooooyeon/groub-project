@@ -1,0 +1,260 @@
+package kr.or.ddit.community.anonyboard.controller;
+
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.bbscommon.BbsAtchVO;
+import kr.or.ddit.community.anonyboard.service.AnonyBoardService;
+import kr.or.ddit.community.anonyboard.vo.AnonyBoardVO;
+import kr.or.ddit.community.anonyboard.vo.AnonyCmntVO;
+import kr.or.ddit.community.anonyboard.vo.AnonyPstHdVO;
+import kr.or.ddit.user.vo.UserVO;
+
+//익명게시판
+@RequestMapping("/community/anonyboard")
+@Controller
+public class AnonyBoardController {
+	
+	@Autowired
+	AnonyBoardService anonyBoardService;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	//게시판 리스트
+	@RequestMapping("/list")
+	public String list(Model model) {
+		
+		
+		List<AnonyBoardVO> data = this.anonyBoardService.list();
+		log.info("data : " + data);
+		model.addAttribute("data",data);
+		
+		
+		
+		return "community/anonyBoard/anonyBoardList";
+	}
+	
+	
+	
+	//게시판 상세보기
+	@RequestMapping("/detail")
+	public String detail(AnonyBoardVO anonyBoardVO, AnonyCmntVO anonyCmntVO,  Model model) {
+		log.info("anonyBoardVO : " + anonyBoardVO);
+		
+		
+		//내용보기
+		anonyBoardVO = this.anonyBoardService.detail(anonyBoardVO);
+		log.info("detail anonyBoardVO : " + anonyBoardVO );
+		model.addAttribute("data",anonyBoardVO);
+		
+		//조회수 증가
+		anonyBoardService.inqCnt(anonyBoardVO.getPstNo());
+		
+		//댓글 가져오기
+		List<AnonyCmntVO> comment = this.anonyBoardService.commentSelect(anonyCmntVO);
+		model.addAttribute("comment",comment);
+		
+		
+		return "community/anonyBoard/anonyBoardDetail";
+	}
+	
+	
+	//게시판 작성
+	@GetMapping("/register")
+	public String register(Model model, AnonyPstHdVO hd) {
+		hd.setGrCd("HD");	
+
+		List<AnonyPstHdVO> pstHdVOList = this.anonyBoardService.getHd(hd);
+		log.info("pstHdVOList : " + pstHdVOList);
+		
+		model.addAttribute("data",pstHdVOList);
+		
+		return "community/anonyBoard/anonyBoardRegister";
+	}
+	
+	
+	//게시판 작성
+	@PostMapping("/register")
+	public String registerPost(Model model,@ModelAttribute AnonyBoardVO anonyBoardVO,Principal principal) {
+		//로그인 한 아이디 받음
+		String userId = principal.getName();
+
+		anonyBoardVO.setUserId(userId);
+		
+		log.info("result: " + anonyBoardVO);
+		int result = anonyBoardService.register(anonyBoardVO);
+		System.out.println("result : " + result);
+		
+		return "redirect:/community/anonyboard/list";
+	}
+	
+
+
+	@GetMapping("/update")
+	public String update(Model model, @ModelAttribute AnonyBoardVO anonyBoardVO) {
+	    // pstNo를 가공하거나 필요한 로직을 처리한 후 data 변수에 할당
+	    
+		anonyBoardVO = this.anonyBoardService.detail(anonyBoardVO);
+		
+		log.info("update anonyBoardVO" + anonyBoardVO);
+		model.addAttribute("data",anonyBoardVO);
+
+	    return "community/anonyBoard/anonyBoardUpdate"; // 이동할 JSP 페이지의 이름
+	}
+
+	
+	@PostMapping("/update")
+	public String update(Model model,@ModelAttribute AnonyBoardVO anonyBoardVO, Principal principal) {
+		log.info("updatePost다!");
+		log.info("update post anonyBoardVO : " + anonyBoardVO);
+		
+		int result = anonyBoardService.update(anonyBoardVO);
+		
+		return "redirect:/community/anonyboard/list";
+	}
+
+
+	@ResponseBody
+	@PostMapping("/deletePost")
+	public String deletePost(@RequestBody AnonyBoardVO anonyBoardVO ) {
+		log.info("deletePost boardVo : " + anonyBoardVO);
+	    
+	    int result = anonyBoardService.deletePost(anonyBoardVO);
+	    if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+
+
+	@ResponseBody
+	@PostMapping("/updateFileExist")
+	public String updateFileExist(@RequestBody BbsAtchVO bbsAtchVO ) {
+		log.info("updateFileExist bbsAtchVO : " + bbsAtchVO);
+	    
+		//FILE_EXIST 값을 N으로 처리
+	    int result = anonyBoardService.updateFileExist(bbsAtchVO);
+	    log.info("result : " + result);
+	    
+	    if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+
+	
+	@ResponseBody
+	@PostMapping("/updateFileExistCancel")
+	public String updateFileExistCancel(@RequestBody BbsAtchVO bbsAtchVO ) {
+		log.info("updateFileExist bbsAtchVO : " + bbsAtchVO);
+		
+		//FILE_EXIST 값을 N으로 처리
+		int result = anonyBoardService.updateFileExistCancel(bbsAtchVO);
+		log.info("result : " + result);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	
+	
+	//=====================================댓글===============================================
+	
+	//댓글 작성
+	//{cmntCn: 'aaaaaaa', userId: 'NAVER_2014030001', pstNo: 48}
+	@ResponseBody
+	@PostMapping("/commentRegister")
+	public String commentRegister(@RequestBody AnonyCmntVO anonyCmntVO ) {
+		log.info("commentRegister anonyCmntVO : " + anonyCmntVO);
+		//anonyCmntVO : AnonyCmntVO(cmntNo=0, pstNo=48, userId=NAVER_2014030001, 
+		//cmntCn=ggg, regDt=null, mdfcnDt=null, delDt=null, delrNm=null,
+		//upCmntNo=0, cmntLv=null)
+		int result = anonyBoardService.commentRegister(anonyCmntVO);
+		log.info("commentRegister result : " + result);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	
+	
+	//대댓글 작성하기
+	@ResponseBody
+	@PostMapping("/commentInComment")
+	public String commentInComment(@RequestBody AnonyCmntVO anonyCmntVO ) {
+		log.info("commentInComment anonyCmntVO : " + anonyCmntVO);
+		//anonyCmntVO : AnonyCmntVO(cmntNo=0, pstNo=48, userId=NAVER_2014030001, 
+		//cmntCn=ggg, regDt=null, mdfcnDt=null, delDt=null, delrNm=null,
+		//upCmntNo=0, cmntLv=null)
+		int result = anonyBoardService.commentInCommentRegister(anonyCmntVO);
+		log.info("commentInComment result : " + result);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	//대댓글 삭제하기
+	@ResponseBody
+	@PostMapping("/deleteCommentPost")
+	public String deleteCommentPost(@RequestBody AnonyCmntVO anonyCmntVO) {
+		log.info("deleteCommentPost anonyCmntVO : " + anonyCmntVO);
+		
+		int result = anonyBoardService.deleteComment(anonyCmntVO);
+		log.info("deleteCommentPost result" + result);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	
+	@ResponseBody
+	@PostMapping("/commentModify")
+	public String commentModifyPost(@RequestBody AnonyCmntVO anonyCmntVO) {
+		log.info("commentModifyPost : " + anonyCmntVO);
+		log.info("댓글 수정!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		
+		int result = anonyBoardService.commentModify(anonyCmntVO);
+		log.info("commentModifyPost result" + result);
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	
+	
+	
+	
+	
+}

@@ -1,0 +1,27 @@
+package kr.or.ddit.msg;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@RequestMapping("/msg")
+@Controller
+public class MsgController {
+
+	@GetMapping("/compose")
+	public String compose() {
+		return "msg/compose";
+	}
+	
+	@GetMapping("/inbox")
+	public String inbox() {
+		return "msg/inbox";
+	}
+	
+	@PostMapping("/send")
+	public String send() throws InterruptedException {
+		Thread.sleep(1000);
+		return "redirect:/msg/inbox";
+	}
+}

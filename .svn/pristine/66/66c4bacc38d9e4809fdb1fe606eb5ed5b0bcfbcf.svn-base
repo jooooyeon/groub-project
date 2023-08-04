@@ -1,0 +1,30 @@
+package kr.or.ddit.msg;
+
+import java.util.List;
+
+import kr.or.ddit.msg.vo.MsgVO;
+
+public interface MsgService {
+
+	public int insert(MsgVO msg);
+	public int importMsg(MsgVO msg);
+	//받은 메일함
+	public List<MsgVO> listReceiver(MsgVO msg);
+	//보낸 메일함
+	public List<MsgVO> listSender(MsgVO msg);
+	//받은 메일 상세보기
+	public MsgVO detailReceiver(MsgVO msg);
+	//보낸 메일 상세보기
+	public MsgVO detailSender(MsgVO msg);
+	//중요 메일함
+	public List<MsgVO> msgImport(MsgVO msg);
+	//복구 안되는 삭제
+	public int delete(MsgVO msg);
+	//휴지통 보내기
+	public int trashSet(MsgVO msg);
+	//복원
+	public int restore(MsgVO msg);
+	//휴지통
+	List<MsgVO> trash(MsgVO msg);
+	
+}

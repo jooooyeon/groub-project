@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.community.anonyBoard.mapper.AnonyBoardMapper">
+	<!-- 목록 -->
+	<select id="list" resultType="anonyBoardVO">
+		select * from anonyboard
+		order by BRD_NO desc
+	</select>
+	
+	<!-- 글작성 -->
+	<insert id="register" parameterType="anonyBoardVO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="brdNo" >
+			SELECT SEQUENCE1.NEXTVAL FROM DUAL
+		</selectKey>
+	
+		INSERT INTO ANONYBOARD (BRD_NO,MEM_NO,BRD_HEADER,BRD_TITLE,BRD_CONTENT,BRD_POST_DATE) 
+		VALUES (#{brdNo}, 'test1', #{brdHeader}, #{brdTitle}, #{brdContent}, sysdate )
+	</insert>
+
+
+	<!-- 상세보기 -->
+	<resultMap type="anonyBoardVO" id="anonyBoardMap">
+		<result property="brdNo" column="BRD_NO" />
+		<result property="memNo" column="MEM_NO" />
+		<result property="brdHeader" column="BRD_HEADER" />
+		<result property="brdTitle" column="BRD_TITLE" />
+		<result property="brdContent" column="BRD_CONTENT" />
+		<result property="brdPostDate" column="BRD_POST_DATE" />
+		<result property="brdViewCount" column="BRD_VIEW_COUNT" />
+		<result property="brdCategory" column="BRD_CATEGORY" />
+		<result property="isTemp" column="IS_TEMP" />
+		<collection property="boardAttachVO" resultMap="boardAttachMap"></collection>
+	</resultMap>
+	
+	<resultMap type="boardAttachVO" id="boardAttachMap">
+		<result property="brdFileNo" column="BRD_FILE_NO" />
+		<result property="brdNo" column="BRD_NO" />
+		<result property="brdFileName" column="BRD_FILE_NAME" />
+		<result property="brdFileUuid" column="BRD_FILE_UUID" />
+		<result property="brdFilePath" column="BRD_FILE_PATH" />
+		<result property="brdFileType" column="BRD_FILE_TYPE" />
+	</resultMap>
+
+	<!-- 상세보기 -->
+	<select id="detail" parameterType="anonyBoardVO" resultMap="anonyBoardMap">
+		SELECT A.BRD_NO,A.MEM_NO
+			 , A.BRD_HEADER
+			 , A.BRD_TITLE,A.BRD_CONTENT,A.BRD_POST_DATE
+		     , B.BRD_FILE_NO, B.BRD_NO, B.BRD_FILE_NAME, B.BRD_FILE_UUID, B.BRD_FILE_PATH, B.BRD_FILE_TYPE
+		FROM   ANONYBOARD A, BOARD_ATTACH B
+		WHERE  A.BRD_NO = #{brdNo}
+		AND    A.BRD_NO = B.BRD_NO(+)
+	</select>
+	
+	<!-- 첨부파일업로드 -->
+	<update id="insertAttachFiles" parameterType="java.util.List">
+		<foreach collection="list" item="boardAttachVO"
+		open="INSERT ALL " close="SELECT * FROM DUAL" separator=" ">
+			INTO BOARD_ATTACH(BRD_FILE_NO, BRD_NO, BRD_FILE_NAME, BRD_FILE_UUID, BRD_FILE_PATH, BRD_FILE_TYPE)
+			VALUES(#{boardAttachVO.brdFileNo}, #{boardAttachVO.brdNo}, #{boardAttachVO.brdFileName}, 
+			#{boardAttachVO.brdFileUuid}, #{boardAttachVO.brdFilePath}, #{boardAttachVO.brdFileType})
+		</foreach>
+	</update>
+	
+	
+	<update id="update" parameterType="anonyBoardVO" >
+		UPDATE ANONYBOARD
+		SET MEM_NO='test1', BRD_HEADER=#{brdHeader}, BRD_TITLE=#{brdTitle}
+			, BRD_CONTENT=#{brdContent}, BRD_POST_DATE=SYSDATE
+		WHERE BRD_NO = #{brdNo}
+	
+	</update>
+	
+	<update id="delete" parameterType="anonyBoardVO">
+		DELETE FROM ANONYBOARD WHERE BRD_NO = #{brdNo}
+	</update>
+
+
+
+</mapper>

@@ -1,0 +1,68 @@
+package kr.or.ddit.msg.vo;
+
+import java.io.Serializable;
+
+import lombok.Data;
+
+/**
+ * @author 김종명
+ *
+ */
+@Data
+public class MsgVO implements Serializable {
+	
+//	//프로토콜 문법
+//	String dd = "{id:희망,name:대덕}";
+	/**
+	 * 쪽지 보낸 사람
+	 */
+	private String sender;
+	/**
+	 * 쪽지 관리 번호
+	 */
+	private int memoNo;
+	/**
+	 * 쪽지를 받는 사람 사용자 아이디
+	 */
+	private String userId;
+	/**
+	 * 상태코드
+	 */
+	private String statCd;
+	/**
+	 * 상태
+	 */
+	private String mngCdNm1;
+	/**
+	 * 상태 변경 일시
+	 */
+	private String statChgDt;
+	/**
+	 * 쪽지 제목
+	 */
+	private String memoTtl;
+	/**
+	 * 쪽지 내용
+	 */
+	private String memoCn;
+	/**
+	 * 보낸 일시
+	 */
+	private String dsptchDt;
+	/**
+	 * 사용자 이름
+	 */
+	private String userNm;
+	/**
+	 * 사용자 직책&공지사항 관련 일반/중요
+	 */
+	private String cstCdNm;
+	/**
+	 * 사용자 부서
+	 */
+	private String deptNm;
+	/**
+	 * 사용자 이미지
+	 */
+	private String userImg;
+}

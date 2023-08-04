@@ -1,0 +1,28 @@
+package kr.or.ddit.community.anonyBoard.vo;
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import kr.or.ddit.common.BoardAttachVO;
+import lombok.Data;
+
+@Data
+public class AnonyBoardVO {
+	private int brdNo;//글번호
+	private String memNo;//사원번호
+	private String brdHeader;//머릿말
+	private String brdTitle; //제목
+	private String brdContent;
+	private Date brdPostDate;//작성일
+	private int brdViewCount;//조회수
+	private String brdCategory;//게시판구분
+	private String isTemp;//임시저장여부
+	private MultipartFile[] attachFiles;
+	//1:N
+	private List<BoardAttachVO> boardAttachVO;
+	
+	
+	
+}

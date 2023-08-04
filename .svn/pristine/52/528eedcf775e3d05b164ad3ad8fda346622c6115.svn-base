@@ -1,0 +1,46 @@
+package kr.or.ddit.ai.recommend.certification.controller;
+
+import java.security.Principal;
+import java.util.List;
+
+import javax.security.auth.message.callback.SecretKeyCallback.Request;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import kr.or.ddit.ai.recommend.certification.service.CertificationService;
+import kr.or.ddit.ai.recommend.certification.vo.AiCrtfctRsltVO;
+
+
+//자격증 추천
+@Controller
+public class CertificationController {
+
+	@Autowired
+	CertificationService certificationService;
+	
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	
+	@GetMapping("/certification")
+	public String recom(Model model, Principal principal) {
+		String userId = principal.getName();
+		List<AiCrtfctRsltVO> data = this.certificationService.list(userId);
+		log.info("data",data);
+		model.addAttribute("data",data);
+	
+		
+		return "ai/recommend/certification";
+	}
+	
+	
+}

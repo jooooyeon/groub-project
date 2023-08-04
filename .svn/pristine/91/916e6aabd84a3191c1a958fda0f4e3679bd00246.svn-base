@@ -1,0 +1,25 @@
+package kr.or.ddit.notice.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.notice.vo.NoticeVO;
+import kr.or.ddit.notice.vo.PstHdVO;
+
+public interface NoticeMapper {
+	
+	//목록
+	public List<NoticeVO> list();
+	
+	//상세
+	public NoticeVO detail(NoticeVO noticeVO);
+	
+	//조회수 카운트
+	public int inqCnt(int pstNo);
+	
+	//등록
+	public int register(NoticeVO noticeVO);
+	
+	//머릿말 호출
+	public List<PstHdVO> getHd(PstHdVO hd);
+
+}

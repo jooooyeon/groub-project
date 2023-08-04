@@ -1,0 +1,32 @@
+package kr.or.ddit.msg.vo;
+
+import lombok.Data;
+
+@Data
+public class MsgVO {
+	//쪽지 보낸 사람
+	private String sender;
+	//쪽지 번호
+	private int memoNo;
+	//유저ID&쪽지 받는 사람
+	private String userId;
+	//상태코드
+	private String statCd;
+	//상태
+	private String mngCdNm1;
+	//상태변경일시
+	private String statChgDt;
+	//제목
+	private String memoTtl;
+	//내용
+	private String memoCn;
+	//보낸 일시
+	private String dsptchDt;
+	//사용자 이름
+	private String userNm;
+	//사용자 직책
+	private String cstCdNm;
+	//사용자 부서
+	private String deptNm;
+	
+}

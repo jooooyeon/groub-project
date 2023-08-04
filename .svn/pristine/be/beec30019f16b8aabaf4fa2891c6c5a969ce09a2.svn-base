@@ -1,0 +1,40 @@
+package kr.or.ddit.mail.service;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.mail.mapper.MailMapper;
+import kr.or.ddit.mail.vo.MailVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class MailServiceImpl {
+	
+	//메일 내용 저장
+	@Autowired
+	private MailMapper mailMapper;
+	//메일 발신
+	private JavaMailSender javaMailSender;
+	
+	 public void sendMail(MailVO mail) {
+	        SimpleMailMessage message = new SimpleMailMessage();
+	        message.setTo(mail.getRcptnEml());
+	        message.setSubject(mail.getEmlTtl());
+	        message.setText(mail.getEmlCn());
+	        this.javaMailSender.send(message);
+	    }
+	
+	@Transactional
+	public int insert(MailVO mail) {
+		int rlt = this.mailMapper.insertDsptch(mail);
+		rlt += this.mailMapper.insertRcptn(mail);
+		log.info("mail>> "+mail);
+		
+		return rlt;
+	}
+}

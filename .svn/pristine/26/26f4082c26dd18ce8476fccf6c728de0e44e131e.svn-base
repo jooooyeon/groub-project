@@ -1,0 +1,16 @@
+package kr.or.ddit.ai.recommend.goodness.fit.service;
+
+import java.util.List;
+
+import kr.or.ddit.ai.recommend.goodness.fit.vo.FitVO;
+
+public interface FitService {
+
+	//자격증
+	public List<FitVO> crtfct(FitVO fit);
+	//자격기술
+	public List<FitVO> qnsinfo(FitVO fit);
+	//적합도 설정 결과값 저장
+	public int insert(FitVO fit);
+
+}

@@ -1,0 +1,68 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>게시글등록</title>
+<script type="text/javascript">
+
+</script>
+</head>
+<body>
+	register!
+
+	<div class="card mb-3">
+		<div class="card-header">
+			<div class="min-vh-50">
+				<h5 class="mb-0">게시글 작성</h5>
+				<!-- 임시저장 -->
+				<div>
+					<button class="btn btn-outline-secondary me-1 mb-3" style="float: right" type="button">임시저장 불러오기</button>
+				</div>
+				<div style="clear: both;"></div>
+				<!-- 임시저장 끝 -->
+				<form action="/community/anonyboard/register" method="post" enctype="multipart/form-data">
+				<!-- 말머리시작 -->
+				<div class="form-floating"
+					style="width: 18%; float: left; margin-right: 10px;">
+					<select class="form-select" name="brdHeader" id=brdHeader aria-label="Floating label select example" >
+						<option value="recom">추천</option>
+						<option value="hobby">취미</option>
+						<option value="information">정보</option>
+						<option value="club">동호회모집</option>
+						<option value="etc">기타</option>
+					</select>
+					<label for="floatingSelect">말머리</label>
+				</div>
+				<!-- 말머리끝 -->
+				<!-- 제목  시작-->
+				<div class="form-floating mb-3" style="width: 80%; float: left">
+					<input class="form-control" name="brdTitle" id="floatingInput" type="title"	placeholder="제목을 입력해주세요" required />
+					<label for="floatingInput">제목</label>
+				</div>
+				<div style="clear: both;"></div>
+				<!-- 제목  끝-->
+
+				<!-- 에디터 -->
+				<div>
+					<textarea class="tinymce d-none" name="brdContent" data-tinymce="data-tinymce" name="content" placeholder="내용을 입력해주세요" required ></textarea>
+				</div>
+				<!-- 첨부파일 시작 -->
+ 				<div class="mb-3">
+				  <label class="form-label" for="formFileMultiple"></label>
+				  <input class="form-control"  id="pictures" type="file" multiple="multiple" name="attachFiles" />
+				</div>
+				<!-- 첨부파일 끝 -->
+			</div>
+			<div style="text-align: center;">
+				<button class="btn btn-outline-primary me-1 mb-1" type="submit">저장</button>
+				<a href="/community/anonyboard/list" class="btn btn-outline-secondary me-1 mb-1 btn-sm" type="button">임시저장</a>
+				<a href="/community/anonyboard/list" class="btn btn-outline-danger me-1 mb-1 btn-sm" type="button">취소</a>
+			</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>

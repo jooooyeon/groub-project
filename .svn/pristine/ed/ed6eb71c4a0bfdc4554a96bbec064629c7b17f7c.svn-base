@@ -1,0 +1,53 @@
+package kr.or.ddit.empinfo.service.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.empinfo.mapper.EmpInfoMapper;
+import kr.or.ddit.empinfo.service.EmpInfoService;
+import kr.or.ddit.empinfo.vo.CrtfctVO;
+import kr.or.ddit.empinfo.vo.EmpInfoCertificationVO;
+import kr.or.ddit.empinfo.vo.EmpInfoVO;
+import kr.or.ddit.empinfo.vo.VacationVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class EmpInfoServiceImpl implements EmpInfoService {
+
+	@Inject
+	EmpInfoMapper empInfoMapper;
+	
+	
+	//인사정보 메인 리스트
+	@Override
+	public EmpInfoVO detail(EmpInfoVO empInfoVO) {
+		return this.empInfoMapper.detail(empInfoVO);
+	}
+	//연차정보
+	@Override
+	public List<VacationVO> vactionList() {
+		return this.empInfoMapper.vactionList();
+	}
+	//인사정보 신상정보 수정
+	@Override
+	public int updatePersonal(EmpInfoVO empInfoVO) {
+		return this.empInfoMapper.updatePersonal(empInfoVO);
+	}
+	
+	//인사정보 자격증정보 삭제
+	@Override
+	public int deleteCrtfct(EmpInfoCertificationVO EmpInfoCertificationVO) {
+		return this.empInfoMapper.deleteCrtfct(EmpInfoCertificationVO);
+	}
+	
+	//자격증리스트
+	@Override
+	public List<CrtfctVO> selectCrtfct() {
+		return this.empInfoMapper.selectCrtfct();
+	}
+	
+}

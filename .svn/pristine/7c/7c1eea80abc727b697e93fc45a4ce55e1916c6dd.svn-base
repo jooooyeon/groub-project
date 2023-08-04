@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.servey.mapper.ServeyMapper">
+
+	<insert id="serveyInsert"
+		parameterType="kr.or.ddit.servey.vo.ServeyVO">
+		INSERT INTO srvy (
+		srvy_no
+		,user_id
+		,co_id
+		,srvy_ttl
+		,bgng_dt
+		,end_dt
+		,srvy_stts
+		,srvy_cn
+		,reg_dt
+		) VALUES (
+		(SELECT
+		NVL(MAX(srvy_no),0)+1 FROM srvy)
+		,#{userId}
+		,#{coId}
+		,#{srvyTtl}
+		,#{bgngDt}
+		,#{endDt}
+		,'SV001'
+		,#{srvyCn}
+		,sysdate
+		)
+	</insert>
+
+	<insert id="serveyQItemInsert" parameterType="kr.or.ddit.servey.vo.ServeyQItemVO">
+		INSERT INTO srvy_qitem (
+		qitem_no
+		,srvy_no
+		,qitem_ct
+		,input_type
+		) VALUES 
+		(		
+		(SELECT NVL(MAX(qitem_no),0)+1 FROM srvy_qitem)
+		, (SELECT NVL(MAX(srvy_no),0) FROM srvy)
+		, #{qitemCt}
+		, #{inputType}
+		)
+	</insert>
+	
+	<update id="serveyOptionInsert" parameterType="kr.or.ddit.servey.vo.ServeyQItemVO">
+		<foreach collection="serveyOptionVOList" open="INSERT ALL" close="SELECT * FROM DUAL" item="item" separator=" " index="i">
+			INTO srvy_optn (optn_no, qitem_no, srvy_no, optn_ct) -->
+		      VALUES (
+		      (SELECT NVL(MAX(optn_no),0)+1 FROM srvy_optn) +#{i}
+		      , (SELECT NVL(MAX(qitem_no),0) FROM srvy_qitem)
+		      , (SELECT NVL(MAX(srvy_no),0) FROM srvy)
+		      , #{item.optnCt})
+		</foreach>
+	</update>
+
+<!-- 	<update id="serveyQOptionInsert" parameterType="kr.or.ddit.servey.vo.ServeyVO"> -->
+<!-- 	  <foreach collection="serveyQItemVOList" item="qItem" separator=" "> -->
+<!-- 	    INSERT INTO srvy_qitem (qitem_no, srvy_no, qitem_ct, input_type) -->
+<!-- 	    VALUES ( -->
+<!-- 	    NVL(MAX(qitem_no),0)+1 FROM srvy_qitem) -->
+<!-- 	    , NVL(MAX(srvy_no),0) FROM srvy), #{qItem.qitemCt}, #{qItem.inputType}) -->
+	    
+<!-- 	    <foreach collection="qItem.serveyOptionVOList" item="optionItem" separator=" "> -->
+<!-- 	      INSERT INTO srvy_optn (optn_no, qitem_no, srvy_no, optn_ct) -->
+<!-- 	      VALUES ( -->
+<!-- 	      (SELECT NVL(MAX(optn_no),0)+1 FROM srvy_optn) -->
+<!-- 	      , (SELECT NVL(MAX(qitem_no),0) FROM srvy_qitem) -->
+<!-- 	      , NVL(MAX(srvy_no),0) FROM srvy) -->
+<!-- 	      , #{optionItem.optnCt}) -->
+	      
+<!-- 	    </foreach> -->
+<!-- 	  </foreach> -->
+<!-- 	</update> -->
+
+</mapper>

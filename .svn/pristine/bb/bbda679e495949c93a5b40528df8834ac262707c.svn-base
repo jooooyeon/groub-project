@@ -1,0 +1,12 @@
+package kr.or.ddit.draft.service;
+
+import kr.or.ddit.draft.vo.DraftUserVO;
+import kr.or.ddit.draft.vo.DraftVO;
+
+public interface DraftService {
+
+	DraftUserVO selectDraftUsesrInfo(String userId);
+
+	int draftInsert(DraftVO draftVO) throws RuntimeException;
+
+}

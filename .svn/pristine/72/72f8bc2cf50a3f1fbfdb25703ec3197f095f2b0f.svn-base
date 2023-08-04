@@ -1,0 +1,49 @@
+package kr.or.ddit.draft.service.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.or.ddit.draft.mapper.DraftMapper;
+import kr.or.ddit.draft.service.DraftService;
+import kr.or.ddit.draft.vo.DraftOpnVO;
+import kr.or.ddit.draft.vo.DraftUserVO;
+import kr.or.ddit.draft.vo.DraftVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class DarftServiceImpl implements DraftService {
+	
+	@Inject
+	DraftMapper draftMapper;
+	
+	@Override
+	public DraftUserVO selectDraftUsesrInfo(String userId) {
+		return draftMapper.selectDraftUsesrInfo(userId);
+	}
+	
+	@Override
+	@Transactional
+	public int draftInsert(DraftVO draftVO) throws RuntimeException {
+		int result = 0;
+		//기안 테이블 인서트
+		result += draftMapper.draftInsert(draftVO);
+		
+		//기안 의견 테이블 인서트
+		if(draftVO.getDraftOpnVOList() != null) {
+			result += draftMapper.draftOpnInsert(draftVO);
+		}
+		
+		// 기안 - 휴가 인서트
+		if(draftVO.getDraftVacVO() != null) {
+			result += draftMapper.draftVacInsert(draftVO);
+		}
+		
+		return result;
+	}
+
+}

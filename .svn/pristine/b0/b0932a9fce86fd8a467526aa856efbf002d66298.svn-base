@@ -1,0 +1,21 @@
+package kr.or.ddit.ai.recommend.goodness.fit.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.ai.recommend.goodness.fit.vo.CrtfctVO;
+import kr.or.ddit.ai.recommend.goodness.fit.vo.FitVO;
+
+public interface FitMapper {
+	public List<FitVO> crtfct(FitVO fit);
+	public List<FitVO> qnsinfo(FitVO fit);
+	
+	//부서마다 결과값 저장
+	public int insertFit(FitVO fit);
+	//부서마다 자격증 보유 현황 저장
+	public int insertCrtfct(List<CrtfctVO> crtList);
+	//부서마다 자격시술 보유 현황 저장
+	public int insertSkill(FitVO fit);
+	
+	//결과 불러오기
+	public List<FitVO> result(FitVO fit);
+}

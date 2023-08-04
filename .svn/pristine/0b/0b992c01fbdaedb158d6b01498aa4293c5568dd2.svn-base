@@ -1,0 +1,67 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
+<footer class="footer">
+	<div class="row g-0 justify-content-between fs--1 mt-4 mb-3">
+		<div class="col-12 col-sm-auto text-center">
+			<p class="mb-0 text-600">
+				Thank you for creating with Falcon <span
+					class="d-none d-sm-inline-block">| </span><br class="d-sm-none" />
+				2023 &copy; <a href="https://themewagon.com">Themewagon</a>
+			</p>
+		</div>
+		<div class="col-12 col-sm-auto text-center">
+			<p class="mb-0 text-600">v3.17.0</p>
+		</div>
+	</div>
+</footer>
+
+<script>
+var username = '<%=(String) session.getAttribute("username")%>'
+	if (username == "" || username == null) {
+		username = "1"
+	}
+	console.log(username)
+
+	var sockJs = new SockJS("/ws");
+	var stomp = Stomp.over(sockJs);
+	var receiver = $('#receiver');
+
+	stomp.connect({}, function() {
+
+		console.log("STOMP Connection")
+
+		stomp.subscribe("/sub/channel", function(chat) {
+			var content = chat.body;
+			console.log("content", content);
+			if (content) {
+				alert("로그인을 환영합니다.")
+			}
+		});
+
+		stomp.subscribe("/sub/msg/" + username, function(chat) {
+			var content = chat.body;
+			console.log("content", content);
+			if (content) {
+				alert("쪽지 왔어요")
+			}
+
+		});
+
+		stomp.subscribe("/sub/mail/" + username, function(chat) {
+			var content = chat.body;
+			console.log("content", content);
+			if (content) {
+				alert("메일 왔어요")
+			}
+
+		});
+	});
+
+	$("#mail").on("click", function(e) {
+		stomp.send('/pub/mail', {}, JSON.stringify({
+			sender : username,
+			receiver : receiver.val()
+		}));
+	});
+</script>

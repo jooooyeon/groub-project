@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:context="http://www.springframework.org/schema/context"
+   xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+   xmlns:aop="http://www.springframework.org/schema/aop"
+   xmlns:security="http://www.springframework.org/schema/security"
+   xmlns:tx="http://www.springframework.org/schema/tx"
+   xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+      http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd">
+
+    <bean id="customAccessDenide" class="kr.or.ddit.security.CustomAccessDeniedHandler"></bean>
+    <!-- 비밀번호를 암호화하는 것을 사용자 정의로 정의로 처리해보자 -->
+    <bean id="customPasswordEncoder" class="kr.or.ddit.security.CustomNoOpPasswordEncoder"></bean>
+    <!-- 사용자가 이미 정해놓은 테이블과 컬럼명으로 인증/인가를 처리해보자 -->
+    <bean id="customUserDetailsService" class="kr.or.ddit.security.CustomUserDetailsService"></bean>
+    <!-- 인증(authentication)(로그인) 성공 시 핸들링 -->
+    <bean id="customLoginSuccess" class="kr.or.ddit.security.CustomLoginSuccessHandler"></bean>
+    <!-- 인증(authentication)(로그인) 실패 시 핸들링 -->
+    <bean id="customLoginFailure" class="kr.or.ddit.security.CustomLoginFailureHandler"></bean>
+
+
+    <security:http>
+       	<security:intercept-url pattern="/reservation/**" access="hasRole('ROLE_USER')" />
+       	<security:intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+        <!--       	<security:intercept-url pattern="/board/register" access="hasRole('ROLE_MEMBER')" /> 회원만 허용 -->
+        <!--       	<security:intercept-url pattern="/notice/list" access="permitAll" /> 모두 허용 -->
+        <!--       	<security:intercept-url pattern="/notice/register" access="hasRole('ROLE_ADMIN')" /> 관리자만 허용 -->
+        <!-- 로그인 시  시큐리티가 제공해주는 기본 폼 기반 인증 기능을 사용 /아이디, 비번, submit버튼 등 -->
+        <security:form-login login-page="/login"
+        authentication-success-handler-ref="customLoginSuccess"
+        authentication-failure-handler-ref="customLoginFailure"
+        />
+
+        <!-- 사용자 정의 접근 거부 처리자 :
+        접근 거부가 발생한 상황에 단순 메시지 처리 이상의 다양한 처리를 직접 구현하는 것도 가능
+        -->
+        <security:access-denied-handler ref="customAccessDenide"/>
+
+        <!-- 자동 로그인
+        dataSource를 통해 지정한 Database의 약속된 테이블(PERSISTENT_LOGINS)을
+        이용하여 기존 로그인 정보를 기록함
+        token-validity-seconds : 쿠키의 유효시간(초) 604800 -> 7일
+        -->
+        <security:remember-me data-source-ref="dataSource" token-validity-seconds="604800"/>
+
+        <!-- 로그아웃 처리
+        로그아웃을 위한 URI를 지정하고, 로그아웃 처리 후에 별도의 작업을 학 위해
+        사용자가 직접 구현한 처리자를 등록할 수 있음
+        (session.invalidate() : 세션 종료시키는 메서드 - jsp배울때 배움)
+        -->
+        <security:logout logout-url="/logout" invalidate-session="true" delete-cookies="remember-me,JESSION_ID"/>
+
+    </security:http>
+
+    <!-- authentication : 인증(로그인)
+        스프링 시큐리티 5버전부터는 패스워드 암호화 처리기를 반드시 이용하도록 변경됨.
+        암호화 처리기를 사용하지 않도록 noop 문자열을 비밀번호 앞에 사용하여, 암호화 안하겠다고 선언
+    -->
+    <security:authentication-manager>
+        <!-- 메모리상에 아이디와 비밀번호를 지정하고 로그인을 처리. 지정된 아이디와 비밀번호로 로그인이 가능하도록 설정 -->
+        <!-- 사용자 정의 테이블과 컬럼을 사용해보자 -->
+        <security:authentication-provider user-service-ref="customUserDetailsService">
+            <!-- 데이터 소스를 지정
+            dataSource : root-context.xml에서 등록한 bean을 id를 불러와서 참조함
+            -->
+
+            <!-- 사용자가 정의한 비밀번호 암호화 처리기를 지정 -->
+            <security:password-encoder ref="customPasswordEncoder"/>
+
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+</beans>

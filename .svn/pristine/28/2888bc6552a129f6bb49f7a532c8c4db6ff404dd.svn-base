@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.user.mapper.UserMapper">
+
+	<!-- 사용자 목록 조회 -->
+	<select id="list" parameterType="String" resultMap="userMap">
+		SELECT
+			  A.USER_ID
+			, A.CO_ID
+			, A.USER_PSWD
+			, A.USER_NM
+			, A.BRTH_YMD
+			, A.USER_IMG
+			, A.SIGN_IMG
+			, A.USER_TELNO
+			, A.USER_EML
+			, A.ENABLED
+			, A.MNGR_YN
+			, B.AUTH
+			, A.MSNGR_STTS
+			, C.DEPT_NO
+			, C.JBGD_CD
+			, C.JBTL_CD, A.CO_ID
+			, FN_GET_MNG_CD_NM(A.MSNGR_STTS) AS MSNGR_STTS_NM
+			, FN_GET_DEPT_NO_NM(C.DEPT_NO, A.CO_ID) AS DEPT_NM
+			, FN_GET_CST_CD_NM2CO(C.JBGD_CD, A.CO_ID) AS JBGD_NM
+			, FN_GET_CST_CD_NM2CO(C.JBTL_CD, A.CO_ID) AS JBTL_NM
+		FROM
+		    USERS A
+		INNER JOIN
+	    	USERS_AUTH B ON A.USER_ID = B.USER_ID
+	    INNER JOIN
+		    EMP_INFO C ON A.USER_ID = C.USER_ID
+        WHERE
+	    	CO_ID = #{coId}
+    	ORDER BY A.USER_ID DESC
+	</select>
+
+	<resultMap type="kr.or.ddit.user.vo.UserVO" id="userMap">
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="userPswd" column="USER_PSWD" />
+		<result property="userNm" column="USER_NM" />
+		<result property="userTelno" column="USER_TELNO" />
+		<result property="userEml" column="USER_EML" />
+		<result property="brthYmd" column="BRTH_YMD" />
+		<result property="userZip" column="USER_ZIP" />
+		<result property="userAddr" column="USER_ADDR" />
+		<result property="userDaddr" column="USER_DADDR" />
+		<result property="userImg" column="USER_IMG" />
+		<result property="signImg" column="SIGN_IMG" />
+		<result property="gndrMf" column="GNDR_MF" />
+		<result property="hobby" column="HOBBY" />
+		<result property="spcabl" column="SPCABL" />
+		<result property="msngrStts" column="MSNGR_STTS" />
+		<result property="msngrSttsNm" column="MSNGR_STTS_NM" />
+		<result property="enabled" column="ENABLED" />
+		<result property="mngrYn" column="MNGR_YN" />
+		<result property="faceYn" column="FACE_YN" />
+		<result property="voiceYn" column="VOICE_YN" />
+		<result property="spcabl" column="SPCABL" />
+		<result property="deptNo" column="DEPT_NO" />
+		<result property="jbgdCd" column="JBGD_CD" />
+		<result property="jbtlCd" column="JBTL_CD" />
+		<result property="deptNm" column="DEPT_NM" />
+		<result property="jbgdNm" column="JBGD_NM" />
+		<result property="jbtlNm" column="JBTL_NM" />
+		<result property="anslry" column="ANSLRY" />
+		<result property="bankNm" column="BANK_NM" />
+		<result property="actNo" column="ACT_NO" />
+		<result property="jncmpYmd" column="JNCMP_YMD" />
+		<result property="rsgntnYmd" column="RSGNTN_YMD" />
+		<result property="hdofCd" column="HDOF_CD" />
+		<result property="hdofCdNm" column="HDOF_CD_NM" />
+		<result property="mtrscCd" column="MTRSC_CD" />
+		<result property="mtrscCdNm" column="MTRSC_CD_NM" />
+		<collection property="usersAuthVOList" resultMap="usersAuthMap"></collection>
+	</resultMap>
+
+	<resultMap type="kr.or.ddit.user.vo.UsersAuthVO" id="usersAuthMap">
+		<result property="userId" column="USER_ID" />
+		<result property="auth" column="AUTH" />
+	</resultMap>
+
+	<!-- user정보 조회, 권한정보 포함 -->
+	<select id="detailUserAuth" parameterType="kr.or.ddit.user.vo.UserVO" resultMap="userMap">
+		SELECT
+			  A.USER_ID
+			, A.CO_ID
+			, A.USER_PSWD
+			, A.USER_NM
+			, A.BRTH_YMD
+			, A.USER_IMG
+			, A.SIGN_IMG
+			, A.USER_TELNO
+			, A.USER_EML
+			, A.USER_ZIP
+			, A.USER_ADDR
+			, A.USER_DADDR
+			, A.ENABLED
+			, A.MNGR_YN
+			, A.MSNGR_STTS
+			, A.GNDR_MF
+			, A.FACE_YN
+			, A.VOICE_YN
+			, B.AUTH
+			, C.DEPT_NO
+			, C.JBGD_CD
+			, C.JBTL_CD
+			, C.ANSLRY
+			, C.ACT_NO
+			, C.BANK_NM
+			, C.JNCMP_YMD
+			, C.RSGNTN_YMD
+			, C.HDOF_CD
+			, C.MTRSC_CD
+			, FN_GET_MNG_CD_NM(A.MSNGR_STTS) AS MSNGR_STTS_NM
+			, FN_GET_DEPT_NO_NM(C.DEPT_NO, A.CO_ID) AS DEPT_NM
+			, FN_GET_CST_CD_NM2CO(C.JBGD_CD, A.CO_ID) AS JBGD_NM
+			, FN_GET_CST_CD_NM2CO(C.JBTL_CD, A.CO_ID) AS JBTL_NM
+		    , FN_GET_MNG_CD_NM(C.HDOF_CD) AS HDOF_CD_NM
+		    , FN_GET_MNG_CD_NM(C.MTRSC_CD) AS MTRSC_CD_NM
+		FROM
+		    USERS A
+		INNER JOIN
+	    	USERS_AUTH B ON A.USER_ID = B.USER_ID
+	    INNER JOIN
+		    EMP_INFO C ON A.USER_ID = C.USER_ID
+        WHERE A.USER_ID = #{userId}
+	</select>
+
+
+	<!-- user정보 조회 -->
+	<select id="detail" parameterType="kr.or.ddit.user.vo.UserVO" resultType="kr.or.ddit.user.vo.UserVO">
+		SELECT
+		    USER_ID
+		  , CO_ID
+		  , USER_PSWD
+		  , USER_NM
+		  , USER_TELNO
+		  , USER_EML
+		  , BRTH_YMD
+		  , USER_ZIP
+		  , USER_ADDR
+		  , USER_DADDR
+		  , USER_IMG
+		  , SIGN_IMG
+		  , GNDR_MF
+		  , HOBBY
+		  , SPCABL
+		  , MSNGR_STTS
+		  , ENABLED
+		  , MNGR_YN
+		FROM
+		    USERS
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<!-- userId 자동생성 값 조건 조회 -->
+	<select id="maxUserId" parameterType="String" resultType="String">
+		SELECT
+		    MAX(USER_ID)
+		FROM
+		    USERS
+		WHERE USER_ID LIKE #{search}
+	</select>
+
+	<!-- email 중복 체크 -->
+	<select id="checkEmail" parameterType="String" resultType="int">
+		SELECT
+		    COUNT(USER_EML)
+		FROM
+		    USERS
+		WHERE
+		    USER_EML = #{email}
+	</select>
+
+
+	<insert id="registerUser" parameterType="kr.or.ddit.admin.account.vo.UserRegisterVO">
+		INSERT INTO USERS (
+		    USER_ID
+		  , CO_ID
+		  , USER_PSWD
+		  , USER_NM
+		  , USER_TELNO
+		  , USER_EML
+		  , BRTH_YMD
+		  , USER_ZIP
+		  , USER_ADDR
+		  , USER_DADDR
+		  , GNDR_MF
+		  , MSNGR_STTS
+		  , ENABLED
+		  , MNGR_YN
+		) VALUES (
+		    #{userId}
+		  , #{coId}
+		  , 'java'
+		  , #{userNm}
+		  , #{userTelno}
+		  , #{userEml}
+		  , #{brthYmd}
+		  , #{userZip}
+		  , #{userAddr}
+		  , #{userDaddr}
+		  , #{gndrMf}
+		  , 'MS002'
+		  , 1
+		  , 'N'
+		)
+	</insert>
+
+	<insert id="registerEmpInfo" parameterType="kr.or.ddit.admin.account.vo.UserRegisterVO">
+		INSERT INTO EMP_INFO (
+			USER_ID
+		  , DEPT_NO
+		  , JBGD_CD
+		  , JBTL_CD
+		  , ANSLRY
+		  , BANK_NM
+		  , ACT_NO
+		  , JNCMP_YMD
+		  , HDOF_CD
+		  , MTRSC_CD
+		) VALUES (
+			#{userId}
+		  , #{deptNo}
+   		  , #{jbgdCd}
+		  , #{jbtlCd}
+		  , #{anslry}
+		  , #{bankNm}
+		  , #{actNo}
+		  , #{jncmpYmd}
+		  , 'ES001'
+		  , #{mtrscCd}
+		)
+	</insert>
+
+	<insert id="addAuth" parameterType="map">
+		INSERT INTO USERS_AUTH (
+		    AUTH
+		  , USER_ID
+		) VALUES (
+		    #{auth}
+		  , #{userId}
+		)
+	</insert>
+
+	<update id="updateUser" parameterType="kr.or.ddit.user.vo.UserVO">
+		UPDATE USERS
+		    SET
+		        USER_TELNO = #{userTelno}
+		      , USER_EML = #{userEml}
+		      , USER_ZIP = #{userZip}
+		      , USER_ADDR = #{userAddr}
+		      , USER_DADDR = #{userDaddr}
+		WHERE
+		    USER_ID = #{userId}
+	</update>
+
+	<update id="updateEmpInfo" parameterType="kr.or.ddit.user.vo.UserVO">
+		UPDATE EMP_INFO
+		    SET
+		        DEPT_NO = #{deptNo}
+		      , JBGD_CD = #{jbgdCd}
+		      , JBTL_CD = #{jbtlCd}
+		      , ANSLRY = #{anslry}
+		      , BANK_NM = #{bankNm}
+		      , ACT_NO = #{actNo}
+		      , MTRSC_CD = #{mtrscCd}
+		WHERE
+		    USER_ID = #{userId}
+	</update>
+
+
+
+	<update id="accountAct" parameterType="String">
+		UPDATE USERS
+		SET
+		    ENABLED = CASE
+		        WHEN ENABLED = '0' THEN '1'
+		        WHEN ENABLED = '1' THEN '0'
+		    END
+		WHERE
+		    USER_ID = #{userId}
+	</update>
+
+	<update id="faceAct" parameterType="String">
+		UPDATE USERS
+		SET
+		    FACE_YN = CASE
+		        WHEN FACE_YN = 'N' THEN 'Y'
+		        WHEN FACE_YN = 'Y' THEN 'N'
+		    END
+		WHERE
+		    USER_ID = #{userId}
+	</update>
+
+	<select id="hasAdminList" parameterType="String" resultMap="userMap">
+		SELECT
+			  A.USER_ID
+			, A.CO_ID
+			, A.USER_EML
+			, A.USER_NM
+            , B.AUTH
+			, FN_GET_DEPT_NO_NM(C.DEPT_NO, A.CO_ID) AS DEPT_NM
+			, FN_GET_CST_CD_NM2CO(C.JBGD_CD, A.CO_ID) AS JBGD_NM
+			, FN_GET_CST_CD_NM2CO(C.JBTL_CD, A.CO_ID) AS JBTL_NM
+		FROM
+		    USERS A
+		INNER JOIN
+	    	USERS_AUTH B ON A.USER_ID = B.USER_ID
+	    INNER JOIN
+		    EMP_INFO C ON A.USER_ID = C.USER_ID
+        WHERE B.AUTH = 'ROLE_ADMIN'
+          AND A.CO_ID = #{coId}
+	</select>
+
+
+	<delete id="delAuth"  parameterType="map">
+		DELETE FROM USERS_AUTH
+		WHERE
+			USER_ID = #{userId}
+		AND
+			AUTH = #{auth}
+	</delete>
+
+	<insert id="userLog" parameterType="kr.or.ddit.user.vo.UserLogVO">
+		INSERT INTO USER_LOG (
+			 LOG_NO
+			, USER_ID
+			, LOG_STTS
+			, IP_ADDR
+			, NTN_CD
+			)
+		VALUES(
+		 SEQ_LOG.NEXTVAL
+		, #{userId}
+		, #{logStts}
+		, #{ipAddr}
+		, #{ntnCd}
+		)
+	</insert>
+
+	<update id="logSuccessZero" parameterType="String">
+		UPDATE
+			USERS
+		SET
+			FAIL_CNT = 0
+		WHERE
+			USER_ID = #{userId}
+	</update>
+
+
+	<update id="logFailCntUp" parameterType="String">
+		UPDATE
+			USERS
+		SET
+			 FAIL_CNT = FAIL_CNT + 1
+		WHERE
+			USER_ID = #{userId}
+	</update>
+
+	<select id="checkCntUp" parameterType="String" resultType="int">
+		SELECT
+			 FAIL_CNT
+		FROM
+			USERS
+		WHERE
+			USER_ID = #{userId}
+	</select>
+
+	<!-- 사용자 계정 존재 여부 확인 -->
+	<select id="checkId" parameterType="String" resultType="int">
+		SELECT
+			COUNT(USER_ID)
+		FROM
+			USERS
+		WHERE
+			USER_ID = #{userId}
+	</select>
+
+	<!-- 사용자 계정 활성화 여부 확인 -->
+	<select id="checkIdEn" parameterType="String" resultType="String">
+		SELECT
+		    ENABLED
+		FROM
+		    USERS
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<!-- 계정에 등록된 이메일 확인 -->
+	<select id="checkEmlId" parameterType="String" resultType="String">
+		SELECT
+			 USER_EML
+		FROM
+			USERS
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<!-- ROLE_USER만 가지고 있는 계정 조회 -->
+	<select id="onlyUserAuth" parameterType="String" resultType="kr.or.ddit.user.vo.UserVO">
+		SELECT
+			A.USER_ID
+			, A.USER_NM
+		FROM (
+
+			SELECT
+				B.*
+			FROM USERS B
+			INNER JOIN USERS_AUTH C ON B.USER_ID = C.USER_ID
+			WHERE AUTH = 'ROLE_USER'
+			AND B.CO_ID = #{coId}
+
+			MINUS
+
+			SELECT
+				B.*
+			FROM USERS B
+			INNER JOIN USERS_AUTH C ON B.USER_ID = C.USER_ID
+			WHERE AUTH = 'ROLE_ADMIN'
+			AND B.CO_ID = #{coId}
+
+		) A
+
+		WHERE A.CO_ID = #{coId}
+	</select>
+
+
+</mapper>

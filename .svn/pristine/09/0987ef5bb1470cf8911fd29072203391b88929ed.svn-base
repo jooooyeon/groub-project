@@ -1,0 +1,69 @@
+package kr.or.ddit.msg.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.msg.vo.MsgVO;
+
+/**
+ * @author 김종명
+ *
+ */
+public interface MsgMapper {
+	
+	/**
+	 * 모든 알람 읽음처리
+	 * @param List<MsgVO> msg
+	 * @return int
+	 */
+	public int readAllUpdate(List<MsgVO> mList);
+	/**
+	 * 보낸 사람 쪽지 저장
+	 * @param MsgVO msg
+	 * @return int
+	 */
+	public int insertSender(MsgVO msg);
+	/**
+	 * 받는 사람 쪽지 저장
+	 * @param MsgVO msg
+	 * @return int
+	 */
+	public int insertReceiver(MsgVO msg);
+	
+	/**
+	 * 보낸 쪽지
+	 * @param MsgVO msg
+	 * @return List<MsgVO>
+	 */
+	public List<MsgVO> listSender(MsgVO msg);
+	/**
+	 * 받는 쪽지
+	 * @param MsgVO msg
+	 * @return List<MsgVO>
+	 */
+	public List<MsgVO> listReceiver(MsgVO msg);
+	/**
+	 * 보낸 쪽지 상세보기
+	 * @param MsgVO msg
+	 * @return MsgVO
+	 */
+	public MsgVO detailSender(MsgVO msg);
+	/**
+	 * 받는 쪽지 상세보기
+	 * @param MsgVO msg
+	 * @return MsgVO
+	 */
+	public MsgVO detailReceiver(MsgVO msg);
+	
+	/**
+	 * 받는 쪽지 업데이트
+	 * @param MsgVO msg
+	 * @return int
+	 */
+	public int updateReceiver(MsgVO msg);
+	/**
+	 * 보낸 쪽지 업데이트
+	 * @param MsgVO msg
+	 * @return int
+	 */
+	public int updateSender(MsgVO msg);
+}

@@ -1,0 +1,140 @@
+package kr.or.ddit.draft.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+/**
+ * @author 정시윤
+ * 휴가 기안문서에 사용할 휴가 정보 VO
+ */
+public class DraftVacVO {
+	/**
+	 * 휴가부여 관리번호(시퀀스)
+	 */
+	private int vacGrntNo;
+	/**
+	 * 휴가를 부여 받은 사용자 아이디
+	 */
+	private String userId;
+	/**
+	 * 부여받은 휴가의 유형 공통 코드
+	 */
+	private String vacTp;
+	/**
+	 * 휴가 유형의 유형 명(연차, 병가, 보상, 포상)
+	 */
+	private String vacNm;
+	/**
+	 * 부여받은 일자
+	 */
+	private Date vacGrntYmd;
+	/**
+	 * 부여받은 휴가의 총 일 수
+	 */
+	private int vacGrntDays;
+	/**
+	 * 부여받은 휴가의 유효기간(만료일자)
+	 */
+	private Date vldYmd;
+	
+	/**
+	 * 남은 휴가 일 수
+	 */
+	private int remainVacDays;
+	
+	/**
+	 * 휴가를 사용한 일 수
+	 */
+	private int vacUseDays;
+	
+	
+	public DraftVacVO() {
+	}
+
+	public int getVacGrntNo() {
+		return vacGrntNo;
+	}
+
+	public void setVacGrntNo(int vacGrntNo) {
+		this.vacGrntNo = vacGrntNo;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getVacTp() {
+		return vacTp;
+	}
+
+	public void setVacTp(String vacTp) {
+		this.vacTp = vacTp;
+	}
+
+	public String getVacNm() {
+		return vacNm;
+	}
+
+	public void setVacNm(String vacNm) {
+		this.vacNm = vacNm;
+	}
+
+	public Date getVacGrntYmd() {
+		return vacGrntYmd;
+	}
+
+	public void setVacGrntYmd(Date vacGrntYmd) {
+		this.vacGrntYmd = vacGrntYmd;
+	}
+
+	public int getVacGrntDays() {
+		return vacGrntDays;
+	}
+
+	public void setVacGrntDays(int vacGrntDays) {
+		this.vacGrntDays = vacGrntDays;
+	}
+
+	public Date getVldYmd() {
+		return vldYmd;
+	}
+
+	public void setVldYmd(Date vldYmd) {
+		this.vldYmd = vldYmd;
+	}
+
+	public int getRemainVacDays() {
+		int result = vacGrntDays - remainVacDays;
+		this.remainVacDays = result;
+		return result;
+	}
+	
+	public void setRemainVacDays(int remainVacDays) {
+		this.remainVacDays = remainVacDays;
+	}
+
+	public int getVacUseDays() {
+		return vacUseDays;
+	}
+
+	public void setVacUseDays(int vacUseDays) {
+		this.vacUseDays = vacUseDays;
+	}
+
+	@Override
+	public String toString() {
+		return "DraftVacVO [vacGrntNo=" + vacGrntNo + ", userId=" + userId + ", vacTp=" + vacTp + ", vacNm=" + vacNm
+				+ ", vacGrntYmd=" + vacGrntYmd + ", vacGrntDays=" + vacGrntDays + ", vldYmd=" + vldYmd
+				+ ", remainVacDays=" + remainVacDays + ", vacUseDays=" + vacUseDays + "]";
+	}
+	
+	
+	
+	
+	
+}

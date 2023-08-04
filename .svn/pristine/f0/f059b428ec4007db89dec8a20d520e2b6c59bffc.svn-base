@@ -1,0 +1,51 @@
+/**
+ * 
+ */
+
+//채팅방 목록 불러오기
+$(document).on('click', '#msg-list', () => {
+	chatList();
+});
+
+function chatList(){
+	$.ajax({
+		url: '/chat/list',
+		type: 'get',
+		data: {
+			userId: userId,
+		},
+		success: (res) => {
+			let html = ``;
+			res.forEach((e, i) => {
+				html += `
+					<li class="p-2 border-bottom" style="list-style-type:none;">
+                  		<a class="d-flex justify-content-between">
+                    		<div class="d-flex flex-row">
+								<img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-1.webp" alt="avatar" class="rounded-circle d-flex align-self-center me-3 shadow-1-strong" width="60">
+								<div class="pt-1">
+									<p class="fw-bold mb-0 chat-room" data-rmno="`+ e.chatRmNo + `">`
+									
+				for(let i=0;i<e.userList.length;i++){
+					if(e.userList[i].userId!=userId) {
+						html += e.userList[i].deptNm+` `+e.userList[i].cstCdNm+` `+e.userList[i].userNm
+					}
+				}
+									
+				html +=
+									`</p>
+	                        		<p class="small text-muted"></p>
+                      			</div>
+                    		</div>
+	                    <div class="pt-1">
+	                    	<p class="small text-muted mb-1"></p>
+	                    </div>
+						</a>
+                	</li>
+				`
+			})
+			$('#off-chat-list').html(html);
+		},
+	});
+
+	$('#off-chatlist').offcanvas('show');
+}

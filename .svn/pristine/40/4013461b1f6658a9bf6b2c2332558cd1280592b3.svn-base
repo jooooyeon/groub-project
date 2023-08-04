@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.user.mapper.UserMapper">
+
+	<!-- 상품목록 -->
+	<select id="list" resultType="userVO">
+		SELECT *
+		  FROM USER
+	</select>
+
+	<resultMap type="userVO" id="userMap">
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="userPswd" column="USER_PSWD" />
+		<result property="userNm" column="USER_NM" />
+		<result property="userTelno" column="USER_TELNO" />
+		<result property="userEml" column="USER_EML" />
+		<result property="brthYmd" column="BRTH_YMD" />
+		<result property="userZip" column="USER_ZIP" />
+		<result property="userAddr" column="USER_ADDR" />
+		<result property="userDaddr" column="USER_DADDR" />
+		<result property="userImg" column="USER_IMG" />
+		<result property="signImg" column="SIGN_IMG" />
+		<result property="gndrMf" column="GNDR_MF" />
+		<result property="hobby" column="HOBBY" />
+		<result property="spcabl" column="SPCABL" />
+		<result property="msngrStts" column="MSNGR_STTS" />
+		<result property="enabled" column="ENABLED" />
+		<result property="mngrYn" column="MNGR_YN" />
+		<result property="spcabl" column="SPCABL" />
+		<result property="deptNo" column="DEPT_NO" />
+		<result property="jbgdCd" column="JBGD_CD" />
+		<result property="jbtlCd" column="JBTL_CD" />
+		<collection property="usersAuthVOList" resultMap="usersAuthMap"></collection>
+	</resultMap>
+
+	<resultMap type="usersAuthVO" id="usersAuthMap">
+		<result property="userId" column="USER_ID" />
+		<result property="auth" column="AUTH" />
+	</resultMap>
+
+	<!-- user정보 조회, 권한정보 포함 -->
+	<select id="detailUserAuth" parameterType="userVO" resultMap="userMap">
+		SELECT
+			  A.USER_ID
+			, A.CO_ID
+			, A.USER_PSWD
+			, A.USER_NM
+			, A.USER_TELNO
+			, A.USER_EML
+			, A.ENABLED
+			, A.MNGR_YN
+			, B.AUTH
+			, FN_GET_MNG_CD_NM(A.MSNGR_STTS) AS MSNGR_STTS
+			, FN_GET_DEPT_NO_NM(C.DEPT_NO, A.CO_ID) AS DEPT_NO
+			, FN_GET_CST_CD_NM2CO(C.JBGD_CD, A.CO_ID) AS JBGD_CD
+			, FN_GET_CST_CD_NM2CO(C.JBTL_CD, A.CO_ID) AS JBTL_CD
+		FROM
+		    USERS A
+		INNER JOIN
+	    	USERS_AUTH B ON A.USER_ID = B.USER_ID
+	    INNER JOIN
+		    EMP_INFO C ON A.USER_ID = C.USER_ID
+        WHERE A.USER_ID = #{userId}
+	</select>
+
+
+	<!-- user정보 조회 -->
+	<select id="detail" parameterType="userVO" resultType="userVO">
+		SELECT
+		    USER_ID
+		  , CO_ID
+		  , USER_PSWD
+		  , USER_NM
+		  , USER_TELNO
+		  , USER_EML
+		  , BRTH_YMD
+		  , USER_ZIP
+		  , USER_ADDR
+		  , USER_DADDR
+		  , USER_IMG
+		  , SIGN_IMG
+		  , GNDR_MF
+		  , HOBBY
+		  , SPCABL
+		  , MSNGR_STTS
+		  , ENABLED
+		  , MNGR_YN
+		FROM
+		    USERS
+		WHERE USER_ID = #{userId}
+	</select>
+
+
+	<insert id="register" parameterType="userVO">
+	</insert>
+
+	<update id="update" parameterType="userVO">
+	</update>
+
+	<delete id="delete" parameterType="userVO">
+	</delete>
+
+</mapper>

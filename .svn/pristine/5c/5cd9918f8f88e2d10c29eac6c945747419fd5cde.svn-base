@@ -1,0 +1,11 @@
+package kr.or.ddit.ai.module.vehicle.vo;
+
+import java.util.Date;
+
+public class VehicleVO {
+	private int vLogNo;
+    private String vhclNo;
+    private String vhclIo;
+    private Date cgDt;
+
+}

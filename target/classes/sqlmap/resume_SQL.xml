@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.resume.mapper.ResumeMapper">
+
+<!-- 이력서 자격기술 -->
+
+<!-- 이력서 리스트 -->
+<select id="resumeList" resultType="kr.or.ddit.resume.vo.ResumeVO">
+	SELECT
+	    rsm_no
+	   ,rsm_dt
+	   ,rsm_nm
+	   ,resume_tp
+	   ,FN_GET_DEPT_NO_NM(DEPT_NO, 'NAVER') AS DEPT_NO_NM
+	
+	FROM
+	    rsm
+</select>
+
+
+<resultMap type="kr.or.ddit.resume.vo.ResumeVO" id="resumeMap">
+	<result property="rsmNo" column="RSM_NO" />
+	<result property="rsmDt" column="RSM_DT" />
+	<result property="rsmNm" column="RSM_NM" />
+	<result property="telno" column="TELNO" />
+	<result property="mailAddr" column="MAIL_ADDR" />
+	<result property="addr" column="ADDR" />
+	<result property="mtrscCd" column="MTRSC_CD" />
+	<result property="resumeEdu" column="RESUME_EDU" />
+	<result property="image" column="IMAGE" />
+	<result property="resumeMajor" column="RESUME_MAJOR" />
+	<result property="graduate" column="GRADUATE" />
+	<result property="resumeCareer" column="RESUME_CAREER" />
+	<result property="resumeFile" column="RESUME_FILE" />
+	<result property="resumeTp" column="RESUME_TP" />
+	<result property="deptNo" column="DEPT_NO" />
+	<result property="rsmEgNm" column="RSM_EG_NM" />
+	<collection property="qnsinfNm" column="qnsinf_nm" resultMap="qnsinfNmMap"></collection>
+	<collection property="resumeCareerVO" resultMap="careerMap"></collection>
+	<collection property="resumeCirtificationVO" resultMap="cirtificationMap"></collection>
+</resultMap>
+
+<resultMap type="String" id="qnsinfNmMap">
+	<result column="qnsinf_nm"></result>
+</resultMap>
+
+<resultMap type="kr.or.ddit.resume.vo.ResumeCareerVO" id="careerMap">
+	<result property="crrNo" column="CRR_NO" />
+	<result property="rsmNo" column="RSM_NO" />
+	<result property="crrcoNm" column="CRRCO_NM" />
+	<result property="crrStdt" column="CRR_STDT" />
+	<result property="crrEndt" column="CRR_ENDT" />
+	<result property="crrJob" column="CRR_JOB" />
+</resultMap>
+
+<resultMap type="kr.or.ddit.resume.vo.ResumeCirtificationVO" id="cirtificationMap">
+	<result property="rsmCrtfctNo" column="RSM_CRTFCT_NO" />
+	<result property="resumeNo" column="RESUME_NO" />
+	<result property="crtfctNm" column="CRTFCT_NM" />
+	<result property="rsmCrtfctGrad" column="RSM_CRTFCT_GRAD" />
+	<result property="rsmCrtfctYmd" column="RSM_CRTFCT_YMD" />
+	<result property="rsmCrtfctNm" column="RSM_CRTFCT_NM" />
+</resultMap>
+
+
+<select id="resumeDetail" parameterType="kr.or.ddit.resume.vo.ResumeVO" resultMap="resumeMap">
+
+	SELECT
+	    A.rsm_no,
+	    A.rsm_dt,
+	    A.rsm_nm,
+	    A.telno,
+	    A.mail_addr,
+	    A.addr,
+	    A.mtrsc_cd,
+	    A.resume_edu,
+	    A.image,
+	    A.resume_major,
+	    A.graduate,
+	    A.resume_career,
+	    A.resume_file,
+	    A.resume_tp,
+	    A.dept_no,
+	    A.rsm_eg_nm,
+	    B.RSM_NO,
+	    B.CRRCO_NM, 
+	    B.CRR_STDT, 
+	    B.CRR_ENDT, 
+	    B.CRR_JOB,
+	    C.RSM_CRTFCT_NO, 
+	    C.CRTFCT_NM, 
+	    C.rsm_crtfct_grad, 
+	    C.rsm_crtfct_ymd
+	    , D.qnsinf_nm
+	    
+	FROM
+	    rsm A
+	LEFT JOIN 
+		rsm_career B ON B.rsm_no = A.rsm_no
+	
+	LEFT JOIN 
+		rsm_crtfct C ON C.resume_no = A.rsm_no
+	
+	LEFT JOIN
+		rsm_qnsinf D ON D.resume_no = A.rsm_no
+	
+	WHERE
+	    A.rsm_no = #{rsmNo}
+	    
+	order by CRR_STDT , RSM_CRTFCT_YMD
+
+</select>
+
+
+
+
+
+
+</mapper>

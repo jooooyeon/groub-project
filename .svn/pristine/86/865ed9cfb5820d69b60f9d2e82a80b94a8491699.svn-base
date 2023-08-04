@@ -1,0 +1,23 @@
+package kr.or.ddit.community.board.service.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.community.board.mapper.BoardMapper;
+import kr.or.ddit.community.board.service.BoardService;
+import kr.or.ddit.community.board.vo.BoardVO;
+
+@Service
+public class BoardServiceImpl implements BoardService {
+	
+	@Inject
+	BoardMapper boardMapper;
+	
+	@Override
+	public List<BoardVO> list(){
+		return this.boardMapper.list();
+	}
+}

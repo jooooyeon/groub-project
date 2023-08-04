@@ -1,0 +1,11 @@
+package kr.or.ddit.mail.mapper;
+
+import kr.or.ddit.mail.vo.MailVO;
+
+public interface MailMapper {
+	//발신자 저장
+	public int insertDsptch(MailVO mail);
+	//수신자 저장
+	public int insertRcptn(MailVO mail);
+	
+}

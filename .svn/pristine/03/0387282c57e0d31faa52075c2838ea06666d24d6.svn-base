@@ -1,0 +1,122 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="kr.or.ddit.reservation.vo.VhclVO"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+
+<div class="col-lg-12">
+  <div class="card">
+    <div class="card-header">
+      <div class="row flex-between-end">
+      <h3 id="carTitle" >일정 관리</h3>
+        <div class="col-auto align-self-center">
+
+
+		<div class="form-check form-check-inline">
+		  <input class="form-check-input" id="inlineCheckbox1" type="checkbox" value="<sec:authentication property="principal.userVO.coId"/>" checked />
+		  <label class="form-check-label" for="inlineCheckbox1">전체일정</label>
+		</div>
+		<div class="form-check form-check-inline">
+		  <input class="form-check-input" id="inlineCheckbox2" type="checkbox" value="<sec:authentication property="principal.userVO.deptNo"/>" checked />
+		  <label class="form-check-label" for="inlineCheckbox2">팀일정</label>
+		</div>
+		<div class="form-check form-check-inline">
+		  <input class="form-check-input" id="inlineCheckbox3" type="checkbox" value="<sec:authentication property="principal.userVO.userId"/>" checked />
+		  <label class="form-check-label" for="inlineCheckbox3">개인일정</label>
+		</div>
+
+
+        </div>
+      </div>
+    </div>
+    <div class="card-body bg-light">
+      <div class="tab-content">
+        <div class="tab-pane preview-tab-pane active" role="tabpanel" aria-labelledby="tab-dom-d119274c-28f2-4f9b-a522-5ff7a03cee30" id="dom-d119274c-28f2-4f9b-a522-5ff7a03cee30">
+         <div id="calendar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<input id="coId" type="hidden" value="<sec:authentication property="principal.userVO.coId"/>" >
+<input id="userId" type="hidden" value="<sec:authentication property="principal.userVO.userId"/>" >
+
+
+
+<script>
+$(function() {
+	  // FullCalendar 캘린더 생성 함수를 정의합니다.
+	  function createCalendar(data) {
+		console.log(data);
+	    var calendarEl = document.getElementById('calendar');
+	    var calendar = new FullCalendar.Calendar(calendarEl, {
+	      slotMinTime: '08:00',
+	      slotMaxTime: '20:00',
+	      headerToolbar: {
+	        left: 'prev,next,today',
+	        center: 'title',
+	        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+	      },
+	      initialView: 'timeGridWeek',
+	      navLinks: true,
+	      events: data,
+	      locale: 'ko'
+	    });
+	    calendar.render();
+	  }
+
+	  // 체크박스 요소들을 선택합니다.
+	  var checkboxes = document.querySelectorAll('.form-check-input');
+
+	  // 체크된 값을 저장할 배열을 생성합니다.
+	  var checkedValues = [];
+
+	  // 체크된 체크박스들의 값을 배열에 추가하는 함수입니다.
+	  function updateCheckedValues() {
+	    checkedValues = [];
+	    checkboxes.forEach(function(checkbox) {
+	      if (checkbox.checked) {
+	        checkedValues.push(checkbox.value);
+	      }
+	    });
+	  }
+
+	  // 체크박스의 변경 이벤트에 대한 리스너를 추가합니다.
+	  checkboxes.forEach(function(checkbox) {
+	    checkbox.addEventListener('change', function() {
+	      updateCheckedValues();
+	      fetchCalendarData();
+	    });
+	  });
+
+	  // 페이지 로딩 후에 체크된 값을 가져와서 캘린더를 생성합니다.
+	  updateCheckedValues();
+	  fetchCalendarData();
+
+	  // FullCalendar 캘린더를 생성하기 위해 필요한 데이터를 가져오는 함수입니다.
+	  function fetchCalendarData() {
+	    var request = $.ajax({
+	      url: "/schedule/list/",
+	      method: "POST",
+	      dataType: "JSON",
+	      traditional: true,
+	      async: false,
+	      data: { checkedValues: checkedValues },
+	      beforeSend: function(xhr) {
+	    	  xhr.setRequestHeader("${_csrf.headerName}", "${_csrf.token}");
+	      }
+	    });
+
+	    request.done(function(data) {
+	      createCalendar(data);
+	    });
+	  }
+	});
+</script>
+
+
+
+
+
+

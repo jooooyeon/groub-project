@@ -1,0 +1,18 @@
+package kr.or.ddit.user.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class UserLogVO {
+	private int logNo;
+	private String userId;
+	private String coId;
+	private String logStts;
+	private Date logYmd;
+	private String ipAddr;
+	private String ntnCd;
+	private int failCnt;
+
+}

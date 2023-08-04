@@ -1,0 +1,21 @@
+package kr.or.ddit.schedule.vo;
+
+import lombok.Data;
+
+@Data
+public class ScheduleVO {
+
+	private String schdlNo;
+	private String userId;
+	private String deptNo;
+	private String coId;
+	private String schdlTtl;
+	private String schdlCn;
+	private String regDt;
+	private String strtSchdlDt;
+	private String endSchdlDt;
+	private String schdlTp;
+	private String delYn;
+	private String delDt;
+
+}

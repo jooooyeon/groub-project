@@ -1,0 +1,65 @@
+package kr.or.ddit.user.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.user.mapper.UserMapper;
+import kr.or.ddit.user.service.UserService;
+import kr.or.ddit.user.vo.UserVO;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+public class UserServiceImpl implements UserService {
+
+	@Autowired
+	UserMapper userMapper;
+
+
+	/**
+	 * 유저 목록
+	 */
+	public List<UserVO> list(){
+		return this.userMapper.list();
+	};
+
+	/**
+	 * 유저 검색
+	 */
+	public UserVO detail(UserVO userVO) {
+		return this.userMapper.detail(userVO);
+	};
+
+	/**
+	 * 유저 검색
+	 */
+	public UserVO detailUserAuth(UserVO userVO) {
+		return this.userMapper.detailUserAuth(userVO);
+	};
+
+
+
+	/**
+	 * 유저 등록
+	 */
+	public int register(UserVO userVO) {
+		return this.userMapper.register(userVO);
+	};
+
+	/**
+	 * 유저 수정
+	 */
+	public int update(UserVO userVO) {
+		return this.userMapper.update(userVO);
+	};
+
+	/**
+	 * 유저 삭제
+	 */
+	public int delete(UserVO userVO) {
+		return this.userMapper.delete(userVO);
+	};
+
+}

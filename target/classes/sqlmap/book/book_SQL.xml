@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.ai.recommend.book.mapper.BookMapper">
+
+	<select id="recomList" resultType="kr.or.ddit.ai.recommend.book.vo.BookRecomVO">
+		SELECT 
+			abr.BOOK_NO1
+			, abl.BOOK_NM AS BOOK_NM1
+			, abl.AUTHOR AS AUTHOR1
+			, abl.PUBLISHER AS PUBLISHER1
+			, abr.BOOK_NO2 
+			, abl2.BOOK_NM AS BOOK_NM2
+			, abl2.AUTHOR AS AUTHOR2
+			, abl2.PUBLISHER AS PUBLISHER2
+			, abr.BOOK_NO3 
+			, abl3.BOOK_NM AS BOOK_NM3
+			, abl3.AUTHOR AS AUTHOR3
+			, abl3.PUBLISHER AS PUBLISHER3
+		FROM AI_BK_RSLT abr
+		INNER JOIN AI_BOOK_LIST abl
+		ON abl.BOOK_NO = abr.BOOK_NO1
+		INNER JOIN AI_BOOK_LIST abl2
+		ON abl2.BOOK_NO = abr.BOOK_NO2
+		INNER JOIN AI_BOOK_LIST abl3
+		ON abl3.BOOK_NO = abr.BOOK_NO3
+		WHERE abr.USER_ID = #{userId}
+		ORDER BY abr.USER_ID
+	</select>
+
+</mapper>

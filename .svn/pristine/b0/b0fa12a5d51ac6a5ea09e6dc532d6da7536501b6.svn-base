@@ -1,0 +1,35 @@
+package kr.or.ddit.attendance;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import kr.or.ddit.attendance.vo.AttendanceVO;
+
+import java.util.List;
+
+import org.mybatis.spring.SqlSessionTemplate;
+
+//매퍼xml(attendance_SQL.xml) 실행
+@Repository
+public class AttendanceDao {
+	
+	
+	//IoC : 제어의 역전
+	//DAO 클래스 : 데이터에 접근하는 클래스
+	//Repository 어노테이션 : 데이터에 접근하는 클래스
+	//스프링이 데이터를 관리하는 클래스라고 인지하여 자바빈으로 등록하여 관리
+	@Autowired
+	SqlSessionTemplate sqlSessionTemplate;
+	
+	//근태 목록 조회
+	public List<AttendanceVO> list(String attnd) {
+		return sqlSessionTemplate.selectList("attendance.list",attnd);
+	}
+	
+	//출퇴근 데이터 넣기
+	public int insert(AttendanceVO attendanceVO) {
+		return sqlSessionTemplate.insert("attendance.insert",attendanceVO);
+	}
+
+}

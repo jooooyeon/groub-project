@@ -1,0 +1,14 @@
+package kr.or.ddit.schedule.service;
+
+import java.util.List;
+
+import kr.or.ddit.schedule.vo.ScheduleVO;
+
+public interface ScheduleService {
+
+	/**
+	 * 전체 일정 조회
+	 * @param userId
+	 */
+	public List<ScheduleVO> listAll(String schdlTp);
+}

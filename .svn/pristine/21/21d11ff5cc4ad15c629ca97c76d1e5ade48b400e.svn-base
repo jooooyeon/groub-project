@@ -1,0 +1,162 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+
+<footer class="footer">
+	<div class="row g-0 justify-content-between fs--1 mt-4 mb-3">
+		<div class="col-12 col-sm-auto text-center">
+			<p class="mb-0 text-600">
+				Thank you for creating with Falcon <span
+					class="d-none d-sm-inline-block">| </span><br class="d-sm-none" />
+				2023 &copy; <a href="https://themewagon.com">Themewagon</a>
+			</p>
+		</div>
+		<div class="col-12 col-sm-auto text-center"></div>
+	</div>
+</footer>
+
+<div class="modal fade" id="chat-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <img src="#" class="rounded me-2" alt="...">
+      <strong class="me-auto">알람 왔어요</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Hello, world! This is a toast message.
+    </div>
+  </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  <div class="offcanvas-header">
+    <h5 id="offcanvasRightLabel">채팅방 목록</h5>
+  </div>
+  <div class="offcanvas-body">
+    ...
+  </div>
+</div>
+
+<sec:authorize access="isAuthenticated()">
+<script>
+let userId = `<%=request.getUserPrincipal().getName()%>`
+// 	console.log("userId",userId);
+	let userData = {};
+	
+	var sockJs = new SockJS("/ws");
+	var stomp = Stomp.over(sockJs);
+	stomp.debug = null;
+	
+	var receiver = $('#receiver');
+
+	stomp.connect({}, function() {
+
+		stomp.subscribe("/sub/alarm/" + userId, function(chat) {
+			var content = chat.body; 
+			if (content) {
+				$('.toast-body').html(content);
+				console.log("알람",content);
+				$('#liveToast').toast('show');
+			}
+		});
+
+		stomp.subscribe("/sub/userData", function(chat) {
+			var content = JSON.parse(chat.body);
+			if (content) {
+				userData = content;
+				console.log("userData",userData);
+			}
+		});
+	});
+
+	$(()=>{
+		stomp.send('/pub/userData',{}, JSON.stringify({}));
+	});
+	
+	var chat = new SockJS("/chat");
+	var stompChat = Stomp.over(chat);
+	stompChat.debug = null;
+
+	stompChat.connect({}, function() {
+	
+		stompChat.subscribe("/sub/userList", function(chat) {
+			var content = JSON.parse(chat.body);
+			if (content) {
+				listView(content);
+// 				$('.offcanvas').offcanvas('show');
+			}
+		});
+	});
+	
+	$(()=>{
+		stompChat.send('/pub/userList',{}, JSON.stringify({}));
+	});
+	
+	function listView(content){
+		let html = ``;
+		
+		const userSesstion = new Map(Object.entries(content));
+			html += `<div class="text-center">현재 접속 목록</div>`;
+		userSesstion.forEach((value, key, map)=>{
+			html += `
+					<li>
+						<button type="button" class="dropdown-item" id="chat-add" data-toggle="modal" data-target="#chat-modal">
+							<div class="hover-actions-trigger chat-contact nav-item text-center d-flex align-items-center">
+								`+key+`
+							</div>
+						</button>
+					</li>
+			`
+		});
+		html += `
+			<li class="d-flex align-items-center text-center">
+				<a class="dropdown-item btn btn-ouline-secondary btn-sm" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" id="chat-list">방 목록보기</a>
+			</li>
+		`
+		$('#drop-chat-list').html(html);
+	}
+	
+	$(document).on('click','#chat-add',()=>{
+		const modalElement = document.querySelector('#chat-modal');
+		const bootstrapModal = new bootstrap.Modal(modalElement);
+		bootstrapModal.show();
+	});
+	
+	document.addEventListener('DOMContentLoaded',()=>{
+		document.addEventListener('click', (e) => {
+			if (e.target.matches('#chat-list')) {
+				var xhr = new XMLHttpRequest();
+				xhr.open('get', '/chat/list');
+				xhr.onreadystatechange = function() {
+				  if (xhr.readyState === 4 && xhr.status === 200) {
+				    var res = xhr.responseText;
+				    console.log(res);
+					}
+				};
+				xhr.send();
+			}
+		});
+	});
+</script>
+</sec:authorize>

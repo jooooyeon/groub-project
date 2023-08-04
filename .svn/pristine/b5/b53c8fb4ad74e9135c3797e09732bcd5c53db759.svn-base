@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.ai.recommend.certification.mapper.CertificationMapper">
+	
+	<!-- 자격증ai -->
+	<select id="list" resultType="kr.or.ddit.ai.recommend.certification.vo.AiCrtfctRsltVO" >
+        SELECT A.RSLT_NO, A.USER_ID,
+		       B1.CRTFCT_NM AS certification1,
+		       B1.CRTFCT_DESCRIP AS description1,
+               B1.CRTFCT_URL AS url1,
+		       B2.CRTFCT_NM AS certification2,
+		       B2.CRTFCT_DESCRIP AS description2,
+               B2.CRTFCT_URL AS url2,
+		       B3.CRTFCT_NM AS certification3,
+		       B3.CRTFCT_DESCRIP AS description3,
+               B3.CRTFCT_URL AS url3,
+		       B4.CRTFCT_NM AS certification4,
+		       B4.CRTFCT_DESCRIP AS description4,
+               B4.CRTFCT_URL AS url4,
+		       B5.CRTFCT_NM AS certification5,
+		       B5.CRTFCT_DESCRIP AS description5,
+               B5.CRTFCT_URL AS url5
+		FROM AI_CRTFCT_RSLT A
+		LEFT JOIN CRTFCT B1 ON A.CRTFCT_NO = B1.CRTFCT_NO
+		LEFT JOIN CRTFCT B2 ON A.CRTFCT_NO2 = B2.CRTFCT_NO
+		LEFT JOIN CRTFCT B3 ON A.CRTFCT_NO3 = B3.CRTFCT_NO
+		LEFT JOIN CRTFCT B4 ON A.CRTFCT_NO4 = B4.CRTFCT_NO
+		LEFT JOIN CRTFCT B5 ON A.CRTFCT_NO5 = B5.CRTFCT_NO
+		WHERE A.USER_ID = #{userId}
+	</select>
+	
+
+</mapper>

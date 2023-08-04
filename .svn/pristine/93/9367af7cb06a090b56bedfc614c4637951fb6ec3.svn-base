@@ -1,0 +1,64 @@
+package kr.or.ddit.reservation.vo;
+
+import java.util.Date;
+
+public class VhclRsvtVO {
+
+	private int vRsvtNo;
+	private String userId;
+	private String vhclNo;
+	private Date rsvtDt;
+	private String strtRsvtDt;
+	private String endRsvtDt;
+	private String prps;
+	public int getVRsvtNo() {
+		return vRsvtNo;
+	}
+	public void setVRsvtNo(int vRsvtNo) {
+		this.vRsvtNo = vRsvtNo;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getVhclNo() {
+		return vhclNo;
+	}
+	public void setVhclNo(String vhclNo) {
+		this.vhclNo = vhclNo;
+	}
+	public Date getRsvtDt() {
+		return rsvtDt;
+	}
+	public void setRsvtDt(Date rsvtDt) {
+		this.rsvtDt = rsvtDt;
+	}
+	public String getStrtRsvtDt() {
+		return strtRsvtDt;
+	}
+	public void setStrtRsvtDt(String strtRsvtDt) {
+		this.strtRsvtDt = strtRsvtDt;
+	}
+	public String getEndRsvtDt() {
+		return endRsvtDt;
+	}
+	public void setEndRsvtDt(String endRsvtDt) {
+		this.endRsvtDt = endRsvtDt;
+	}
+	public String getPrps() {
+		return prps;
+	}
+	public void setPrps(String prps) {
+		this.prps = prps;
+	}
+	@Override
+	public String toString() {
+		return "VhclRsvtVO [vRsvtNo=" + vRsvtNo + ", userId=" + userId + ", vhclNo=" + vhclNo + ", rsvtDt=" + rsvtDt
+				+ ", strtRsvtDt=" + strtRsvtDt + ", endRsvtDt=" + endRsvtDt + ", prps=" + prps + "]";
+	}
+
+
+
+}

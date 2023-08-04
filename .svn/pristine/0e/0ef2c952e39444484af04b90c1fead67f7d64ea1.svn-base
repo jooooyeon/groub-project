@@ -1,0 +1,182 @@
+package kr.or.ddit.empinfo.controller;
+
+import java.io.IOException;
+import java.security.Principal;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.empinfo.service.EmpInfoService;
+import kr.or.ddit.empinfo.vo.CrtfctVO;
+import kr.or.ddit.empinfo.vo.EmpInfoCertificationVO;
+import kr.or.ddit.empinfo.vo.EmpInfoVO;
+import kr.or.ddit.empinfo.vo.FamVO;
+import kr.or.ddit.empinfo.vo.HrRcrdVO;
+import kr.or.ddit.empinfo.vo.VacationVO;
+
+@RequestMapping("/empinfo")
+@Controller
+public class EmpInfoController {
+	
+	@Autowired
+	EmpInfoService empInfoService;
+	
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	
+	/**
+	 * 인사정보 메인 페이지
+	 */
+	@RequestMapping("/empinfo")
+	public String mainEmpInfo(EmpInfoVO empInfoVO, Model model, Principal principal){
+		String userId = principal.getName();
+		empInfoVO.setUserId(userId);
+		log.info("mainEmpInfo userId : " + userId);
+		
+		empInfoVO = this.empInfoService.detail(empInfoVO);
+		log.info("crtfctVO empInfoVO : " + empInfoVO);
+		model.addAttribute("data",empInfoVO);
+		
+		
+		List<CrtfctVO> crtfctVO = this.empInfoService.selectCrtfct();
+		log.info("crtfctVO selectCrtfct : " + crtfctVO );
+		model.addAttribute("crtfct",crtfctVO);
+		
+		return "empInfo/empInfo";
+	}
+	
+	
+	//인사정보 신상정보 수정
+	@ResponseBody
+	@PostMapping("/updatePersonal")
+	public String updatePersonalEmpInfo(@RequestBody EmpInfoVO empInfoVO, Model model) {
+		
+		log.info("updatePersonalEmpInfo empInfoVO : " + empInfoVO);
+		
+		int result = empInfoService.updatePersonal(empInfoVO);
+		if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+	
+	//인사정보 자격증 정보 삭제
+	@ResponseBody
+	@PostMapping("/deleteCrtfct")
+	public String deleteCrtfct(@RequestBody EmpInfoCertificationVO empInfoCertificationVO, Model model) {
+		
+		log.info("updatePersonalEmpInfo empInfoCertificationVO : " + empInfoCertificationVO);
+		
+		int result = empInfoService.deleteCrtfct(empInfoCertificationVO);
+		if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	@RequestMapping("/vacinfopersonal")
+	public String vacInfoPersonal(){
+
+		
+		return "empInfo/vacInfoPersonal";
+	}
+	
+	
+	
+
+	
+	@GetMapping("/vacinfoemployee")
+	public String vacInfoEmployee(Model model, Principal principal){
+		String userId = principal.getName();
+		log.info("vacInfoEmployee userId : " + userId);
+		
+		List<VacationVO> vacationVO = this.empInfoService.vactionList();
+		log.info("vacInfoEmployee vacationVO : " + vacationVO);
+		model.addAttribute("data",vacationVO);
+		
+		
+		return "empInfo/vacInfoEmployee";
+	}
+
+	
+	
+	
+//	@RequestMapping("/excelDown")
+//	public void excelDownload(HttpServletResponse response, Principal principal) throws IOException{
+//		String userId = principal.getName();
+//		log.info("vacInfoEmployee userId : " + userId);
+//		
+//		List<VacationVO> vacationVO = this.empInfoService.vactionList();
+//		log.info("excelDownload->vacInfoEmployee vacationVO : " + vacationVO);
+//		
+//		XSSFWorkbook wb=null;
+//		Sheet sheet=null;
+//		Row row=null;
+//		Cell cell=null; 
+//		wb = new XSSFWorkbook();
+//		sheet = wb.createSheet("mysheet이름");
+//		
+//		int rowCnt = 0;
+//		for(VacationVO vo : vacationVO) {
+//			// row(행) 생성
+//			row = sheet.createRow(rowCnt++); //0번째 행
+//			cell=row.createCell(0);
+//			cell.setCellValue("0");
+//			cell=row.createCell(1);
+//			cell.setCellValue("가가가");
+//			cell=row.createCell(2);
+//			cell.setCellValue("나나나");
+//		}
+////		row = sheet.createRow(1); //1번째 행
+////		cell=row.createCell(0);
+////		cell.setCellValue("1");
+////		cell=row.createCell(1);
+////		cell.setCellValue("AAA");
+////		cell=row.createCell(2);
+////		cell.setCellValue("BBB");
+////		
+////		row = sheet.createRow(2);  //2번째 행
+////		cell=row.createCell(0);
+////		cell.setCellValue("2");
+////		cell=row.createCell(1);
+////		cell.setCellValue("aaa");
+////		cell=row.createCell(2);
+////		cell.setCellValue("bbb");
+//		
+//		// 컨텐츠 타입과 파일명 지정
+//		response.setContentType("ms-vnd/excel");
+//		response.setHeader("Content-Disposition", "attachment;filename=example.xlsx");  //파일이름지정.
+//		//response OutputStream에 엑셀 작성
+////		wb.write(response.getOutputStream());
+//	}
+
+	
+	
+	
+
+}

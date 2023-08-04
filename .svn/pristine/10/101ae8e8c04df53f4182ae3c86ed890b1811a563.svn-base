@@ -1,0 +1,26 @@
+package kr.or.ddit.community.anonyBoard.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.common.BoardAttachVO;
+import kr.or.ddit.community.anonyBoard.vo.AnonyBoardVO;
+
+public interface AnonyBoardMapper {
+
+	//목록 보기
+	public List<AnonyBoardVO> list();
+	
+	//게시글 등록
+	public int register(AnonyBoardVO baVO);
+
+	//상세보기
+	public AnonyBoardVO detail(AnonyBoardVO anonyBoardVO);
+	//첨부파일
+	public int insertAttachFiles(List<BoardAttachVO> boardAttachVOList);
+
+	//수정
+	public int update(AnonyBoardVO anonyBoardVO);
+
+	//삭제
+	public int delete(AnonyBoardVO anonyBoardVO);
+}

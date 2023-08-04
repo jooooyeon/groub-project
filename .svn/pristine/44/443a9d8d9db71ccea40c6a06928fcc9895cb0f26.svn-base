@@ -1,0 +1,76 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+
+<footer class="footer">
+	<div class="row g-0 justify-content-between fs--1 mt-4 mb-3">
+		<div class="col-12 col-sm-auto text-center">
+			<p class="mb-0 text-600">
+				Thank you for creating with Falcon <span
+					class="d-none d-sm-inline-block">| </span><br class="d-sm-none" />
+				2023 &copy; <a href="https://themewagon.com">Themewagon</a>
+			</p>
+		</div>
+		<div class="col-12 col-sm-auto text-center"></div>
+	</div>
+</footer>
+
+<sec:authorize access="isAuthenticated()">
+	<script>
+	let userId = `<%=request.getUserPrincipal().getName()%>`
+// 	console.log("userId",userId);
+	let userData = {};
+	
+	var sockJs = new SockJS("/ws");
+	var stomp = Stomp.over(sockJs);
+	stomp.debug = null;
+	
+	var receiver = $('#receiver');
+
+	stomp.connect({}, function() {
+
+		stomp.subscribe("/sub/alarm/" + userId, function(chat) {
+			var content = chat.body; 
+			if (content) {
+				html = `
+				<div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+					<div class="toast-header">
+						<img src="..." class="rounded mr-2" alt="...">
+						<strong class="mr-auto">Bootstrap</strong>
+						<small class="text-muted">just now</small>
+						<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="toast-body">
+					See? Just like this.
+					</div>
+				</div>
+				`
+				$('footer').before(html);
+			}
+		});
+
+		stomp.subscribe("/sub/userList", function(chat) {
+			var content = JSON.parse(chat.body);
+			if (content) {
+				userData = content;
+				console.log("userData",userData);
+			}
+		});
+	});
+
+	$("#mail").on("click", function(e) {
+		stomp.send('/pub/mail', {}, JSON.stringify({
+			sender : userId,
+			receiver : receiver.val()
+		}));
+	});
+	
+	$(()=>{
+		stomp.send('/pub/list',{}, JSON.stringify({}));
+	});
+	
+
+</script>
+</sec:authorize>

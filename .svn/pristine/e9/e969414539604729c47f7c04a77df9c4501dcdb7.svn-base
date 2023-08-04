@@ -1,0 +1,48 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+
+
+	<%-- ${data } --%>
+	<div class="card mb-2">
+		<div class="card-body">
+			<h5 class="card-title">내정보</h5>
+			<sec:authorize access="isAuthenticated()">
+				<sec:authentication property="principal.userVO.userId" var="loginId" />
+				<sec:authentication property="principal.userVO.userNm"
+					var="loginName" />
+			</sec:authorize>
+			
+			<ul class="nav nav-tabs" id="myTab" role="tablist">
+			  <li class="nav-item"><a class="nav-link active" id="my-tab" data-bs-toggle="tab" href="#tab-my" role="tab" aria-controls="tab-my" aria-selected="true">내정보</a></li>
+			  <li class="nav-item"><a class="nav-link" id="ai-tab" data-bs-toggle="tab" href="#tab-ai" role="tab" aria-controls="tab-ai" aria-selected="false">AI기능</a></li>
+			</ul>
+			<div class="tab-content border border-top-0 p-3" id="myTabContent">
+<!-- 내정보 div -->
+			  <div class="tab-pane fade show active" id="tab-my" role="tabpanel" aria-labelledby="my-tab">
+			  	나는 내정보가 나올 곳!!
+
+			  	
+			  	
+			  	
+			  </div>
+<!-- 내정보 div 끝 -->
+<!-- ai div -->
+			  <div class="tab-pane fade" id="tab-ai" role="tabpanel" aria-labelledby="ai-tab">
+			   <p>나는 ai기능을 사용할수 있져!</p>
+			   
+			   <button>얼굴인식할꾸야</button>
+			   <button>음성인식할구야</button>
+			   
+			  </div>
+<!-- ai div 끝 -->
+			</div>
+			
+			
+			
+			
+		</div>
+	</div>

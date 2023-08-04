@@ -1,0 +1,34 @@
+package kr.or.ddit.security;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import lombok.extern.slf4j.Slf4j;
+
+/* 비밀번호 암호화 처리기
+ 스프링 시큐리티 5부터는 기본적으 PasswordEncoder를 지정해야 함
+ 사요자 테이블(USERS)의 비밀번호(PASSWORD)의 비밀번호를 암호화하여 저장해놓아야 함
+ 테스트를 위해서 암호화를 처리하지 않았으므로 아무 처리를 하지 않고 로그인하면 당연히 로그인 오류가 발생함
+ 그래서 암호화를 하지 않는 PasswordEncoder를 직접 구현하여 지정하면 로그인 시 함호화를 고려하지 않으므로
+ 로그인이 가능해짐
+ */
+@Slf4j
+public class CustomNoOpPasswordEncoder implements PasswordEncoder{
+	//encode : 암호화
+	@Override
+	public String encode(CharSequence rawPassword) {
+//		log.warn("암호화 전 비밀번호 : " + rawPassword);
+
+		//원래는 여기 암호화 과정이 있지만, 지금은 학습 목적상 그냥 나감!
+
+		return rawPassword.toString();
+	}
+
+	//로그인 시도 시 입력한 비밀번호와 USERS 테이블의 PASSWORD 컬럼의 그 값이 같은지 비교
+	@Override
+	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+//		log.warn("같은가? " + rawPassword + " : " + encodedPassword);
+
+		return rawPassword.toString().equals(encodedPassword);
+	}
+}
+

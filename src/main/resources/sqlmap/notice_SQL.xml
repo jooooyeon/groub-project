@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.notice.mapper.NoticeMapper">
+
+	<select id="list" resultType="kr.or.ddit.notice.vo.NoticeVO" >
+		SELECT
+			ROWNUM
+			, a.*
+		FROM(
+		SELECT
+		    A.PST_NO    
+		   ,A.USER_ID   
+		   ,A.CO_ID     
+		   ,A.DELR_NM   
+		   ,A.MDFR_NM   
+		   ,A.PST_HD
+		   ,A.PST_TTL   
+		   ,A.PST_CN    
+		   ,A.REG_DT    
+		   ,A.MDFCN_DT  
+		   ,A.INQ_CNT   
+		   ,A.BBS_CLSF  
+		   ,A.TEMP_YN   
+		   ,A.DEL_YN    
+		   ,A.DEL_DT    
+		   ,B.USER_NM   
+		   ,F.CST_CD_NM AS header_as_kor
+		FROM
+		    BBS A
+		INNER JOIN USERS B
+		ON A.USER_ID = B.USER_ID AND A.BBS_CLSF = 'BB001' AND A.DEL_YN = 'N'
+		INNER JOIN CUSTOME_CODE F
+        ON a.PST_HD = F.CST_CD
+		ORDER BY PST_NO) A
+		ORDER BY ROWNUM DESC	
+	</select>
+	
+	
+	<!-- 공지사항 상세보기 -->
+	<resultMap type="kr.or.ddit.notice.vo.NoticeVO" id="noticeMap">
+		<result property="pstNo" column="PST_NO" />
+		<result property="userId" column="USER_ID" />
+		<result property="coId" column="CO_ID" />
+		<result property="delrNm" column="DELR_NM" />
+		<result property="mdfrNm" column="MDFR_NM" />
+		<result property="pstHd" column="PST_HD" />
+		<result property="pstTtl" column="PST_TTL" />
+		<result property="pstCn" column="PST_CN" />
+		<result property="regDt" column="REG_DT" />
+		<result property="mdfcnDt" column="MDFCN_DT" />
+		<result property="inqCnt" column="INQ_CNT" />
+		<result property="bbsClsf" column="BBS_CLSF" />
+		<result property="tempYn" column="TEMP_YN" />
+		<result property="delYn" column="DEL_YN" />
+		<result property="delDt" column="DEL_DT" />
+		<result property="userNm" column="USER_NM" />
+		<result property="cstCdNm" column="CST_CD_NM" />
+		<result property="headerAsKor" column="HEADER_AS_KOR" />
+		<collection property="pstHdVO" resultMap="pstHdMap"></collection>
+		<collection property="bbsAtchVO" resultMap="bbsAtchMap"></collection>
+	</resultMap>
+	
+	
+	<resultMap type="kr.or.ddit.notice.vo.PstHdVO" id="pstHdMap">
+		<result property="cstCd" column="CST_CD" />
+		<result property="coId" column="CO_ID" />
+		<result property="grCd" column="GR_CD" />
+		<result property="cstCdNm" column="CST_CD_NM" />
+		<result property="userId" column="USER_ID" />
+		<result property="regDt" column="REG_DT" />
+		<result property="useYn" column="USE_YN" />
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.bbscommon.BbsAtchVO" id="bbsAtchMap">
+		<result property="bbsFlNo" column="BBS_FL_NO" />
+		<result property="fileNm" column="FILE_NM" />
+		<result property="fileUuid" column="FILE_UUID" />
+		<result property="filePath" column="FILE_PATH" />
+		<result property="fileExtn" column="FILE_EXTN" />
+		<result property="fileSize" column="FILE_SIZE" />
+		<result property="pstNo" column="PST_NO" />
+		<result property="fileExist" column="FILE_EXIST" />
+	</resultMap>
+	
+	
+	<!-- 공지사항 상세보기 -->
+	<select id="detail" parameterType="kr.or.ddit.notice.vo.NoticeVO" resultMap="noticeMap">
+        SELECT
+		     A.PST_NO
+		   , A.USER_ID
+		   , A.CO_ID
+		   , A.DELR_NM
+		   , A.MDFR_NM
+		   , A.PST_HD
+           , F.CST_CD_NM AS HEADER_AS_KOR
+		   , A.PST_TTL
+		   , A.PST_CN
+		   , A.REG_DT
+		   , A.MDFCN_DT
+		   , A.INQ_CNT
+		   , A.BBS_CLSF
+		   , A.TEMP_YN
+		   , A.DEL_YN
+		   , A.DEL_DT
+		   , B.BBS_FL_NO
+		   , B.FILE_NM
+		   , B.FILE_UUID
+		   , B.FILE_PATH
+		   , B.FILE_EXTN
+		   , B.FILE_SIZE
+		   , B.PST_NO
+           , C.USER_NM
+           , D.JBGD_CD
+           , E.CST_CD_NM AS CST_CD_NM
+           , B.FILE_EXIST
+           
+		FROM BBS A
+        
+        LEFT JOIN BBS_ATCH B
+        ON A.PST_NO = B.PST_NO
+        
+        INNER JOIN USERS C
+        ON A.USER_ID = C.USER_ID
+         
+        INNER JOIN EMP_INFO D
+        ON A.USER_ID = D.USER_ID
+        
+        INNER JOIN CUSTOME_CODE E
+        ON D.JBGD_CD = E.CST_CD        
+        
+        INNER JOIN CUSTOME_CODE F
+        ON A.PST_HD = F.CST_CD
+        
+		WHERE A.PST_NO = #{pstNo}
+	</select>
+
+	<!-- BBS_ATCH테이블의 기본키 데이터 + 1 -->
+	<select id="getNextBbsFlNo" resultType="int">
+		SELECT NVL(MAX(BBS_FL_NO),0)+1 FROM BBS_ATCH
+	</select>
+
+	<update id="inqCnt">
+		UPDATE
+			BBS
+		SET
+			INQ_CNT = INQ_CNT + 1
+		WHERE 
+			PST_NO = #{PSTNO}
+	</update>
+	
+	<update id="insertAttachFiles" parameterType="java.util.List">
+		<foreach collection="list" item="bbsAtchVO"
+		open="INSERT ALL " close="SELECT * FROM DUAL" separator=" " index="idx">
+		INTO BBS_ATCH(
+			BBS_FL_NO, FILE_NM, FILE_UUID, FILE_PATH, FILE_EXTN, FILE_SIZE, PST_NO, FILE_EXIST) 
+		VALUES(
+			  #{bbsAtchVO.bbsFlNo}+#{idx}
+			, #{bbsAtchVO.fileNm}
+			, #{bbsAtchVO.fileUuid}
+			, #{bbsAtchVO.filePath}
+			, #{bbsAtchVO.fileExtn}
+			, #{bbsAtchVO.fileSize}
+			, #{bbsAtchVO.pstNo}
+			, 'Y')
+		</foreach>
+	</update>
+	
+	<!-- /board/update에서 파일업로드 상태 변경(N) -->
+	<update id="updateFileExist" parameterType="kr.or.ddit.bbscommon.BbsAtchVO">
+		UPDATE BBS_ATCH
+		SET FILE_EXIST = #{fileExist}
+		WHERE BBS_FL_NO = #{bbsFlNo}
+	</update>
+	
+	<!-- /board/update에서 파일업로드 상태 변경(All Y) -->
+	<update id="updateFileExistCancel" parameterType="kr.or.ddit.bbscommon.BbsAtchVO">
+		UPDATE BBS_ATCH
+		SET FILE_EXIST = 'Y'
+		WHERE PST_NO = #{pstNo}
+	</update>
+	
+	<!-- /board/update에서 N인것 delete -->
+	<update id="updateFileExistDel" parameterType="kr.or.ddit.bbscommon.BbsAtchVO">
+		DELETE FROM BBS_ATCH
+		WHERE  PST_NO = #{pstNo}
+		AND    FILE_EXIST = 'N'
+	</update>	
+	
+	<!-- 공지사항 등록 -->
+	<insert id="register" parameterType="kr.or.ddit.notice.vo.NoticeVO" >
+		<selectKey resultType="int" order="BEFORE" keyProperty="pstNo">
+			SELECT SEQ_BBS.NEXTVAL FROM DUAL
+		</selectKey>
+	 	INSERT INTO BBS(
+					 PST_NO
+				   , USER_ID
+				   , CO_ID
+				   , DELR_NM
+				   , MDFR_NM
+				   , PST_HD
+				   , PST_TTL
+				   , PST_CN
+				   , REG_DT
+				   , MDFCN_DT
+				   , INQ_CNT
+				   , BBS_CLSF
+				   , TEMP_YN
+				   , DEL_YN
+					)
+				VALUES (
+					  #{pstNo}
+					, #{userId}
+					, #{coId}
+					, null
+					, #{userId}
+					, #{pstHd}
+					, #{pstTtl}
+					, #{pstCn}
+					, SYSDATE
+					, SYSDATE
+					, #{inqCnt}
+					, 'BB001'
+					, 'N'
+					, 'N'
+					)
+	</insert>
+		
+	<select id="getHd" parameterType="kr.or.ddit.notice.vo.PstHdVO" resultType="kr.or.ddit.notice.vo.PstHdVO" >
+		SELECT CST_CD, CO_ID, GR_CD, CST_CD_NM, USER_ID, REG_DT, USE_YN FROM CUSTOME_CODE
+		WHERE GR_CD = #{grCd}
+	</select>
+
+	<update id="update" parameterType="kr.or.ddit.notice.vo.NoticeVO">
+		UPDATE BBS
+	    SET
+	         USER_ID = #{userId}
+	        , CO_ID = #{coId}
+	        , MDFR_NM = #{userId}
+	        , PST_HD = #{pstHd}
+	        , PST_TTL = #{pstTtl}
+	        , PST_CN = #{pstCn}
+	        , MDFCN_DT = SYSDATE
+	        , INQ_CNT = #{inqCnt}
+	        , BBS_CLSF = 'BB001'
+	        , TEMP_YN = 'N'
+	        , DEL_YN = 'N'
+		WHERE PST_NO = #{pstNo}
+	</update>
+
+
+	<delete id="delete"  parameterType="kr.or.ddit.notice.vo.NoticeVO">
+		DELETE FROM BBS
+		WHERE PST_NO = #{pstNo}
+	</delete>
+
+
+	<!-- 메인화면에 공지사항 띄우기 -->
+	<select id="selectMainPageList" resultType="kr.or.ddit.notice.vo.NoticeVO">
+		SELECT *
+		FROM (
+		    SELECT
+		        pst_no,
+		        FN_GET_CST_CD_NM(pst_hd) AS headers,
+		        pst_ttl,
+		        reg_dt
+		    FROM
+		        bbs
+		    WHERE
+		        bbs_clsf = 'BB001' AND del_yn = 'N'
+		    ORDER BY
+		        reg_dt DESC
+		)
+		WHERE ROWNUM <![CDATA[<=]]> 3
+	</select>
+
+
+</mapper>
+
+
+
+
+
+
+

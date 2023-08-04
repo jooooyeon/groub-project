@@ -1,0 +1,59 @@
+package kr.or.ddit.community.board.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class CmntVO {
+	/*
+	 * 댓글 관리 번호 기본키
+	 */
+	private int cmntNo; 
+	
+	/*
+	 * 게시물 관리번호
+	 */
+	private int pstNo;
+	
+	/*
+	 * 회원아이디_댓글 작성자
+	 */
+	private String userId;
+	
+	/*
+	 * 댓글 내용
+	 */
+	private String cmntCn;
+	
+	/*
+	 * 댓글 작성일
+	 */
+	private Date regDt;
+	
+	/*
+	 * 댓글 수정일
+	 */
+	private Date mdfcnDt;
+	
+	/*
+	 * 댓글 삭제일
+	 */
+	private Date delDt;
+	
+	/*
+	 * 회원아이디_댓글 삭제자
+	 */
+	private String delrNm;
+	
+	/*
+	 * 댓글 관리 번호
+	 */
+	private int upCmntNo;
+	
+	/*
+	 * 대댓글의 계층, 최상위 0부터 1씩 증가
+	 */
+	private String cmntLv;
+
+}

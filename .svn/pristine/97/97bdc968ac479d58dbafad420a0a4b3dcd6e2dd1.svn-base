@@ -1,0 +1,27 @@
+package kr.or.ddit.schedule.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import kr.or.ddit.schedule.mapper.ScheduleMapper;
+import kr.or.ddit.schedule.service.ScheduleService;
+import kr.or.ddit.schedule.vo.ScheduleVO;
+
+@Service
+public class ScheduleServiceImpl implements ScheduleService{
+
+	@Autowired
+	ScheduleMapper scheduleMapper;
+
+	/**
+	 * 전체 일정 조회
+	 * @param userId
+	 */
+	@Override
+	public List<ScheduleVO> listAll(String schdlTp) {
+		return scheduleMapper.listAll(schdlTp);
+	}
+
+}

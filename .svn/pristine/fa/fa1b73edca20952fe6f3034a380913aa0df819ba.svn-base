@@ -1,0 +1,215 @@
+package kr.or.ddit.community.board.controller;
+
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.or.ddit.bbscommon.BbsAtchVO;
+import kr.or.ddit.community.board.service.BoardService;
+import kr.or.ddit.community.board.vo.BoardVO;
+import kr.or.ddit.community.board.vo.CmntVO;
+import kr.or.ddit.community.board.vo.PstHdVO;
+import kr.or.ddit.user.vo.UserVO;
+
+//자유게시판
+@RequestMapping("/community/board")
+@Controller
+public class Boardcontroller {
+	
+	@Autowired
+	BoardService boardService;
+
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+
+	//게시판 리스트
+	@RequestMapping("/list")
+	public String list(Model model) {
+		
+		
+		List<BoardVO> data = this.boardService.list();
+		log.info("data : " + data);
+		model.addAttribute("data",data);
+		
+		
+		
+		return "community/board/boardList";
+	}
+	
+	
+	
+	//게시판 상세보기
+	@RequestMapping("/detail")
+	public String detail(BoardVO boardVO, Model model) {
+		log.info("boardVO : " + boardVO);
+		
+		//내용보기
+		boardVO = this.boardService.detail(boardVO);
+		log.info("detail boardVO : " + boardVO );
+		
+		//조회수 증가
+		boardService.inqCnt(boardVO.getPstNo());
+		
+		
+		model.addAttribute("data",boardVO);
+		
+		return "community/board/boardDetail";
+	}
+	
+	
+	//게시판 작성
+	@GetMapping("/register")
+	public String register(Model model, PstHdVO hd) {
+		hd.setGrCd("HD");	
+
+		List<PstHdVO> pstHdVOList = this.boardService.getHd(hd);
+		log.info("pstHdVOList : " + pstHdVOList);
+		
+		model.addAttribute("data",pstHdVOList);
+		
+		return "community/board/boardRegister";
+	}
+	
+	
+	//게시판 작성
+	@PostMapping("/register")
+	public String registerPost(Model model,@ModelAttribute BoardVO boardVO,Principal principal) {
+		//로그인 한 아이디 받음
+		String userId = principal.getName();
+
+		boardVO.setUserId(userId);
+		
+		
+		//result: BoardVO(pstNo=0, userId=NAVER_2014030001, coId=null, delrNm=null, mdfrNm=null, pstHd=HE, pstTtl=연습!2
+		//, pstCn=<p>33</p>, regDt=null, mdfcnDt=null, inqCnt=0, bbsClsf=null, tempYn=null, delYn=null
+		//, delDt=null, attachFiles=[org.springframework.web.multipart.support.StandardMultipartHttpServletRequest$StandardMultipartFile@3c675c3f]
+		//, bbsAtchVO=null)
+		log.info("result: " + boardVO);
+		int result = boardService.register(boardVO);
+		System.out.println("result : " + result);
+		
+		return "redirect:/community/board/list";
+	}
+	
+
+
+	@GetMapping("/update")
+	public String update(Model model, @ModelAttribute BoardVO boardVO) {
+	    // pstNo를 가공하거나 필요한 로직을 처리한 후 data 변수에 할당
+	    
+		boardVO = this.boardService.detail(boardVO);
+		
+		log.info("update boardVO" + boardVO);
+		model.addAttribute("data",boardVO);
+
+	    return "community/board/boardUpdate"; // 이동할 JSP 페이지의 이름
+	}
+
+	
+	@PostMapping("/update")
+	public String update(Model model,@ModelAttribute BoardVO boardVO, Principal principal) {
+		//update post boardVO : BoardVO(pstNo=23, userId=null, coId=NAVER, delrNm=null, mdfrNm=null, 
+		// pstHd=null, pstHdVO=null, pstTtl=1231235555555555555555, pstCn=<p>1231235555555555555555</p>,
+		// regDt=null, mdfcnDt=null, inqCnt=26, bbsClsf=null, tempYn=null, delYn=null, delDt=null, 
+		//userNm=null, cstCdNm=null, headerAsKor=null,
+		//attachFiles=[org.springframework.web.multipart.support.StandardMultipartHttpServletRequest$StandardMultipartFile
+		//@2f1e0dcf], bbsAtchVO=null)
+		//20:13:35.704 [http-nio-80-exec-20] DEBUG org.springframework.web.servlet.view.RedirectView -
+		//View name 'redirect:',
+		//model {boardVO=BoardVO(pstNo=23, userId=null, coId=NAVER, delrNm=null, mdfrNm=null, pstHd=null, pstHdVO=null, 
+		//pstTtl=1231235555555555555555, pstCn=<p>1231235555555555555555</p>, regDt=null, mdfcnDt=null, inqCnt=26,
+		//bbsClsf=null, tempYn=null, delYn=null, delDt=null, userNm=null, cstCdNm=null, headerAsKor=null, 
+		//attachFiles=[org.springframework.web.multipart.support.StandardMultipartHttpServletRequest$StandardMultipartFile
+		//@2f1e0dcf], bbsAtchVO=null), org.springframework.validation.BindingResult.boardVO
+		//=org.springframework.validation.BeanPropertyBindingResult: 0 errors}
+		log.info("updatePost다!");
+		log.info("update post boardVO : " + boardVO);
+		
+		int result = boardService.update(boardVO);
+		
+		return "redirect:/community/board/list";
+	}
+
+
+	@ResponseBody
+	@PostMapping("/deletePost")
+	public String deletePost(@RequestBody BoardVO boardVO ) {
+		log.info("deletePost boardVo : " + boardVO);
+	    
+	    int result = boardService.deletePost(boardVO);
+	    if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+
+
+	@ResponseBody
+	@PostMapping("/updateFileExist")
+	public String updateFileExist(@RequestBody BbsAtchVO bbsAtchVO ) {
+		log.info("updateFileExist bbsAtchVO : " + bbsAtchVO);
+	    
+		//FILE_EXIST 값을 N으로 처리
+	    int result = boardService.updateFileExist(bbsAtchVO);
+	    log.info("result : " + result);
+	    
+	    if (result > 0) {
+	        return "success";
+	    } else {
+	        return "fail";
+	    }
+	}
+
+	
+	@ResponseBody
+	@PostMapping("/updateFileExistCancel")
+	public String updateFileExistCancel(@RequestBody BbsAtchVO bbsAtchVO ) {
+		log.info("updateFileExist bbsAtchVO : " + bbsAtchVO);
+		
+		//FILE_EXIST 값을 N으로 처리
+		int result = boardService.updateFileExistCancel(bbsAtchVO);
+		log.info("result : " + result);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+	
+	
+	//=====================================댓글===============================================
+	
+	@ResponseBody
+	@GetMapping("/commentRegister")
+	public String commentRegister(@RequestBody CmntVO cmntVO ) {
+		log.info("commentRegister cmntVO : " + cmntVO);
+		
+		int result = boardService.commentRegister(cmntVO);
+		log.info("commentRegister result : " + result);
+		
+		if (result > 0) {
+			return "success";
+		} else {
+			return "fail";
+		}
+	}
+	
+}

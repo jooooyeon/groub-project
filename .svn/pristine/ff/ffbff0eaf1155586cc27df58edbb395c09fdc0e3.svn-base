@@ -1,0 +1,56 @@
+package kr.or.ddit.user.vo;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.validation.Valid;
+
+import lombok.Data;
+
+@Data
+public class UserVO {
+	private String userId;
+	private String userPswd;
+	private String coId;
+	private String enabled;
+	private String userNm;
+	private String userTelno;
+	private String userEml;
+	private Date brthYmd;
+	private String userZip;
+	private String userAddr;
+	private String userDaddr;
+	private String userImg;
+	private String signImg;
+	private String gndrMf;
+	private String hobby;
+	private String spcabl;
+	private String mngrYn;
+	private String msngrStts;
+	private String deptNo;
+	private String jbgdCd;
+	private String jbtlCd;
+	private String msngrSttsNm;
+	private String deptNm;
+	private String jbgdNm;
+	private String jbtlNm;
+	private String hdofCd;
+	private String hdofCdNm;
+	private String mtrscCd;
+	private String mtrscCdNm;
+	private String faceYn;
+	private String voiceYn;
+
+	private int anslry;
+	private String bankNm;
+	private long actNo;
+	private String jncmpYmd;
+	private String rsgntnYmd;
+
+
+	@Valid
+	private List<UsersAuthVO> usersAuthVOList;
+
+
+
+}

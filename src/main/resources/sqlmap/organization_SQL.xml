@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 
+namespace : xml 파일이 여러개일 수 있음
+이를 구별하기 위한 식별 용도로 사용됨
+ -->
+
+<mapper namespace="kr.or.ddit.organization.mapper.OrganizationMapper">
+	  <select id="list" parameterType="String"  resultType="kr.or.ddit.organization.vo.OrganizationVO">
+			SELECT A.USER_ID 
+			    , A.USER_NM
+			    , A.USER_TELNO
+			    , A.USER_EML
+			    , A.USER_IMG
+			    , B.DEPT_NO
+                , FN_GET_DEPT_NO_NM(B.DEPT_NO, A.CO_ID) AS DEPT_NM
+			    , FN_GET_CST_CD_NM2CO(B.JBGD_CD, A.CO_ID) AS JBGD_CD
+            	, FN_GET_CST_CD_NM2CO(B.JBTL_CD, A.CO_ID) AS JBTL_CD
+			    FROM USERS A
+			    INNER JOIN EMP_INFO B
+			        ON A.USER_ID = B.USER_ID
+                WHERE A.CO_ID = #{coId}
+			    ORDER BY B.DEPT_NO
+                
+	  </select>
+</mapper> 
+
+
+                
+
+
+
+
+

@@ -1,0 +1,14 @@
+package kr.or.ddit.draft.mapper;
+
+import java.util.List;
+
+import kr.or.ddit.draft.vo.DraftUserVO;
+
+public interface DraftMapper {
+	/**
+	 * 사용자 한명의 기안을 올리기 위한 정보를 조회하는 메소드
+	 * @param userId 조회할 유저의 아이디
+	 * @return 유저 정보 + 휴가 정보
+	 */
+	DraftUserVO selectDraftUsesrInfo(String userId);
+}

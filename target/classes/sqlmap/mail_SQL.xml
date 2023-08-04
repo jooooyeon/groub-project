@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mail.mapper.MailMapper">
+
+	<sql id="emlSttsWhere">
+        <!-- 수신 조건 검색 -->
+        <if test="emlStts!=null and emlStts!=''">
+        AND
+        	A.eml_stts = #{emlStts}
+        </if>
+	</sql>
+
+	<!-- 발신 메일 상세보기 -->
+	<select id="dsptchDetail" resultType="kr.or.ddit.mail.vo.MailVO">
+        SELECT
+            A.eml_no
+          , A.dsptch_eml
+          , A.eml_stts
+          , A.dsptch_dt
+          , A.eml_ttl
+          , A.eml_cn
+          , A.del_yn
+          , A.del_dt
+          , A.dsptch_cd
+          , B.rcptn_eml
+          , C.user_nm
+          , C.user_img
+          , F.dept_nm
+          , G.cst_cd_nm
+        FROM
+            mail_dsptch A
+        INNER JOIN
+            mail_rcptn B ON B.eml_no = A.eml_no
+        LEFT JOIN
+            users C ON C.user_eml = A.dsptch_eml
+        LEFT JOIN 
+            emp_info D ON D.user_id = C.user_id
+        LEFT JOIN
+            dept F ON F.dept_no = D.dept_no
+        LEFT JOIN 
+            custome_code G ON G.cst_cd = D.jbgd_cd
+        WHERE
+            1 = 1
+        AND
+            A.eml_no = #{emlNo}
+	</select>
+
+	<!-- 수신 메일 상세보기 -->
+	<select id="rcptnDetail" resultType="kr.or.ddit.mail.vo.MailVO">
+        SELECT
+            A.rcptn_eml
+          , A.eml_no
+          , A.eml_stts
+          , A.open_dt
+          , A.del_yn
+          , A.del_dt
+          , B.dsptch_dt
+          , B.dsptch_eml
+          , B.eml_ttl
+          , B.eml_cn
+          , C.user_nm
+          , C.user_img
+          , F.dept_nm
+          , G.cst_cd_nm
+        FROM
+            mail_rcptn A
+        INNER JOIN 
+            mail_dsptch B on B.eml_no = A.eml_no
+        LEFT JOIN 
+            users C on C.user_eml = A.rcptn_eml
+        LEFT JOIN 
+            emp_info D on D.user_id  = C.user_id
+        LEFT JOIN 
+            dept F on F.dept_no = D.dept_no
+        LEFT JOIN
+            custome_code G ON G.cst_cd = D.jbgd_cd
+        WHERE
+            1 = 1
+        AND
+            A.eml_no = #{emlNo}
+	</select>
+
+	<!-- 발신자 메일 설정 -->
+	<update id="dsptchSet" parameterType="kr.or.ddit.mail.vo.MailVO">
+		UPDATE mail_dsptch
+		SET
+		    eml_stts = #{emlStts}
+		WHERE
+			eml_no = #{emlNo}
+	</update>
+		
+	<!-- 수신자 메일 설정 -->
+	<update id="rcptnSet" parameterType="kr.or.ddit.mail.vo.MailVO">
+		UPDATE
+			mail_rcptn
+		SET
+			eml_stts = #{emlStts}
+		WHERE
+			eml_no = #{emlNo}
+	</update>
+	
+	<!-- 첨부파일 존재 여부 -->
+	<select id="isExistAtch" resultType="boolean">
+		SELECT
+		    count(eml_no)
+		FROM
+		    mail_atch
+	</select>
+
+	<!-- 메일 첨부파일 불러오기 -->
+	<select id="listAtch" resultType="kr.or.ddit.mail.vo.MailAtchVO">
+		SELECT
+		    mail_fl_no
+		  , file_nm
+		  , file_uuid
+		  , file_path
+		  , file_extn
+		  , file_size
+		  , eml_no
+		FROM
+		    mail_atch
+		WHERE
+			eml_no = #{emlNo}
+	</select>
+
+	<!-- 받은 메일함/중요 메일함 -->
+	<select id="listRcptn" resultType="kr.or.ddit.mail.vo.MailVO">
+		WITH T AS(
+			SELECT
+			    A.rcptn_eml
+			  , A.eml_no
+			  , A.eml_stts
+			  , A.open_dt
+			  , A.del_yn
+			  , A.del_dt
+			  , B.dsptch_dt
+			  , B.dsptch_eml
+			  , B.eml_ttl
+			  , B.eml_cn
+			FROM
+			    mail_rcptn A
+			INNER JOIN 
+			    mail_dsptch B on B.eml_no = A.eml_no
+			WHERE
+				1 = 1
+			AND
+				A.rcptn_eml = #{rcptnEml}
+			<if test="emlStts!=null and emlStts!=''">
+			AND
+				A.eml_stts = #{emlStts}
+			</if>
+			ORDER BY
+				B.dsptch_dt DESC
+			),
+		J AS(
+			SELECT
+				A.eml_no
+			  , A.rcptn_eml
+			  , A.eml_stts
+			  , C.user_id
+			  , C.user_nm
+			  , F.dept_nm
+			  , G.cst_cd_nm
+			  , H.mng_cd_nm1
+			FROM
+			    mail_rcptn A
+			INNER JOIN 
+			    mail_dsptch B on B.eml_no = A.eml_no
+			INNER JOIN
+				users C on C.user_eml = B.dsptch_eml
+			INNER JOIN
+				emp_info D on D.user_id = C.user_id
+			INNER JOIN
+				dept F on F.dept_no = D.dept_no
+			INNER JOIN
+			    custome_code G on g.cst_cd = D.jbgd_cd
+			INNER JOIN
+				manage_code H on H.mng_cd = A.eml_stts
+			
+			WHERE
+				A.rcptn_eml = #{rcptnEml}
+			<if test="emlStts!=null and emlStts!=''">
+			AND
+				A.eml_stts = #{emlStts}
+			</if>
+			ORDER BY
+				B.dsptch_dt DESC
+			)
+			SELECT 
+				  T.*
+				, J.*
+			FROM
+				T
+			LEFT JOIN
+				J on J.eml_no = T.eml_no
+	</select>
+	
+	<!-- 보낸 메일함 -->
+	<select id="listDsptch" resultType="kr.or.ddit.mail.vo.MailVO">
+		WITH T AS(
+			SELECT
+			    A.eml_no
+			  , A.dsptch_eml
+			  , A.eml_stts
+			  , A.dsptch_dt
+			  , A.eml_ttl
+			  , A.eml_cn
+			  , A.del_yn
+			  , A.del_dt
+			  , A.dsptch_cd
+			  , B.rcptn_eml
+			FROM
+			    mail_dsptch A
+			INNER JOIN
+				mail_rcptn B on B.eml_no = A.eml_no
+			WHERE
+				1 = 1
+			AND
+				A.dsptch_eml = #{dsptchEml}
+			ORDER BY
+				A.dsptch_dt DESC
+		),
+		K AS(
+			SELECT
+		        A.eml_no
+		      , B.rcptn_eml
+			  , C.user_nm
+			  , F.dept_nm
+			  , G.cst_cd_nm
+			  , H.mng_cd_nm1
+			FROM
+			    mail_dsptch A
+			INNER JOIN
+			    mail_rcptn B on B.eml_no = A.eml_no
+			INNER JOIN 
+			    users C on C.user_eml = B.rcptn_eml
+			INNER JOIN
+			    emp_info D on D.user_id = C.user_id
+			INNER JOIN
+			    dept F on F.dept_no = D.dept_no
+			INNER JOIN
+			    custome_code G on g.cst_cd = D.jbgd_cd
+			INNER JOIN
+				manage_code H on H.mng_cd = A.eml_stts
+			WHERE
+				A.dsptch_eml = #{dsptchEml}
+			ORDER BY
+				A.dsptch_dt DESC
+		)
+		SELECT 
+			  T.*
+			, K.*
+		FROM 
+			T
+		LEFT JOIN
+			K on K.eml_no = T.eml_no
+		<if test="emlStts!='' and emlStts!=null">
+		WHERE
+			T.eml_stts = #{emlStts}
+		</if>
+	</select>
+	
+	<!-- 휴지통 -->
+	<select id="listTrash" resultType="kr.or.ddit.mail.vo.MailVO">
+		
+	</select>
+
+	<!-- 수신자 사용자 여부 판별 -->
+	<select id="isExistRcptn" resultType="boolean">
+		SELECT
+			count(rcptn_eml)
+		FROM
+			mail_rcptn
+		WHERE
+			rcptn_eml = #{rcptnEml}
+	</select>
+	
+	<!-- 발신자 사용자 여부 판별 -->
+	<select id="isExistDsptch" resultType="boolean">
+		SELECT
+			count(user_eml)
+		FROM
+			users
+		WHERE
+			user_eml = #{dsptchEml}
+	</select>
+	
+	<!-- 발신자 메일 등록 -->
+	<insert id="insertDsptch" parameterType="kr.or.ddit.mail.vo.MailVO">
+	<selectKey keyColumn="eml_no" order="BEFORE" resultType="int" keyProperty="emlNo">
+		SELECT NVL(MAX(eml_no),0)+1 FROM mail_dsptch
+	</selectKey>
+		INSERT INTO mail_dsptch (
+		    eml_no
+		  , dsptch_eml
+		  , eml_stts
+		  , dsptch_dt
+		  , eml_ttl
+		  , eml_cn
+		  , del_yn
+		  , del_dt
+		  , dsptch_cd
+		) VALUES (
+		    #{emlNo}
+		  ,#{dsptchEml}
+		  ,'MM001'
+		  ,sysdate
+		  ,#{emlTtl}
+		  ,#{emlCn}
+		  ,'N'
+		  ,sysdate+90
+		  ,#{dsptchCd}
+		)
+	</insert>	
+	
+	<!-- 수신자 메일 등록 -->
+	<insert id="insertRcptn" parameterType="kr.or.ddit.mail.vo.MailVO">
+		<selectKey keyColumn="eml_no" order="BEFORE" resultType="int" keyProperty="emlNo">
+			SELECT NVL(MAX(eml_no),0)+1 FROM mail_rcptn
+		</selectKey>
+		INSERT INTO mail_rcptn (
+		    eml_no
+		  , rcptn_eml
+		  , eml_stts
+		  , open_dt
+		  , del_yn
+		  , del_dt
+		) VALUES (
+		    #{emlNo}
+		  , #{rcptnEml}
+		  , 'MM001'
+		  , null
+		  , 'N'
+		  , sysdate+90
+		)
+	</insert>
+	
+	<!-- 첨부파일 등록 -->
+	<update id="insertAtch" parameterType="java.util.Map">
+    <selectKey keyColumn="mail_fl_no" order="BEFORE" resultType="int" keyProperty="mailFlNo">
+        SELECT NVL(MAX(mail_fl_no),0)+1 FROM mail_atch
+    </selectKey>
+	    <foreach collection="mailAtchList" item="item"
+	    open="INSERT ALL" close="SELECT * FROM DUAL" index="idx" separator=" ">
+	    INTO mail_atch (
+	        mail_fl_no
+	      , file_nm
+	      , file_uuid
+	      , file_path
+	      , file_extn
+	      , file_size
+	      , eml_no
+	    ) VALUES 
+	    (
+	        #{mailFlNo}+#{idx}
+	      , #{item.fileNm}
+	      , #{item.fileUuid}
+	      , #{item.filePath}
+	      , #{item.fileExtn}
+	      , #{item.fileSize}
+	      , #{item.emlNo}
+	    )
+	    </foreach>
+	</update>
+	
+	<resultMap type="kr.or.ddit.mail.vo.MailVO" id="mailVO">
+		<result column="eml_no" property="emlNo"/>
+		<result column="eml_stts" property="emlStts"/>
+		<result column="del_yn" property="delYn"/>
+		<result column="del_dt" property="delDt"/>
+		<result column="rcptn_eml" property="rcptnEml"/>
+		<result column="open_dt" property="openDt"/>
+		<result column="dsptch_eml" property="dsptchEml"/>
+		<result column="dsptch_dt" property="dsptchDt"/>
+		<result column="eml_ttl" property="emlTtl"/>
+		<result column="eml_cn" property="emlCn"/>
+		<collection property="mailAtchList" resultMap="mailAtchVO"></collection>
+	</resultMap>
+	
+	<resultMap type="kr.or.ddit.mail.vo.MailAtchVO" id="mailAtchVO">
+		<result column="mail_fl_no" property="mailFlNo"/>
+		<result column="file_nm" property="fileNm"/>
+		<result column="file_uuid" property="fileUuid"/>
+		<result column="file_path" property="filePath"/>
+		<result column="file_extn" property="fileExtn"/>
+		<result column="file_size" property="fileSize"/>
+		<result column="eml_no" property="emlNo"/>
+	</resultMap>
+
+</mapper>

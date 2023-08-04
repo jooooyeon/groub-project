@@ -1,0 +1,17 @@
+package kr.or.ddit.empinfo.vo;
+
+import java.util.Date;
+
+import lombok.Data;
+
+@Data
+public class VacationVO {
+
+	private int vacGrntNo; //시퀀스
+	private String userId; //사원번호
+	private String vacTp; //부여받은 휴가 유형
+	private Date vacGrntYmd; //휴가 부여받은 일자
+	private int vacGrntDays; //부여받은 휴가의 일수
+	private String vacGrntExpln; //휴가 사유
+	private Date vldYmd; //휴가 만료기간
+}
